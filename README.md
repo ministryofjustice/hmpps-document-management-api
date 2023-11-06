@@ -4,4 +4,4 @@
 [![Docker Repository on Quay](https://quay.io/repository/hmpps/hmpps-document-management-api/status "Docker Repository on Quay")](https://quay.io/repository/hmpps/hmpps-document-management-api)
 [![API docs](https://img.shields.io/badge/API_docs_-view-85EA2D.svg?logo=swagger)](https://hmpps-document-management-api-dev.hmpps.service.justice.gov.uk/webjars/swagger-ui/index.html?configUrl=/v3/api-docs)
 
-A shared electronic document management service.
+A shared electronic document management API.
