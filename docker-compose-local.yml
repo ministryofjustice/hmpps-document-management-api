@@ -1,0 +1,44 @@
+version: "3"
+services:
+  db:
+    image: postgres:15
+    networks:
+      - hmpps
+    container_name: document-management-db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=document-management-db
+      - POSTGRES_PASSWORD=document-management
+      - POSTGRES_USER=document-management
+
+  localstack:
+    image: localstack/localstack:latest
+    networks:
+      - hmpps
+    container_name: localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=sqs,sns
+      - DEBUG=${DEBUG-}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+  hmpps-auth:
+    image: quay.io/hmpps/hmpps-auth:latest
+    networks:
+      - hmpps
+    container_name: hmpps-auth
+    ports:
+      - "9090:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/auth/health"]
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - DELIUS_ENABLED=false
+
+networks:
+  hmpps:
