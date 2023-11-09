@@ -19,6 +19,9 @@ dependencies {
 
   // OpenAPI
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
+
+  // Test dependencies
+  testImplementation("com.h2database:h2")
 }
 
 kotlin {
