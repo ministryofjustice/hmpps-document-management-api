@@ -11,9 +11,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.wiremock.OAuthExtension
 
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
-@Sql(
-  "classpath:test_data/reset-database.sql",
-)
+@Sql("classpath:test_data/reset-database.sql")
 @ExtendWith(OAuthExtension::class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")

@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository
 
 import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -94,6 +95,13 @@ class DocumentRepositoryIntTest : IntegrationTestBase() {
         assertThat(supersededByUsername).isEqualTo("SUPERSEDED_BY_USER")
       }
     }
+  }
+
+  @Sql("classpath:test_data/soft-deleted-document-id-3.sql")
+  @Test
+  fun `retrieve soft deleted document from database`() {
+    assertThatThrownBy { repository.findById(3L).orElseThrow() }
+      .isInstanceOf(NoSuchElementException::class.java)
   }
 
   @Test

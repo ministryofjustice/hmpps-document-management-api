@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.hypersistence.utils.hibernate.type.json.JsonType
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
@@ -24,8 +25,8 @@ data class DocumentMetadataHistory(
   @JoinColumn(name = "document_id", nullable = false)
   val document: Document,
 
-  // @Column(columnDefinition = "jsonb")
   @Type(value = JsonType::class)
+  @Column(columnDefinition = "jsonb")
   val metadata: JsonNode,
 
   val supersededTime: LocalDateTime = LocalDateTime.now(),
