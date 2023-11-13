@@ -18,7 +18,7 @@ import java.time.LocalDateTime
 data class DocumentMetadataHistory(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  val id: String,
+  val documentMetadataHistoryId: Long = 0,
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "document_id", nullable = false)
@@ -28,7 +28,7 @@ data class DocumentMetadataHistory(
   @Type(value = JsonType::class)
   val metadata: JsonNode,
 
-  val supersededTime: LocalDateTime,
+  val supersededTime: LocalDateTime = LocalDateTime.now(),
 
   val supersededByServiceName: String,
 

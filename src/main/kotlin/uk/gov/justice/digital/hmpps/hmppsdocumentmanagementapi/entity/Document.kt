@@ -3,7 +3,10 @@ package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity
 import com.fasterxml.jackson.databind.JsonNode
 import io.hypersistence.utils.hibernate.type.json.JsonType
 import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -23,11 +26,11 @@ import java.util.UUID
 data class Document(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  val id: String,
+  val documentId: Long = 0,
 
   val documentUuid: UUID = UUID.randomUUID(),
 
-  // @Enumerated(EnumType.STRING)
+  @Enumerated(EnumType.STRING)
   val documentType: DocumentType,
 
   val filename: String,
@@ -40,11 +43,11 @@ data class Document(
 
   val mimeType: String,
 
-  // @Column(columnDefinition = "jsonb")
   @Type(value = JsonType::class)
+  @Column(columnDefinition = "jsonb")
   val metadata: JsonNode,
 
-  val createdTime: LocalDateTime,
+  val createdTime: LocalDateTime = LocalDateTime.now(),
 
   val createdByServiceName: String,
 
@@ -59,4 +62,6 @@ data class Document(
   @OneToMany(mappedBy = "document", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
   @OrderBy("supersededTime DESC")
   private val documentMetadataHistory: MutableList<DocumentMetadataHistory> = mutableListOf()
+
+  fun documentMetadataHistory() = documentMetadataHistory
 }
