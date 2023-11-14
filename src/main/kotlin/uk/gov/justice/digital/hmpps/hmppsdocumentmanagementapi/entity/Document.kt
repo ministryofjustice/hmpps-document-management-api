@@ -45,7 +45,7 @@ data class Document(
 
   @Type(value = JsonType::class)
   @Column(columnDefinition = "jsonb")
-  val metadata: JsonNode,
+  var metadata: JsonNode,
 
   val createdTime: LocalDateTime = LocalDateTime.now(),
 
@@ -53,11 +53,11 @@ data class Document(
 
   val createdByUsername: String?,
 ) {
-  val deletedTime: LocalDateTime? = null
+  var deletedTime: LocalDateTime? = null
 
-  val deletedByServiceName: String? = null
+  var deletedByServiceName: String? = null
 
-  val deletedByUsername: String? = null
+  var deletedByUsername: String? = null
 
   @OneToMany(mappedBy = "document", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
   @OrderBy("supersededTime DESC")
