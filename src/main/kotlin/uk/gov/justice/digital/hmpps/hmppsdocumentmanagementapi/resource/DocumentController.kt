@@ -16,8 +16,9 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
@@ -48,6 +49,7 @@ class DocumentController(
       ApiResponse(
         responseCode = "200",
         description = "Document found",
+        content = [Content(schema = Schema(implementation = Document::class))],
       ),
       ApiResponse(
         responseCode = "401",
@@ -109,6 +111,7 @@ class DocumentController(
       .body(documentFile)
   }
 
+  @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("/{documentType}/{documentUuid}")
   @Operation(
     summary = "Upload a document file and associated metadata and store against a unique identifier",
@@ -125,6 +128,7 @@ class DocumentController(
       ApiResponse(
         responseCode = "201",
         description = "Document and associated metadata uploaded successfully",
+        content = [Content(schema = Schema(implementation = Document::class))],
       ),
       ApiResponse(
         responseCode = "401",
@@ -142,8 +146,8 @@ class DocumentController(
   fun uploadDocument(
     @PathVariable documentType: DocumentType,
     @PathVariable documentUuid: UUID,
-    @RequestParam file: MultipartFile,
-    @RequestParam metadata: JsonNode,
+    @RequestPart file: MultipartFile,
+    @RequestBody metadata: JsonNode,
   ): Document {
     throw NotImplementedError()
   }
