@@ -45,7 +45,7 @@ spring:
       validationTimeout: 500
 
   flyway:
-    locations: classpath:/migrations/common
+    locations: classpath:/migration/common
     placeholders:
       dpr_user: ${DPR_USER}
       dpr_password: ${DPR_PASSWORD}
