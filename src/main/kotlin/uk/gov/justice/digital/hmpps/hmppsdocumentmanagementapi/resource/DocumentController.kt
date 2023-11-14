@@ -109,12 +109,41 @@ class DocumentController(
   }
 
   @PostMapping("/{documentType}/{documentUuid}")
+
+  @Operation(
+    summary = "Upload a document file and associated metadata and store against a unique identifier",
+    description =
+    """
+    Accepts a document file binary and associated metadata. Uses the supplied document type to apply any validation
+    rules and extra security then stores the file, creates and populates a document object with file properties and
+    supplied metadata and saves the document. The document is associated with the client supplied unique identifier.
+    This identifier cannot be reused once the upload operation is successful.
+    """,
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "201",
+        description = "Document and associated metadata uploaded successfully",
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role. Note that the required role can be document type dependent",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
   @PreAuthorize("hasAnyRole('DOCUMENT_WRITER', 'DOCUMENT_ADMIN')")
   fun uploadDocument(
     @PathVariable documentType: DocumentType,
     @PathVariable documentUuid: UUID,
     @RequestParam file: MultipartFile,
-    @RequestBody metadata: JsonNode
+    @RequestParam metadata: JsonNode
   ): Document {
     throw NotImplementedError()
   }
