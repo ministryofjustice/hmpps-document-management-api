@@ -26,6 +26,13 @@ class DocumentService(
     return document.toModel()
   }
 
+  fun getDocumentFile(documentUuid: UUID): ByteArray {
+    val documentFile = documentFileRepository.findByDocumentUuid(documentUuid)
+      ?: throw EntityNotFoundException("Document file with UUID '$documentUuid' not found")
+
+    return documentFile.fileData
+  }
+
   fun uploadDocument(
     documentType: DocumentType,
     documentUuid: UUID,
