@@ -38,7 +38,7 @@ data class Document(
 
   @Schema(
     description = "The file size in bytes of the document file",
-    example = "warrant_for_remand",
+    example = "48243",
   )
   val fileSize: Long,
 
@@ -59,11 +59,10 @@ data class Document(
       "dates, tags etc. and the properties available will be defined by the document's type.",
     example =
     """
-    {    
+    {
       "prisonCode": "KMI",
-      "previousPrisonCodes": ["MDI"],
       "prisonNumber": "C3456DE",
-      "previousPrisonNumbers": ["A1234BC", "B2345CD"],
+      "court": "Birmingham Magistrates",
       "warrantDate": "2023-11-14"
     }
     """,

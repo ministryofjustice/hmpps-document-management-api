@@ -1,4 +1,4 @@
--- Provides test based document type description when querying the database as well as referential integrity
+-- Provides text based document type description when querying the database as well as referential integrity
 CREATE TABLE document_type
 (
     code                            varchar(40)     NOT NULL CONSTRAINT document_type_pk PRIMARY KEY,

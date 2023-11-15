@@ -19,6 +19,7 @@ import org.hibernate.annotations.Where
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import java.time.LocalDateTime
 import java.util.UUID
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as DocumentModel
 
 @Entity
 @Table
@@ -64,4 +65,19 @@ data class Document(
   private val documentMetadataHistory: MutableList<DocumentMetadataHistory> = mutableListOf()
 
   fun documentMetadataHistory() = documentMetadataHistory
+
+  fun toModel() =
+    DocumentModel(
+      documentUuid,
+      documentType,
+      filename,
+      fileExtension,
+      fileSize,
+      fileHash,
+      mimeType,
+      metadata,
+      createdTime,
+      createdByServiceName,
+      createdByUsername,
+    )
 }

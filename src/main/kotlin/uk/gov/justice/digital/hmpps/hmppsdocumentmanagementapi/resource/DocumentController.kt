@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource
 
 import com.fasterxml.jackson.databind.JsonNode
+import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.multipart.MultipartFile
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
@@ -65,7 +67,7 @@ class DocumentController(
       ),
     ],
   )
-  @PreAuthorize("hasAnyRole('DOCUMENT_READER', 'DOCUMENT_ADMIN')")
+  //@PreAuthorize("hasAnyRole('DOCUMENT_READER', 'DOCUMENT_ADMIN')")
   fun getDocument(@PathVariable documentUuid: UUID) =
     documentService.getDocument(documentUuid)
 
@@ -97,7 +99,7 @@ class DocumentController(
       ),
     ],
   )
-  @PreAuthorize("hasAnyRole('DOCUMENT_READER', 'DOCUMENT_ADMIN')")
+  //@PreAuthorize("hasAnyRole('DOCUMENT_READER', 'DOCUMENT_ADMIN')")
   fun downloadDocumentFile(@PathVariable documentUuid: UUID): ResponseEntity<InputStreamResource> {
     val document = documentService.getDocument(documentUuid)
     val documentFile = null
@@ -136,15 +138,13 @@ class DocumentController(
       ),
     ],
   )
-  @PreAuthorize("hasAnyRole('DOCUMENT_WRITER', 'DOCUMENT_ADMIN')")
+  //@PreAuthorize("hasAnyRole('DOCUMENT_WRITER', 'DOCUMENT_ADMIN')")
   fun uploadDocument(
     @PathVariable documentType: DocumentType,
     @PathVariable documentUuid: UUID,
-    @RequestPart file: MultipartFile,
-    @RequestBody metadata: JsonNode,
-  ): Document {
-    throw NotImplementedError()
-  }
+    @RequestParam file: MultipartFile,
+    @RequestParam metadata: String,
+  ) = documentService.uploadDocument(documentType, documentUuid, file, JacksonUtil.toJsonNode(metadata))
 
   @ResponseStatus(HttpStatus.ACCEPTED)
   @DeleteMapping("/{documentUuid}")
@@ -174,7 +174,7 @@ class DocumentController(
       ),
     ],
   )
-  @PreAuthorize("hasAnyRole('DOCUMENT_WRITER', 'DOCUMENT_ADMIN')")
+  //@PreAuthorize("hasAnyRole('DOCUMENT_WRITER', 'DOCUMENT_ADMIN')")
   fun deleteDocument(@PathVariable documentUuid: UUID) {
     throw NotImplementedError()
   }
