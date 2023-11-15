@@ -8,11 +8,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Schema(
-  description =
-  """
-  Document properties and metadata associated with the document. The document file must be downloaded separately using
-  the GET /documents/{documentUuid}/file endpoint.
-  """,
+  description = "Document properties and metadata associated with the document. The document file must be downloaded " +
+    "separately using the GET /documents/{documentUuid}/file endpoint.",
 )
 data class Document(
   @Schema(
@@ -58,11 +55,8 @@ data class Document(
   val mimeType: String,
 
   @Schema(
-    description =
-    """
-    JSON structured metadata associated with the document. May contain prison codes, prison numbers, dates, tags etc.
-    and the properties available will be defined by the document's type."
-    """,
+    description = "JSON structured metadata associated with the document. May contain prison codes, prison numbers, " +
+      "dates, tags etc. and the properties available will be defined by the document's type.",
     example =
     """
     {    

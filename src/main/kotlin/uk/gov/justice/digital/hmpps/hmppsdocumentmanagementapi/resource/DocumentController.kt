@@ -38,11 +38,8 @@ class DocumentController(
   @GetMapping("/{documentUuid}")
   @Operation(
     summary = "Get a document by its unique identifier",
-    description =
-    """
-    Returns document properties and metadata associated with the document. The document file must be downloaded
-    separately using the GET /documents/{documentUuid}/file endpoint.
-    """,
+    description = "Returns document properties and metadata associated with the document. The document file must be " +
+      "downloaded separately using the GET /documents/{documentUuid}/file endpoint.",
   )
   @ApiResponses(
     value = [
@@ -115,13 +112,10 @@ class DocumentController(
   @PostMapping("/{documentType}/{documentUuid}")
   @Operation(
     summary = "Upload a document file and associated metadata and store against a unique identifier",
-    description =
-    """
-    Accepts a document file binary and associated metadata. Uses the supplied document type to apply any validation
-    rules and extra security then stores the file, creates and populates a document object with file properties and
-    supplied metadata and saves the document. The document is associated with the client supplied unique identifier.
-    This identifier cannot be reused once the upload operation is successful.
-    """,
+    description = "Accepts a document file binary and associated metadata. Uses the supplied document type to apply any " +
+      "validation rules and extra security then stores the file, creates and populates a document object with file " +
+      "properties and supplied metadata and saves the document. The document is associated with the client supplied " +
+      "unique identifier. This identifier cannot be reused once the upload operation is successful.",
   )
   @ApiResponses(
     value = [
