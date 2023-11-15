@@ -44,7 +44,7 @@ data class Document(
 
   val mimeType: String,
 
-  @Type(value = JsonType::class)
+  @Type(JsonType::class)
   @Column(columnDefinition = "jsonb")
   var metadata: JsonNode,
 

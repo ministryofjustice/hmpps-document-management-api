@@ -6,6 +6,8 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Lob
 import jakarta.persistence.Table
+import org.hibernate.annotations.JdbcType
+import org.hibernate.type.descriptor.jdbc.VarbinaryJdbcType
 import java.util.UUID
 
 @Entity
@@ -18,5 +20,6 @@ data class DocumentFile(
   val documentUuid: UUID,
 
   @Lob
+  @JdbcType(VarbinaryJdbcType::class)
   val fileData: ByteArray,
 )
