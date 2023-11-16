@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource
 import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
-import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -28,6 +27,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorRespo
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResults
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.DocumentSearchService
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.DocumentService
 import java.util.UUID
@@ -198,7 +198,7 @@ class DocumentController(
       ApiResponse(
         responseCode = "202",
         description = "Document and associated metadata uploaded successfully",
-        content = [Content(array = ArraySchema(schema = Schema(implementation = Document::class)))],
+        content = [Content(schema = Schema(implementation = DocumentSearchResults::class))],
       ),
       ApiResponse(
         responseCode = "400",

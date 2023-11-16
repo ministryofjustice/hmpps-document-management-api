@@ -82,4 +82,4 @@ data class Document(
     )
 }
 
-fun List<Document>.toModels() = map { it.toModel() }
+fun Collection<Document>.toModels() = map { it.toModel() }
