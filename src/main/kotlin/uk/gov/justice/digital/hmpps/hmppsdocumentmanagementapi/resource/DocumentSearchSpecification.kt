@@ -16,7 +16,7 @@ class DocumentSearchSpecification {
 
   fun metadataContains(property: String, value: String) =
     Specification<Document> { root, _, cb ->
-      cb.equal(
+      cb.like(
         cb.function(
           "lower",
           String::class.java,
@@ -27,7 +27,7 @@ class DocumentSearchSpecification {
             cb.literal(property),
           ),
         ),
-        value.lowercase(),
+        "%${value.lowercase()}%",
       )
     }
 }
