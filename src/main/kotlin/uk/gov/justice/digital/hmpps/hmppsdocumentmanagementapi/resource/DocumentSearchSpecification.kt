@@ -7,8 +7,12 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.Docum
 
 @Component
 class DocumentSearchSpecification {
-  fun prisonCodeEquals(documentType: DocumentType) =
-    Specification<Document> { root, _, cb -> cb.equal(root.get<String>("documentType"), documentType) }
+  fun prisonCodeEquals(documentType: DocumentType?) =
+    if (documentType == null) {
+      Specification<Document> { _, _, cb -> cb.conjunction() }
+    } else {
+      Specification<Document> { root, _, cb -> cb.equal(root.get<String>("documentType"), documentType) }
+    }
 
   fun metadataContains(property: String, value: String) =
     Specification<Document> { root, _, cb ->
