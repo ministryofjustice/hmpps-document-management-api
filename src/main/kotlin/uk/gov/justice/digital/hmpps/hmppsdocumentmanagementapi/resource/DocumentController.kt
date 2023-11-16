@@ -2,10 +2,13 @@ package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource
 
 import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import jakarta.validation.Valid
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -23,6 +27,8 @@ import org.springframework.web.multipart.MultipartFile
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.DocumentSearchService
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.DocumentService
 import java.util.UUID
 
@@ -32,6 +38,7 @@ import java.util.UUID
 @RequestMapping("/documents", produces = [MediaType.APPLICATION_JSON_VALUE])
 class DocumentController(
   private val documentService: DocumentService,
+  private val documentSearchService: DocumentSearchService,
 ) {
   @GetMapping("/{documentUuid}")
   @Operation(
@@ -123,6 +130,11 @@ class DocumentController(
         content = [Content(schema = Schema(implementation = Document::class))],
       ),
       ApiResponse(
+        responseCode = "400",
+        description = "Bad request",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
         responseCode = "401",
         description = "Unauthorised, requires a valid Oauth2 token",
         content = [Content(schema = Schema(implementation = ErrorResponse::class))],
@@ -174,4 +186,45 @@ class DocumentController(
   fun deleteDocument(@PathVariable documentUuid: UUID) {
     throw NotImplementedError()
   }
+
+  @ResponseStatus(HttpStatus.ACCEPTED)
+  @PostMapping("/search")
+  @Operation(
+    summary = "Search for documents with matching metadata and optionally document type",
+    description = "Uses the supplied metadata and optional document type to filter and return documents.",
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "202",
+        description = "Document and associated metadata uploaded successfully",
+        content = [Content(array = ArraySchema(schema = Schema(implementation = Document::class)))],
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Bad request",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role. Note that the required role can be document type dependent",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  @PreAuthorize("hasAnyRole('DOCUMENT_READER', 'DOCUMENT_ADMIN')")
+  fun searchDocuments(
+    @Valid
+    @RequestBody
+    @Parameter(
+      description = "The search parameters to use to filter documents",
+      required = true,
+    )
+    request: DocumentSearchRequest,
+  ) = documentSearchService.searchDocuments(request)
 }
