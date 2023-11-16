@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.swagger.v3.oas.annotations.media.Schema
-import jakarta.validation.constraints.NotEmpty
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 
 @Schema(
@@ -15,7 +14,6 @@ data class DocumentSearchRequest(
   )
   val documentType: DocumentType?,
 
-  @field:NotEmpty(message = "Document metadata must be supplied")
   @Schema(
     description = "JSON structured metadata to match with document metadata. Documents will match if their metadata " +
       "contains all the supplied properties and their values e.g. prisonCode = \"KMI\" AND prisonNumber = \"A1234BC\". " +

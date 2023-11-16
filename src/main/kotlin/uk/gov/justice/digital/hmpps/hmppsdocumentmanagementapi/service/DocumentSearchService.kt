@@ -15,13 +15,11 @@ class DocumentSearchService(
   private val documentSearchSpecification: DocumentSearchSpecification,
 ) {
   fun searchDocuments(request: DocumentSearchRequest): DocumentSearchResults {
-    var spec = documentSearchSpecification.prisonCodeEquals(request.documentType!!)
+    // var spec =
 
-    /*with(request) {
-      documentType?.apply {
-        spec = documentSearchSpecification.prisonCodeEquals(documentType)
-      }
-    }*/
+    var spec = documentSearchSpecification.metadataContains("prisonNumber", request.metadata["prisonNumber"].asText())
+
+    request.documentType?.apply { spec = documentSearchSpecification.prisonCodeEquals(request.documentType) }
 
     val results = documentRepository.findAll(spec)
 

@@ -9,4 +9,21 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.Docum
 class DocumentSearchSpecification {
   fun prisonCodeEquals(documentType: DocumentType) =
     Specification<Document> { root, _, cb -> cb.equal(root.get<String>("documentType"), documentType) }
+
+  fun metadataContains(property: String, value: String) =
+    Specification<Document> { root, _, cb ->
+      cb.equal(
+        cb.function(
+          "lower",
+          String::class.java,
+          cb.function(
+            "jsonb_extract_path_text",
+            String::class.java,
+            root.get<String>("metadata"),
+            cb.literal(property),
+          ),
+        ),
+        value.lowercase(),
+      )
+    }
 }

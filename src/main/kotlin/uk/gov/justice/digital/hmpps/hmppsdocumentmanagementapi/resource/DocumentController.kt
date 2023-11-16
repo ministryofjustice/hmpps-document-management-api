@@ -197,7 +197,7 @@ class DocumentController(
     value = [
       ApiResponse(
         responseCode = "202",
-        description = "Document and associated metadata uploaded successfully",
+        description = "Search request accepted and results returned",
         content = [Content(schema = Schema(implementation = DocumentSearchResults::class))],
       ),
       ApiResponse(
