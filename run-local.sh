@@ -12,8 +12,8 @@
 
 # Provide the DB connection details to local container-hosted Postgresql DB
 # Match with the credentials set in docker-compose.yml
-export DB_SERVER=localhost
-export DB_NAME=document-management-db
+export DB_SERVER=localhost:5433
+export DB_NAME=document-management
 export DB_USER=document-management
 export DB_PASS=document-management
 export DB_SSL_MODE=prefer

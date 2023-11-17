@@ -81,3 +81,5 @@ data class Document(
       createdByUsername,
     )
 }
+
+fun Collection<Document>.toModels() = map { it.toModel() }

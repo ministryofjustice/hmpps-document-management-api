@@ -27,10 +27,10 @@ VALUES
     'd58e3582afa99040e27b92b13c8f2280',
     'application/pdf',
     JSON '{ "prisonNumbers": ["A1234BC"], "prisonCodes": ["KMI"] }',
-    now()::timestamp,
+    NOW(),
     'Remand and Sentencing',
     'CREATED_BY_USER',
-    now()::timestamp,
+    NOW(),
     'Remand and Sentencing',
     'DELETED_BY_USER'
 );
