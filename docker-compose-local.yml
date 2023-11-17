@@ -7,9 +7,9 @@ services:
     container_name: document-management-db
     restart: always
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
-      - POSTGRES_DB=document-management-db
+      - POSTGRES_DB=document-management
       - POSTGRES_PASSWORD=document-management
       - POSTGRES_USER=document-management
 
@@ -19,7 +19,7 @@ services:
       - hmpps
     container_name: localstack
     ports:
-      - "4566:4566"
+      - "4567:4566"
     environment:
       - SERVICES=sqs,sns
       - DEBUG=${DEBUG-}

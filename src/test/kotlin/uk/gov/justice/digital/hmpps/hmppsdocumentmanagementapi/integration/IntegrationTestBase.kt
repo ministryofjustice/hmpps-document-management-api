@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration
 
 import org.junit.jupiter.api.extension.ExtendWith
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
@@ -12,8 +11,7 @@ import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.context.jdbc.SqlMergeMode
 import org.springframework.test.web.reactive.server.WebTestClient
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.containers.output.Slf4jLogConsumer
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.container.PostgresContainer
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.wiremock.OAuthExtension
 
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
@@ -35,17 +33,12 @@ abstract class IntegrationTestBase {
   ): (HttpHeaders) -> Unit = jwtAuthHelper.setAuthorisation(user, roles)
 
   companion object {
-    private val log = LoggerFactory.getLogger(this::class.java)
-    private val pgContainer = PostgreSQLContainer<Nothing>("postgres:15").apply {
-      withReuse(true)
-      start()
-      followOutput(Slf4jLogConsumer(log).withPrefix("postgresql"))
-    }
+    private val pgContainer = PostgresContainer.instance
 
     @JvmStatic
     @DynamicPropertySource
     fun properties(registry: DynamicPropertyRegistry) {
-      pgContainer.run {
+      pgContainer?.run {
         registry.add("spring.datasource.url", pgContainer::getJdbcUrl)
         registry.add("spring.datasource.username", pgContainer::getUsername)
         registry.add("spring.datasource.password", pgContainer::getPassword)

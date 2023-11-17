@@ -1,3 +1,9 @@
+spring:
+  datasource:
+    url: 'jdbc:postgresql://localhost:5432/document-management'
+    username: document-management
+    password: document-management
+
 server:
   shutdown: immediate
 
