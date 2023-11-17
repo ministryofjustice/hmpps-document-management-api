@@ -16,6 +16,31 @@ import java.util.UUID
 class DocumentSearchIntTest : IntegrationTestBase() {
   private val deletedDocumentUuid = UUID.fromString("f73a0f91-2957-4224-b477-714370c04d37")
 
+  @Test
+  fun unauthorised() {
+    val documentType = DocumentType.HMCTS_WARRANT
+    val metadata = JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")
+
+    webTestClient.post()
+      .uri("/documents/search")
+      .bodyValue(DocumentSearchRequest(documentType, metadata))
+      .exchange()
+      .expectStatus().isUnauthorized
+  }
+
+  @Test
+  fun forbidden() {
+    val documentType = DocumentType.HMCTS_WARRANT
+    val metadata = JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")
+
+    webTestClient.post()
+      .uri("/documents/search")
+      .bodyValue(DocumentSearchRequest(documentType, metadata))
+      .headers(setAuthorisation())
+      .exchange()
+      .expectStatus().isForbidden
+  }
+
   @Sql("classpath:test_data/document-search.sql")
   @Test
   fun `response contains search request`() {
