@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.toModels
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResults
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResult
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentSearchSpecification
 
@@ -14,7 +14,7 @@ class DocumentSearchService(
   private val documentRepository: DocumentRepository,
   private val documentSearchSpecification: DocumentSearchSpecification,
 ) {
-  fun searchDocuments(request: DocumentSearchRequest): DocumentSearchResults {
+  fun searchDocuments(request: DocumentSearchRequest): DocumentSearchResult {
     var spec = documentSearchSpecification.prisonCodeEquals(request.documentType)
 
     request.metadata.fields().forEach {
@@ -23,7 +23,7 @@ class DocumentSearchService(
 
     val results = documentRepository.findAll(spec)
 
-    return DocumentSearchResults(
+    return DocumentSearchResult(
       request,
       results.toModels(),
     )

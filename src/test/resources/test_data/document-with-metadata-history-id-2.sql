@@ -24,7 +24,7 @@ VALUES
     'd58e3582afa99040e27b92b13c8f2280',
     'application/pdf',
     JSON '{ "prisonNumbers": ["C3456DE"], "prisonCodes": ["KMI"] }',
-    now()::timestamp - 3,
+    NOW() - INTERVAL '3 DAYS',
     'Remand and Sentencing',
     'CREATED_BY_USER'
 );
@@ -43,7 +43,7 @@ VALUES
     1,
     2,
     JSON '{ "prisonNumbers": ["A1234BC"], "prisonCodes": ["KMI"] }',
-    now()::timestamp - 2,
+    NOW() - INTERVAL '2 DAYS',
     'Remand and Sentencing',
     'SUPERSEDED_BY_USER'
 ),
@@ -51,7 +51,7 @@ VALUES
     2,
     2,
     JSON '{ "prisonNumbers": ["B2345CD"], "prisonCodes": ["KMI"] }',
-    now()::timestamp - 1,
+    NOW() - INTERVAL '1 DAY',
     'Remand and Sentencing',
     'SUPERSEDED_BY_USER'
 );

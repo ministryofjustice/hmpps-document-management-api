@@ -26,7 +26,9 @@ dependencies {
 
   // Test dependencies
   testImplementation("org.wiremock:wiremock:3.3.1")
-  testImplementation("com.h2database:h2")
+  testImplementation("org.testcontainers:postgresql:1.19.2")
+  testImplementation("io.jsonwebtoken:jjwt-impl:0.12.3")
+  testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.3")
 }
 
 kotlin {

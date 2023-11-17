@@ -1,16 +1,3 @@
-spring:
-  datasource:
-    url: 'jdbc:h2:mem:document-management-db;MODE=PostgreSQL;INIT=create domain if not exists jsonb as json'
-    username: document-management
-    password: document-management
-
-  flyway:
-    locations: classpath:/migration/h2,classpath:/migration/common
-
-  h2:
-    console:
-      enabled: true
-
 server:
   shutdown: immediate
 

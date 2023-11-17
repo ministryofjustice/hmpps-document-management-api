@@ -27,7 +27,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorRespo
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResults
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResult
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.DocumentSearchService
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.DocumentService
 import java.util.UUID
@@ -198,7 +198,7 @@ class DocumentController(
       ApiResponse(
         responseCode = "202",
         description = "Search request accepted and results returned",
-        content = [Content(schema = Schema(implementation = DocumentSearchResults::class))],
+        content = [Content(schema = Schema(implementation = DocumentSearchResult::class))],
       ),
       ApiResponse(
         responseCode = "400",

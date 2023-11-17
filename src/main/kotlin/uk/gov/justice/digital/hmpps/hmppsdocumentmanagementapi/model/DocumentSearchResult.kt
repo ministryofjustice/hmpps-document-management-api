@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model
 
 import io.swagger.v3.oas.annotations.media.Schema
 
-data class DocumentSearchResults(
+data class DocumentSearchResult(
   @Schema(
     description = "Describes the search parameters that were used to filter documents",
   )
