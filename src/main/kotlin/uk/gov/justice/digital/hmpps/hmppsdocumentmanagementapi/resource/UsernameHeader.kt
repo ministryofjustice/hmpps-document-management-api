@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 @Parameter(
   name = USERNAME,
   `in` = ParameterIn.HEADER,
+  description = "The username of the user interacting with the client service",
   required = false,
   content = [Content(schema = Schema(implementation = String::class))],
 )

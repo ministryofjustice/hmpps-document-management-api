@@ -71,7 +71,14 @@ class DocumentController(
     ],
   )
   @PreAuthorize("hasAnyRole('DOCUMENT_READER', 'DOCUMENT_ADMIN')")
-  fun getDocument(@PathVariable documentUuid: UUID) =
+  fun getDocument(
+    @PathVariable
+    @Parameter(
+      description = "Document unique identifier",
+      required = true,
+    )
+    documentUuid: UUID,
+  ) =
     documentService.getDocument(documentUuid)
 
   @GetMapping("/{documentUuid}/file", produces = [MediaType.APPLICATION_PDF_VALUE])
@@ -103,7 +110,14 @@ class DocumentController(
     ],
   )
   @PreAuthorize("hasAnyRole('DOCUMENT_READER', 'DOCUMENT_ADMIN')")
-  fun downloadDocumentFile(@PathVariable documentUuid: UUID): ResponseEntity<ByteArray> {
+  fun downloadDocumentFile(
+    @PathVariable
+    @Parameter(
+      description = "Document unique identifier",
+      required = true,
+    )
+    documentUuid: UUID,
+  ): ResponseEntity<ByteArray> {
     val document = documentService.getDocument(documentUuid)
     val documentFile = documentService.getDocumentFile(documentUuid)
     return ResponseEntity.ok()
@@ -119,8 +133,8 @@ class DocumentController(
     summary = "Upload a document file and associated metadata and store against a unique identifier",
     description = "Accepts a document file binary and associated metadata. Uses the supplied document type to apply any " +
       "validation rules and extra security then stores the file, creates and populates a document object with file " +
-      "properties and supplied metadata and saves the document. The document is associated with the client supplied " +
-      "unique identifier. This identifier cannot be reused once the upload operation is successful.",
+      "properties and supplied metadata and saves that document object. The document is associated with the client supplied " +
+      "unique identifier. This identifier is used as an idempotency key and therefore cannot be reused once the upload operation is successful.",
   )
   @ApiResponses(
     value = [
@@ -144,14 +158,40 @@ class DocumentController(
         description = "Forbidden, requires an appropriate role. Note that the required role can be document type dependent",
         content = [Content(schema = Schema(implementation = ErrorResponse::class))],
       ),
+      ApiResponse(
+        responseCode = "409",
+        description = "Conflict, the supplied document unique identifier is already present in the service",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
     ],
   )
   @PreAuthorize("hasAnyRole('DOCUMENT_WRITER', 'DOCUMENT_ADMIN')")
   fun uploadDocument(
-    @PathVariable documentType: DocumentType,
-    @PathVariable documentUuid: UUID,
-    @RequestPart file: MultipartFile,
-    @RequestPart metadata: String,
+    @PathVariable
+    @Parameter(
+      description = "The type of document being uploaded. This categorises the document and may enforce additional authentication and validation rules",
+      required = true,
+    )
+    documentType: DocumentType,
+    @PathVariable
+    @Parameter(
+      description = "Client supplied document unique identifier. A version 1 or version 4 (preferred) UUID. Used as an idempotency key preventing duplicate document uploads",
+      required = true,
+    )
+    documentUuid: UUID,
+    @RequestPart
+    @Parameter(
+      description = "File part of the multipart request",
+      required = true,
+    )
+    file: MultipartFile,
+    @RequestPart
+    @Parameter(
+      description = "The metadata describing the uploaded document. Should contain a person identifier e.g. prison number or DELIUS id along with any other pertinent metadata. " +
+        "The document type used will specify what metadata is required as a minimum",
+      required = true,
+    )
+    metadata: String,
   ) = documentService.uploadDocument(documentType, documentUuid, file, JacksonUtil.toJsonNode(metadata))
 
   @ResponseStatus(HttpStatus.ACCEPTED)
@@ -183,7 +223,14 @@ class DocumentController(
     ],
   )
   @PreAuthorize("hasAnyRole('DOCUMENT_WRITER', 'DOCUMENT_ADMIN')")
-  fun deleteDocument(@PathVariable documentUuid: UUID) {
+  fun deleteDocument(
+    @PathVariable
+    @Parameter(
+      description = "Document unique identifier",
+      required = true,
+    )
+    documentUuid: UUID,
+  ) {
     throw NotImplementedError()
   }
 
@@ -191,7 +238,10 @@ class DocumentController(
   @PostMapping("/search")
   @Operation(
     summary = "Search for documents with matching metadata and optionally document type",
-    description = "Uses the supplied metadata and optional document type to filter and return documents.",
+    description = "Uses the supplied metadata and optional document type to filter and return documents. " +
+      "Documents will match if they are of the supplied type (optional) and/or their metadata contains all the supplied " +
+      "properties and their values e.g. prisonCode = \"KMI\" AND prisonNumber = \"A1234BC\". Value matching is partial " +
+      "and case insensitive so court = \"ham magis\" will match \"Birmingham Magistrates\".",
   )
   @ApiResponses(
     value = [
