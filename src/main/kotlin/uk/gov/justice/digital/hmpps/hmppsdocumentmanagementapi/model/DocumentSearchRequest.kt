@@ -17,7 +17,7 @@ data class DocumentSearchRequest(
   @Schema(
     description = "JSON structured metadata to match with document metadata. Documents will match if their metadata " +
       "contains all the supplied properties and their values e.g. prisonCode = \"KMI\" AND prisonNumber = \"A1234BC\". " +
-      "Value matching is case insensitive so court = \"birmingham magistrates\" will match \"Birmingham Magistrates\".",
+      "Value matching is partial and case insensitive so court = \"ham magis\" will match \"Birmingham Magistrates\".",
     example =
     """
     {
