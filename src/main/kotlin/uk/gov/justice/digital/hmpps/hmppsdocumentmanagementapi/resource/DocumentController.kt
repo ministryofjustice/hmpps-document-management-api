@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestPart
@@ -78,8 +80,7 @@ class DocumentController(
       required = true,
     )
     documentUuid: UUID,
-  ) =
-    documentService.getDocument(documentUuid)
+  ) = documentService.getDocument(documentUuid)
 
   @GetMapping("/{documentUuid}/file", produces = [MediaType.APPLICATION_PDF_VALUE])
   @Operation(
@@ -190,9 +191,79 @@ class DocumentController(
       description = "The metadata describing the uploaded document. Should contain a person identifier e.g. prison number or DELIUS id along with any other pertinent metadata. " +
         "The document type used will specify what metadata is required as a minimum",
       required = true,
+      example =
+      """
+      {
+        "prisonCode": "KMI",
+        "prisonNumber": "C3456DE",
+        "court": "Birmingham Magistrates",
+        "warrantDate": "2023-11-14"
+      }
+      """,
     )
     metadata: String,
   ) = documentService.uploadDocument(documentType, documentUuid, file, JacksonUtil.toJsonNode(metadata))
+
+  @ResponseStatus(HttpStatus.ACCEPTED)
+  @PutMapping("/{documentUuid}/metadata")
+  @Operation(
+    summary = "Replace the metadata associated with a document",
+    description = "Accepts JSON based metadata to associate with the document identified by the supplied unique identifier. " +
+      "Applies authorisation and validation rules based on the type of document. If valid, the previous metadata will be stored " +
+      "and the metadata associated with the document will be replaced with the supplied metadata.",
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "202",
+        description = "Document metadata replaced successfully",
+        content = [Content(schema = Schema(implementation = Document::class))],
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Bad request",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role. Note that the required role can be document type dependent",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  @PreAuthorize("hasAnyRole('DOCUMENT_WRITER', 'DOCUMENT_ADMIN')")
+  fun replaceDocumentMetadata(
+    @PathVariable
+    @Parameter(
+      description = "Document unique identifier",
+      required = true,
+    )
+    documentUuid: UUID,
+    @RequestBody
+    @Parameter(
+      description = "The replacement metadata describing the document. Should contain a person identifier e.g. " +
+        "prison number or DELIUS id along with any other pertinent metadata. " +
+        "The document type used will specify what metadata is required as a minimum",
+      required = true,
+      example =
+      """
+      {
+        "prisonCode": "KMI",
+        "prisonNumber": "C3456DE",
+        "court": "Birmingham Magistrates",
+        "warrantDate": "2023-11-14"
+      }
+      """,
+    )
+    metadata: JsonNode,
+  ) {
+    throw NotImplementedError()
+  }
 
   @ResponseStatus(HttpStatus.ACCEPTED)
   @DeleteMapping("/{documentUuid}")
