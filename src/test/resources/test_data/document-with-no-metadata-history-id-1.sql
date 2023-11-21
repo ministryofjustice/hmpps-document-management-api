@@ -23,7 +23,7 @@ VALUES
     48243,
     'd58e3582afa99040e27b92b13c8f2280',
     'application/pdf',
-    JSON '{ "prisonNumbers": ["A1234BC"], "prisonCodes": ["KMI"] }',
+    JSON '{ "prisonCode": "KMI", "prisonNumber": "A1234BC" }',
     NOW(),
     'Remand and Sentencing',
     'CREATED_BY_USER'

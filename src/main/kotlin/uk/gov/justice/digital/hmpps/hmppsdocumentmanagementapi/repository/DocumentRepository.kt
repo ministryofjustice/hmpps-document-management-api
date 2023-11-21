@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository
 
 import jakarta.persistence.EntityNotFoundException
+import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.stereotype.Repository
@@ -11,6 +12,8 @@ import java.util.UUID
 interface DocumentRepository :
   JpaRepository<Document, Long>,
   JpaSpecificationExecutor<Document> {
+
+  @EntityGraph(attributePaths = ["documentMetadataHistory"])
   fun findByDocumentUuid(documentUuid: UUID): Document?
 }
 
