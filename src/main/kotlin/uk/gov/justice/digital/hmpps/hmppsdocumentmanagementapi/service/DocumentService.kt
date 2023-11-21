@@ -11,6 +11,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.DocumentFi
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentFileRepository
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.findByDocumentUuidOrThrowNotFound
 import java.util.UUID
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as DocumentModel
 
@@ -21,8 +22,7 @@ class DocumentService(
   private val documentFileRepository: DocumentFileRepository,
 ) {
   fun getDocument(documentUuid: UUID): DocumentModel {
-    val document = documentRepository.findByDocumentUuid(documentUuid)
-      ?: throw EntityNotFoundException("Document with UUID '$documentUuid' not found")
+    val document = documentRepository.findByDocumentUuidOrThrowNotFound(documentUuid)
 
     return document.toModel()
   }
@@ -39,6 +39,7 @@ class DocumentService(
     documentUuid: UUID,
     file: MultipartFile,
     metadata: JsonNode,
+    documentRequestContext: DocumentRequestContext,
   ): DocumentModel {
     // TODO: UUID check should include soft deleted documents
     require(documentRepository.findByDocumentUuid(documentUuid) == null) {
@@ -64,8 +65,8 @@ class DocumentService(
         fileHash = "",
         mimeType = file.contentType ?: "application/pdf",
         metadata = metadata,
-        createdByServiceName = "Remand and Sentencing",
-        createdByUsername = "CREATED_BY_USER",
+        createdByServiceName = documentRequestContext.serviceName,
+        createdByUsername = documentRequestContext.username,
       ),
     )
 
@@ -77,8 +78,7 @@ class DocumentService(
     metadata: JsonNode,
     documentRequestContext: DocumentRequestContext,
   ): DocumentModel {
-    val document = documentRepository.findByDocumentUuid(documentUuid)
-      ?: throw EntityNotFoundException("Document with UUID '$documentUuid' not found")
+    val document = documentRepository.findByDocumentUuidOrThrowNotFound(documentUuid)
 
     document.replaceMetadata(
       metadata = metadata,

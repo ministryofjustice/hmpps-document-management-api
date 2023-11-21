@@ -205,7 +205,15 @@ class DocumentController(
       """,
     )
     metadata: String,
-  ) = documentService.uploadDocument(documentType, documentUuid, file, JacksonUtil.toJsonNode(metadata))
+    request: HttpServletRequest,
+  ) =
+    documentService.uploadDocument(
+      documentType,
+      documentUuid,
+      file,
+      JacksonUtil.toJsonNode(metadata),
+      request.getAttribute(DocumentRequestContext::class.simpleName) as DocumentRequestContext,
+    )
 
   @ResponseStatus(HttpStatus.ACCEPTED)
   @PutMapping("/{documentUuid}/metadata")

@@ -13,6 +13,8 @@ import org.springframework.test.context.jdbc.SqlMergeMode
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.container.PostgresContainer
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.wiremock.OAuthExtension
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.SERVICE_NAME
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.USERNAME
 
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
 @Sql("classpath:test_data/reset-database.sql")
@@ -31,6 +33,14 @@ abstract class IntegrationTestBase {
     user: String = "test-client",
     roles: List<String> = listOf(),
   ): (HttpHeaders) -> Unit = jwtAuthHelper.setAuthorisation(user, roles)
+
+  internal fun setDocumentContext(
+    serviceName: String = "Test consuming service name",
+    username: String? = "TEST_USERNAME",
+  ): (HttpHeaders) -> Unit = {
+    it.set(SERVICE_NAME, serviceName)
+    it.set(USERNAME, username)
+  }
 
   companion object {
     private val pgContainer = PostgresContainer.instance

@@ -37,6 +37,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
       .uri("/documents/search")
       .bodyValue(DocumentSearchRequest(documentType, metadata))
       .headers(setAuthorisation())
+      .headers(setDocumentContext())
       .exchange()
       .expectStatus().isForbidden
   }
@@ -159,6 +160,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
       .uri("/documents/search")
       .bodyValue(DocumentSearchRequest(documentType, metadata))
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
+      .headers(setDocumentContext())
       .exchange()
       .expectStatus().isAccepted
       .expectHeader().contentType(MediaType.APPLICATION_JSON)
