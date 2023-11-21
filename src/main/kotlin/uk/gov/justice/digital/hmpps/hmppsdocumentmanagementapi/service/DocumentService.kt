@@ -70,4 +70,17 @@ class DocumentService(
 
     return document.toModel()
   }
+
+  fun replaceDocumentMetadata(documentUuid: UUID, metadata: JsonNode): DocumentModel {
+    val document = documentRepository.findByDocumentUuid(documentUuid)
+      ?: throw EntityNotFoundException("Document with UUID '$documentUuid' not found")
+
+    document.replaceMetadata(
+      metadata = metadata,
+      supersededByServiceName = "Remand and Sentencing",
+      supersededByUsername = "SUPERSEDED_BY_USER",
+    )
+
+    return documentRepository.saveAndFlush(document).toModel()
+  }
 }

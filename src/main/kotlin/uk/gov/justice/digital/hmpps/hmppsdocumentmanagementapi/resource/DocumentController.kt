@@ -188,7 +188,8 @@ class DocumentController(
     file: MultipartFile,
     @RequestPart
     @Parameter(
-      description = "The metadata describing the uploaded document. Should contain a person identifier e.g. prison number or DELIUS id along with any other pertinent metadata. " +
+      description = "The metadata describing the uploaded document. Should contain a person identifier e.g. prison number " +
+        "or case reference number along with any other pertinent metadata. " +
         "The document type used will specify what metadata is required as a minimum",
       required = true,
       example =
@@ -247,7 +248,7 @@ class DocumentController(
     @RequestBody
     @Parameter(
       description = "The replacement metadata describing the document. Should contain a person identifier e.g. " +
-        "prison number or DELIUS id along with any other pertinent metadata. " +
+        "prison number or case reference number along with any other pertinent metadata. " +
         "The document type used will specify what metadata is required as a minimum",
       required = true,
       example =
@@ -261,9 +262,7 @@ class DocumentController(
       """,
     )
     metadata: JsonNode,
-  ) {
-    throw NotImplementedError()
-  }
+  ) = documentService.replaceDocumentMetadata(documentUuid, metadata)
 
   @ResponseStatus(HttpStatus.ACCEPTED)
   @DeleteMapping("/{documentUuid}")

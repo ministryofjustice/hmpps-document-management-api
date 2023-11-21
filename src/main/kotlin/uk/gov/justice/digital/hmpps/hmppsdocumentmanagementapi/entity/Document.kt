@@ -66,6 +66,20 @@ data class Document(
 
   fun documentMetadataHistory() = documentMetadataHistory
 
+  fun replaceMetadata(metadata: JsonNode, supersededTime: LocalDateTime = LocalDateTime.now(), supersededByServiceName: String, supersededByUsername: String?) {
+    documentMetadataHistory.add(
+      DocumentMetadataHistory(
+        document = this,
+        metadata = this.metadata,
+        supersededTime = supersededTime,
+        supersededByServiceName = supersededByServiceName,
+        supersededByUsername = supersededByUsername,
+      ),
+    )
+
+    this.metadata = metadata
+  }
+
   fun toModel() =
     DocumentModel(
       documentUuid,
