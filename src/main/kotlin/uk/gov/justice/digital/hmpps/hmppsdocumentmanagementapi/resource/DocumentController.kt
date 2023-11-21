@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document
@@ -262,7 +264,13 @@ class DocumentController(
       """,
     )
     metadata: JsonNode,
-  ) = documentService.replaceDocumentMetadata(documentUuid, metadata)
+    request: HttpServletRequest,
+  ) =
+    documentService.replaceDocumentMetadata(
+      documentUuid,
+      metadata,
+      request.getAttribute(DocumentRequestContext::class.simpleName) as DocumentRequestContext,
+    )
 
   @ResponseStatus(HttpStatus.ACCEPTED)
   @DeleteMapping("/{documentUuid}")

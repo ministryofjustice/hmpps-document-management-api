@@ -5,6 +5,7 @@ import jakarta.persistence.EntityNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.DocumentFile
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
@@ -71,14 +72,18 @@ class DocumentService(
     return document.toModel()
   }
 
-  fun replaceDocumentMetadata(documentUuid: UUID, metadata: JsonNode): DocumentModel {
+  fun replaceDocumentMetadata(
+    documentUuid: UUID,
+    metadata: JsonNode,
+    documentRequestContext: DocumentRequestContext,
+  ): DocumentModel {
     val document = documentRepository.findByDocumentUuid(documentUuid)
       ?: throw EntityNotFoundException("Document with UUID '$documentUuid' not found")
 
     document.replaceMetadata(
       metadata = metadata,
-      supersededByServiceName = "Remand and Sentencing",
-      supersededByUsername = "SUPERSEDED_BY_USER",
+      supersededByServiceName = documentRequestContext.serviceName,
+      supersededByUsername = documentRequestContext.username,
     )
 
     return documentRepository.saveAndFlush(document).toModel()
