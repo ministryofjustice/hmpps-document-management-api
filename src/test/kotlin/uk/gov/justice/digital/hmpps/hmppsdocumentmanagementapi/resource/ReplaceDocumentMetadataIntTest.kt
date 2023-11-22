@@ -87,7 +87,7 @@ class ReplaceDocumentMetadataIntTest : IntegrationTestBase() {
 
   @Sql("classpath:test_data/document-with-no-metadata-history-id-1.sql")
   @Test
-  fun `entity contains replaced metadata`() {
+  fun `document contains replaced metadata`() {
     webTestClient.replaceDocumentMetadata(documentUuid, metadata)
 
     val entity = repository.findByDocumentUuid(documentUuid)!!
