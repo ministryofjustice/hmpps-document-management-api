@@ -5,7 +5,6 @@ import com.nimbusds.jwt.SignedJWT
 import io.opentelemetry.api.trace.Span
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.apache.commons.lang3.StringUtils
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.context.annotation.Configuration
@@ -14,7 +13,6 @@ import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import java.text.ParseException
-import java.util.Optional
 
 @Configuration
 @ConditionalOnExpression("T(org.apache.commons.lang3.StringUtils).isNotBlank('\${applicationinsights.connection.string:}')")
@@ -32,31 +30,32 @@ class ClientTrackingConfiguration(private val clientTrackingInterceptor: ClientT
 @Configuration
 class ClientTrackingInterceptor : HandlerInterceptor {
   override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
-    val (user, clientId) = findUserAndClient(request)
-    user?.let {
-      Span.current().setAttribute("username", it) // username in customDimensions
-      Span.current().setAttribute("enduser.id", it) // user_Id at the top level of the request
+    val token = request.getHeader(HttpHeaders.AUTHORIZATION)
+    if (token?.startsWith("Bearer ") == true) {
+      try {
+        val jwtBody = getClaimsFromJWT(token)
+        val user = jwtBody.getClaim("user_name")?.toString()
+        user?.run {
+          Span.current().setAttribute("username", this) // username in customDimensions
+          Span.current().setAttribute("enduser.id", this) // user_Id at the top level of the request
+        }
+
+        val client = jwtBody.getClaim("client_id")?.toString()
+        client?.run {
+          Span.current().setAttribute("clientId", this)
+        }
+      } catch (e: ParseException) {
+        log.warn("problem decoding jwt public key for application insights", e)
+      }
     }
-    clientId?.let { Span.current().setAttribute("clientId", clientId) }
     return true
   }
 
-  private fun findUserAndClient(req: HttpServletRequest): Pair<String?, String?> =
-    req.getHeader(HttpHeaders.AUTHORIZATION)
-      ?.takeIf { it.startsWith("Bearer ") }
-      ?.let { getClaimsFromJWT(it) }
-      ?.let { it.getClaim("user_name") as String? to it.getClaim("client_id") as String? }
-      ?: (null to null)
-
-  private fun getClaimsFromJWT(token: String): JWTClaimsSet? =
-    try {
-      SignedJWT.parse(token.replace("Bearer ", ""))
-    } catch (e: ParseException) {
-      log.warn("problem decoding jwt public key for application insights", e)
-      null
-    }?.jwtClaimsSet
+  @Throws(ParseException::class)
+  private fun getClaimsFromJWT(token: String): JWTClaimsSet =
+    SignedJWT.parse(token.replace("Bearer ", "")).jwtClaimsSet
 
   companion object {
-    private val log = LoggerFactory.getLogger(this::class.java)
+    private val log = LoggerFactory.getLogger(ClientTrackingInterceptor::class.java)
   }
 }

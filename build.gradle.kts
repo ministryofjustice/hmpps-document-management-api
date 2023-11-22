@@ -30,6 +30,7 @@ dependencies {
   testImplementation("org.testcontainers:postgresql:1.19.2")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.3")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.3")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-testing:1.32.0")
 }
 
 kotlin {
