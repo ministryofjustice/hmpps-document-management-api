@@ -17,10 +17,16 @@ import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.CLIENT_ID
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.JwtAuthHelper
 
+@TestPropertySource(
+  properties = [
+    "applicationinsights.connection.string=TEST",
+  ],
+)
 @Import(JwtAuthHelper::class, ClientTrackingInterceptor::class, ClientTrackingConfiguration::class)
 @ContextConfiguration(initializers = [ConfigDataApplicationContextInitializer::class])
 @ActiveProfiles("test")
@@ -28,8 +34,8 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.JwtAu
 class ClientTrackingConfigurationTest {
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
-  private lateinit var clientTrackingInterceptor: ClientTrackingInterceptor
-  private lateinit var clientTrackingInterceptorSpy: ClientTrackingInterceptor
+  private lateinit var interceptor: ClientTrackingInterceptor
+  private lateinit var interceptorSpy: ClientTrackingInterceptor
 
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
@@ -42,8 +48,8 @@ class ClientTrackingConfigurationTest {
 
   @BeforeEach
   fun setUp() {
-    clientTrackingInterceptorSpy = spy(clientTrackingInterceptor)
-    whenever(clientTrackingInterceptorSpy.getCurrentSpan()).thenReturn(span)
+    interceptorSpy = spy(interceptor)
+    whenever(interceptorSpy.getCurrentSpan()).thenReturn(span)
   }
 
   @Test
@@ -52,7 +58,7 @@ class ClientTrackingConfigurationTest {
     val token = jwtAuthHelper.createJwt(subject = user, user = user, client = null)
     req.addHeader(HttpHeaders.AUTHORIZATION, "Bearer $token")
 
-    clientTrackingInterceptorSpy.preHandle(req, res, "null")
+    interceptorSpy.preHandle(req, res, "null")
 
     verify(span).setAttribute("username", user)
     verify(span).setAttribute("enduser.id", user)
@@ -64,7 +70,7 @@ class ClientTrackingConfigurationTest {
     val token = jwtAuthHelper.createJwt(subject = CLIENT_ID, user = null, client = CLIENT_ID)
     req.addHeader(HttpHeaders.AUTHORIZATION, "Bearer $token")
 
-    clientTrackingInterceptorSpy.preHandle(req, res, "null")
+    interceptorSpy.preHandle(req, res, "null")
 
     verify(span).setAttribute("clientId", CLIENT_ID)
     verifyNoMoreInteractions(span)
@@ -76,7 +82,7 @@ class ClientTrackingConfigurationTest {
     val token = jwtAuthHelper.createJwt(subject = user, user = user, client = CLIENT_ID)
     req.addHeader(HttpHeaders.AUTHORIZATION, "Bearer $token")
 
-    clientTrackingInterceptorSpy.preHandle(req, res, "null")
+    interceptorSpy.preHandle(req, res, "null")
 
     verify(span).setAttribute("username", user)
     verify(span).setAttribute("enduser.id", user)
@@ -89,7 +95,7 @@ class ClientTrackingConfigurationTest {
     val token = jwtAuthHelper.createJwt(subject = CLIENT_ID, user = null, client = CLIENT_ID)
     req.addHeader(HttpHeaders.AUTHORIZATION, "Not-Bearer $token")
 
-    clientTrackingInterceptorSpy.preHandle(req, res, "null")
+    interceptorSpy.preHandle(req, res, "null")
 
     verifyNoInteractions(span)
   }
@@ -99,7 +105,7 @@ class ClientTrackingConfigurationTest {
     val token = "invalid"
     req.addHeader(HttpHeaders.AUTHORIZATION, "Bearer $token")
 
-    clientTrackingInterceptorSpy.preHandle(req, res, "null")
+    interceptorSpy.preHandle(req, res, "null")
 
     verifyNoInteractions(span)
   }
