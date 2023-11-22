@@ -2,6 +2,7 @@ plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.8.0"
   kotlin("plugin.spring") version "1.9.20"
   kotlin("plugin.jpa") version "1.9.20"
+  jacoco
 }
 
 configurations {
@@ -40,5 +41,17 @@ tasks {
     kotlinOptions {
       jvmTarget = "21"
     }
+  }
+}
+
+// Jacoco code coverage
+tasks.named("test") {
+  finalizedBy("jacocoTestReport")
+}
+
+tasks.named<JacocoReport>("jacocoTestReport") {
+  reports {
+    html.required.set(true)
+    xml.required.set(true)
   }
 }
