@@ -35,20 +35,27 @@ class ClientTrackingInterceptor : HandlerInterceptor {
       try {
         val jwtBody = getClaimsFromJWT(token)
         val user = jwtBody.getClaim("user_name")?.toString()
-        user?.run {
-          Span.current().setAttribute("username", this) // username in customDimensions
-          Span.current().setAttribute("enduser.id", this) // user_Id at the top level of the request
-        }
-
         val client = jwtBody.getClaim("client_id")?.toString()
-        client?.run {
-          Span.current().setAttribute("clientId", this)
+
+        with(getCurrentSpan()) {
+          user?.run {
+            setAttribute("username", this) // username in customDimensions
+            setAttribute("enduser.id", this) // user_Id at the top level of the request
+          }
+
+          client?.run {
+            setAttribute("clientId", this)
+          }
         }
       } catch (e: ParseException) {
         log.warn("problem decoding jwt public key for application insights", e)
       }
     }
     return true
+  }
+
+  fun getCurrentSpan(): Span {
+    return Span.current()
   }
 
   @Throws(ParseException::class)
