@@ -14,6 +14,8 @@ import java.time.Duration
 import java.util.Date
 import java.util.UUID
 
+internal const val CLIENT_ID = "document-api-client"
+
 @Component
 class JwtAuthHelper {
   private lateinit var keyPair: KeyPair
@@ -28,12 +30,15 @@ class JwtAuthHelper {
   fun jwtDecoder(): JwtDecoder = NimbusJwtDecoder.withPublicKey(keyPair.public as RSAPublicKey).build()
 
   fun setAuthorisation(
-    user: String = "AUTH_ADM",
+    user: String? = null,
+    client: String = CLIENT_ID,
     roles: List<String> = listOf(),
     scopes: List<String> = listOf(),
   ): (HttpHeaders) -> Unit {
     val token = createJwt(
-      subject = user,
+      subject = user ?: client,
+      user = user,
+      client = client,
       scope = scopes,
       expiryTime = Duration.ofHours(1L),
       roles = roles,
@@ -42,15 +47,17 @@ class JwtAuthHelper {
   }
 
   internal fun createJwt(
-    subject: String?,
+    subject: String,
+    user: String?,
+    client: String?,
     scope: List<String>? = listOf(),
     roles: List<String>? = listOf(),
     expiryTime: Duration = Duration.ofHours(1),
     jwtId: String = UUID.randomUUID().toString(),
   ): String =
     mutableMapOf<String, Any>()
-      .also { subject?.let { subject -> it["user_name"] = subject } }
-      .also { it["client_id"] = "calculate-release-dates-admin" }
+      .also { user?.let { user -> it["user_name"] = user } }
+      .also { client?.let { client -> it["client_id"] = client } }
       .also { roles?.let { roles -> it["authorities"] = roles } }
       .also { scope?.let { scope -> it["scope"] = scope } }
       .let {

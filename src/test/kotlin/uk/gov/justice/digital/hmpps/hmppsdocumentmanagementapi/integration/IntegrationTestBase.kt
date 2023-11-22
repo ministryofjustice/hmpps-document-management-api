@@ -22,7 +22,6 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.USERNAME
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
 abstract class IntegrationTestBase {
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
   lateinit var webTestClient: WebTestClient
 
@@ -30,9 +29,10 @@ abstract class IntegrationTestBase {
   lateinit var jwtAuthHelper: JwtAuthHelper
 
   internal fun setAuthorisation(
-    user: String = "test-client",
+    user: String? = null,
+    client: String = CLIENT_ID,
     roles: List<String> = listOf(),
-  ): (HttpHeaders) -> Unit = jwtAuthHelper.setAuthorisation(user, roles)
+  ): (HttpHeaders) -> Unit = jwtAuthHelper.setAuthorisation(user, client, roles)
 
   internal fun setDocumentContext(
     serviceName: String = "Test consuming service name",

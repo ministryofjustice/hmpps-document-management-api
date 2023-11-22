@@ -11,7 +11,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.SERVICE_
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.USERNAME
 
 @Configuration
-class ClientTrackingConfiguration(private val documentRequestContextInterceptor: DocumentRequestContextInterceptor) : WebMvcConfigurer {
+class DocumentRequestContextConfiguration(private val documentRequestContextInterceptor: DocumentRequestContextInterceptor) : WebMvcConfigurer {
   override fun addInterceptors(registry: InterceptorRegistry) {
     log.info("Adding document request context interceptor")
     registry.addInterceptor(documentRequestContextInterceptor).addPathPatterns("/documents/**")
