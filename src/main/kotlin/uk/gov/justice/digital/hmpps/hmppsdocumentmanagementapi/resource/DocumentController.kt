@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document
@@ -188,7 +190,8 @@ class DocumentController(
     file: MultipartFile,
     @RequestPart
     @Parameter(
-      description = "The metadata describing the uploaded document. Should contain a person identifier e.g. prison number or DELIUS id along with any other pertinent metadata. " +
+      description = "The metadata describing the uploaded document. Should contain a person identifier e.g. prison number " +
+        "or case reference number along with any other pertinent metadata. " +
         "The document type used will specify what metadata is required as a minimum",
       required = true,
       example =
@@ -202,7 +205,15 @@ class DocumentController(
       """,
     )
     metadata: String,
-  ) = documentService.uploadDocument(documentType, documentUuid, file, JacksonUtil.toJsonNode(metadata))
+    request: HttpServletRequest,
+  ) =
+    documentService.uploadDocument(
+      documentType,
+      documentUuid,
+      file,
+      JacksonUtil.toJsonNode(metadata),
+      request.getAttribute(DocumentRequestContext::class.simpleName) as DocumentRequestContext,
+    )
 
   @ResponseStatus(HttpStatus.ACCEPTED)
   @PutMapping("/{documentUuid}/metadata")
@@ -247,7 +258,7 @@ class DocumentController(
     @RequestBody
     @Parameter(
       description = "The replacement metadata describing the document. Should contain a person identifier e.g. " +
-        "prison number or DELIUS id along with any other pertinent metadata. " +
+        "prison number or case reference number along with any other pertinent metadata. " +
         "The document type used will specify what metadata is required as a minimum",
       required = true,
       example =
@@ -261,9 +272,13 @@ class DocumentController(
       """,
     )
     metadata: JsonNode,
-  ) {
-    throw NotImplementedError()
-  }
+    request: HttpServletRequest,
+  ) =
+    documentService.replaceDocumentMetadata(
+      documentUuid,
+      metadata,
+      request.getAttribute(DocumentRequestContext::class.simpleName) as DocumentRequestContext,
+    )
 
   @ResponseStatus(HttpStatus.ACCEPTED)
   @DeleteMapping("/{documentUuid}")

@@ -5,11 +5,13 @@ import jakarta.persistence.EntityNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.DocumentFile
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentFileRepository
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.findByDocumentUuidOrThrowNotFound
 import java.util.UUID
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as DocumentModel
 
@@ -20,8 +22,7 @@ class DocumentService(
   private val documentFileRepository: DocumentFileRepository,
 ) {
   fun getDocument(documentUuid: UUID): DocumentModel {
-    val document = documentRepository.findByDocumentUuid(documentUuid)
-      ?: throw EntityNotFoundException("Document with UUID '$documentUuid' not found")
+    val document = documentRepository.findByDocumentUuidOrThrowNotFound(documentUuid)
 
     return document.toModel()
   }
@@ -38,6 +39,7 @@ class DocumentService(
     documentUuid: UUID,
     file: MultipartFile,
     metadata: JsonNode,
+    documentRequestContext: DocumentRequestContext,
   ): DocumentModel {
     // TODO: UUID check should include soft deleted documents
     require(documentRepository.findByDocumentUuid(documentUuid) == null) {
@@ -63,11 +65,27 @@ class DocumentService(
         fileHash = "",
         mimeType = file.contentType ?: "application/pdf",
         metadata = metadata,
-        createdByServiceName = "Remand and Sentencing",
-        createdByUsername = "CREATED_BY_USER",
+        createdByServiceName = documentRequestContext.serviceName,
+        createdByUsername = documentRequestContext.username,
       ),
     )
 
     return document.toModel()
+  }
+
+  fun replaceDocumentMetadata(
+    documentUuid: UUID,
+    metadata: JsonNode,
+    documentRequestContext: DocumentRequestContext,
+  ): DocumentModel {
+    val document = documentRepository.findByDocumentUuidOrThrowNotFound(documentUuid)
+
+    document.replaceMetadata(
+      metadata = metadata,
+      supersededByServiceName = documentRequestContext.serviceName,
+      supersededByUsername = documentRequestContext.username,
+    )
+
+    return documentRepository.saveAndFlush(document).toModel()
   }
 }

@@ -23,7 +23,7 @@ VALUES
     48243,
     'd58e3582afa99040e27b92b13c8f2280',
     'application/pdf',
-    JSON '{ "prisonNumbers": ["C3456DE"], "prisonCodes": ["KMI"] }',
+    JSON '{ "prisonCode": "KMI", "prisonNumber": "C3456DE" }',
     NOW() - INTERVAL '3 DAYS',
     'Remand and Sentencing',
     'CREATED_BY_USER'
@@ -42,7 +42,7 @@ VALUES
 (
     1,
     2,
-    JSON '{ "prisonNumbers": ["A1234BC"], "prisonCodes": ["KMI"] }',
+    JSON '{ "prisonCode": "KMI", "prisonNumber": "A1234BC" }',
     NOW() - INTERVAL '2 DAYS',
     'Remand and Sentencing',
     'SUPERSEDED_BY_USER'
@@ -50,7 +50,7 @@ VALUES
 (
     2,
     2,
-    JSON '{ "prisonNumbers": ["B2345CD"], "prisonCodes": ["KMI"] }',
+    JSON '{ "prisonCode": "KMI", "prisonNumber": "B2345CD" }',
     NOW() - INTERVAL '1 DAY',
     'Remand and Sentencing',
     'SUPERSEDED_BY_USER'
