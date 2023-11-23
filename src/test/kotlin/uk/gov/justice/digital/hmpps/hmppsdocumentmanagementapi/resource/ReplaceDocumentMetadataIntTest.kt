@@ -78,6 +78,47 @@ class ReplaceDocumentMetadataIntTest : IntegrationTestBase() {
   }
 
   @Test
+  fun `400 bad request - invalid document uuid`() {
+    val response = webTestClient.put()
+      .uri("/documents/INVALID/metadata")
+      .bodyValue(metadata)
+      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
+      .headers(setDocumentContext(serviceName, username))
+      .exchange()
+      .expectStatus().isBadRequest
+      .expectBody(ErrorResponse::class.java)
+      .returnResult().responseBody
+
+    with(response!!) {
+      assertThat(status).isEqualTo(400)
+      assertThat(errorCode).isNull()
+      assertThat(userMessage).isEqualTo("Validation failure: Parameter documentUuid must be of type java.util.UUID")
+      assertThat(developerMessage).isEqualTo("Failed to convert value of type 'java.lang.String' to required type 'java.util.UUID'; Invalid UUID string: INVALID")
+      assertThat(moreInfo).isNull()
+    }
+  }
+
+  @Test
+  fun `400 bad request - no body`() {
+    val response = webTestClient.put()
+      .uri("/documents/$documentUuid/metadata")
+      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
+      .headers(setDocumentContext(serviceName, username))
+      .exchange()
+      .expectStatus().isBadRequest
+      .expectBody(ErrorResponse::class.java)
+      .returnResult().responseBody
+
+    with(response!!) {
+      assertThat(status).isEqualTo(400)
+      assertThat(errorCode).isNull()
+      assertThat(userMessage).isEqualTo("Validation failure: Couldn't read request body: Required request body is missing: public uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentController.replaceDocumentMetadata(java.util.UUID,com.fasterxml.jackson.databind.JsonNode,jakarta.servlet.http.HttpServletRequest)")
+      assertThat(developerMessage).isEqualTo("Required request body is missing: public uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentController.replaceDocumentMetadata(java.util.UUID,com.fasterxml.jackson.databind.JsonNode,jakarta.servlet.http.HttpServletRequest)")
+      assertThat(moreInfo).isNull()
+    }
+  }
+
+  @Test
   fun `404 not found`() {
     val response = webTestClient.put()
       .uri("/documents/$documentUuid/metadata")

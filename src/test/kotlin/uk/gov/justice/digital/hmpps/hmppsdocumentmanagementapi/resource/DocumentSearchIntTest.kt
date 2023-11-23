@@ -45,7 +45,6 @@ class DocumentSearchIntTest : IntegrationTestBase() {
       .uri("/documents/search")
       .bodyValue(DocumentSearchRequest(documentType, metadata))
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
-      .headers(setAuthorisation())
       .headers(setDocumentContext())
       .exchange()
       .expectStatus().isForbidden
@@ -67,6 +66,26 @@ class DocumentSearchIntTest : IntegrationTestBase() {
       assertThat(errorCode).isNull()
       assertThat(userMessage).isEqualTo("Exception: Service-Name header is required")
       assertThat(developerMessage).isEqualTo("Service-Name header is required")
+      assertThat(moreInfo).isNull()
+    }
+  }
+
+  @Test
+  fun `400 bad request - no body`() {
+    val response = webTestClient.post()
+      .uri("/documents/search")
+      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
+      .headers(setDocumentContext())
+      .exchange()
+      .expectStatus().isBadRequest
+      .expectBody(ErrorResponse::class.java)
+      .returnResult().responseBody
+
+    with(response!!) {
+      assertThat(status).isEqualTo(400)
+      assertThat(errorCode).isNull()
+      assertThat(userMessage).isEqualTo("Validation failure: Couldn't read request body: Required request body is missing: public uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResult uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentController.searchDocuments(uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest)")
+      assertThat(developerMessage).isEqualTo("Required request body is missing: public uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResult uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentController.searchDocuments(uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest)")
       assertThat(moreInfo).isNull()
     }
   }
