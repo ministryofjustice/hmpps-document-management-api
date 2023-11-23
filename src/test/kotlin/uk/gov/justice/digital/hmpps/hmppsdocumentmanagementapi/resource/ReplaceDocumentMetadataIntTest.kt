@@ -27,7 +27,7 @@ class ReplaceDocumentMetadataIntTest : IntegrationTestBase() {
   private val username = "REPLACED_BY_USERNAME"
 
   @Test
-  fun unauthorised() {
+  fun `401 unauthorised`() {
     webTestClient.put()
       .uri("/documents/$documentUuid/metadata")
       .bodyValue(metadata)
@@ -36,7 +36,7 @@ class ReplaceDocumentMetadataIntTest : IntegrationTestBase() {
   }
 
   @Test
-  fun `forbidden - no roles`() {
+  fun `403 forbidden - no roles`() {
     webTestClient.put()
       .uri("/documents/$documentUuid/metadata")
       .bodyValue(metadata)
@@ -47,7 +47,7 @@ class ReplaceDocumentMetadataIntTest : IntegrationTestBase() {
   }
 
   @Test
-  fun `forbidden - document reader`() {
+  fun `403 forbidden - document reader`() {
     webTestClient.put()
       .uri("/documents/$documentUuid/metadata")
       .bodyValue(metadata)
@@ -58,11 +58,11 @@ class ReplaceDocumentMetadataIntTest : IntegrationTestBase() {
   }
 
   @Test
-  fun `bad request - missing service name header`() {
+  fun `400 bad request - missing service name header`() {
     val response = webTestClient.put()
       .uri("/documents/$documentUuid/metadata")
       .bodyValue(metadata)
-      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
+      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
       .exchange()
       .expectStatus().isBadRequest
       .expectBody(ErrorResponse::class.java)
@@ -73,6 +73,27 @@ class ReplaceDocumentMetadataIntTest : IntegrationTestBase() {
       assertThat(errorCode).isNull()
       assertThat(userMessage).isEqualTo("Exception: Service-Name header is required")
       assertThat(developerMessage).isEqualTo("Service-Name header is required")
+      assertThat(moreInfo).isNull()
+    }
+  }
+
+  @Test
+  fun `404 not found`() {
+    val response = webTestClient.put()
+      .uri("/documents/$documentUuid/metadata")
+      .bodyValue(metadata)
+      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
+      .headers(setDocumentContext(serviceName, username))
+      .exchange()
+      .expectStatus().isNotFound
+      .expectBody(ErrorResponse::class.java)
+      .returnResult().responseBody
+
+    with(response!!) {
+      assertThat(status).isEqualTo(404)
+      assertThat(errorCode).isNull()
+      assertThat(userMessage).isEqualTo("Not found: Document with UUID '$documentUuid' not found")
+      assertThat(developerMessage).isEqualTo("Document with UUID '$documentUuid' not found")
       assertThat(moreInfo).isNull()
     }
   }

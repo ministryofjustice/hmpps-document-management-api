@@ -20,7 +20,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   val metadata = JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")
 
   @Test
-  fun unauthorised() {
+  fun `401 unauthorised`() {
     webTestClient.post()
       .uri("/documents/search")
       .bodyValue(DocumentSearchRequest(documentType, metadata))
@@ -29,7 +29,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   }
 
   @Test
-  fun forbidden() {
+  fun `403 forbidden - no roles`() {
     webTestClient.post()
       .uri("/documents/search")
       .bodyValue(DocumentSearchRequest(documentType, metadata))
@@ -40,7 +40,19 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   }
 
   @Test
-  fun `bad request - missing service name header`() {
+  fun `403 forbidden - document writer`() {
+    webTestClient.post()
+      .uri("/documents/search")
+      .bodyValue(DocumentSearchRequest(documentType, metadata))
+      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
+      .headers(setAuthorisation())
+      .headers(setDocumentContext())
+      .exchange()
+      .expectStatus().isForbidden
+  }
+
+  @Test
+  fun `400 bad request - missing service name header`() {
     val response = webTestClient.post()
       .uri("/documents/search")
       .bodyValue(DocumentSearchRequest(documentType, metadata))
