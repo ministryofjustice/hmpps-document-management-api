@@ -20,3 +20,20 @@ spring:
 hmpps:
   auth:
     url: http://localhost:8090/auth
+
+hmpps.s3:
+  provider: localstack
+  localstackUrl: http://localhost:4567
+  buckets:
+    document-management:
+      bucketName: document-management
+
+hmpps.sqs:
+  provider: localstack
+  localstackUrl: http://localhost:4567
+  queues:
+    audit:
+      queueName: audit-queue
+  topics:
+    domainevents:
+      arn: arn:aws:sns:eu-west-2:000000000000:domainevents-topic

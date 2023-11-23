@@ -22,6 +22,10 @@ dependencies {
   runtimeOnly("org.postgresql:postgresql")
   implementation("io.hypersistence:hypersistence-utils-hibernate-62:3.6.1")
 
+  // AWS
+  implementation("io.awspring.cloud:spring-cloud-aws-starter-s3")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.1.1")
+
   // OpenAPI
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
 
