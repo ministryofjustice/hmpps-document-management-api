@@ -20,7 +20,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   val metadata = JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")
 
   @Test
-  fun unauthorised() {
+  fun `401 unauthorised`() {
     webTestClient.post()
       .uri("/documents/search")
       .bodyValue(DocumentSearchRequest(documentType, metadata))
@@ -29,7 +29,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   }
 
   @Test
-  fun forbidden() {
+  fun `403 forbidden - no roles`() {
     webTestClient.post()
       .uri("/documents/search")
       .bodyValue(DocumentSearchRequest(documentType, metadata))
@@ -40,7 +40,18 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   }
 
   @Test
-  fun `bad request - missing service name header`() {
+  fun `403 forbidden - document writer`() {
+    webTestClient.post()
+      .uri("/documents/search")
+      .bodyValue(DocumentSearchRequest(documentType, metadata))
+      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
+      .headers(setDocumentContext())
+      .exchange()
+      .expectStatus().isForbidden
+  }
+
+  @Test
+  fun `400 bad request - missing service name header`() {
     val response = webTestClient.post()
       .uri("/documents/search")
       .bodyValue(DocumentSearchRequest(documentType, metadata))
@@ -55,6 +66,26 @@ class DocumentSearchIntTest : IntegrationTestBase() {
       assertThat(errorCode).isNull()
       assertThat(userMessage).isEqualTo("Exception: Service-Name header is required")
       assertThat(developerMessage).isEqualTo("Service-Name header is required")
+      assertThat(moreInfo).isNull()
+    }
+  }
+
+  @Test
+  fun `400 bad request - no body`() {
+    val response = webTestClient.post()
+      .uri("/documents/search")
+      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
+      .headers(setDocumentContext())
+      .exchange()
+      .expectStatus().isBadRequest
+      .expectBody(ErrorResponse::class.java)
+      .returnResult().responseBody
+
+    with(response!!) {
+      assertThat(status).isEqualTo(400)
+      assertThat(errorCode).isNull()
+      assertThat(userMessage).isEqualTo("Validation failure: Couldn't read request body: Required request body is missing: public uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResult uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentController.searchDocuments(uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest)")
+      assertThat(developerMessage).isEqualTo("Required request body is missing: public uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResult uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentController.searchDocuments(uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest)")
       assertThat(moreInfo).isNull()
     }
   }

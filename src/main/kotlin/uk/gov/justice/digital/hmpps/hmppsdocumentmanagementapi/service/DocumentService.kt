@@ -42,6 +42,7 @@ class DocumentService(
     documentRequestContext: DocumentRequestContext,
   ): DocumentModel {
     // TODO: UUID check should include soft deleted documents
+    // TODO: Translate exception to 409 conflict
     require(documentRepository.findByDocumentUuid(documentUuid) == null) {
       "Document with UUID '$documentUuid' already exists in service"
     }
