@@ -17,14 +17,12 @@ hmpps:
 
 hmpps.s3:
   provider: localstack
-  localstackUrl: http://localhost:4566
   buckets:
     document-management:
       bucketName: ${random.uuid}
 
 hmpps.sqs:
   provider: localstack
-  localstackUrl: http://localhost:4566
   queues:
     audit:
       queueName: ${random.uuid}
