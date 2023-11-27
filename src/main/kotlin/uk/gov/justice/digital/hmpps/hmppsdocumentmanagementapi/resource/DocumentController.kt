@@ -93,7 +93,7 @@ class DocumentController(
     value = [
       ApiResponse(
         responseCode = "200",
-        description = "Document found",
+        description = "Document file found",
       ),
       ApiResponse(
         responseCode = "401",
@@ -107,7 +107,7 @@ class DocumentController(
       ),
       ApiResponse(
         responseCode = "404",
-        description = "The document associated with this unique identifier was not found.",
+        description = "The document file associated with this unique identifier was not found.",
         content = [Content(schema = Schema(implementation = ErrorResponse::class))],
       ),
     ],

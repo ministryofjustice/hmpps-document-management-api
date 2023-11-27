@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException
 import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
+import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import java.util.UUID
@@ -15,6 +16,12 @@ interface DocumentRepository :
 
   @EntityGraph(attributePaths = ["documentMetadataHistory"])
   fun findByDocumentUuid(documentUuid: UUID): Document?
+
+  @Query(
+    value = "SELECT * FROM document d WHERE d.document_uuid = :documentUuid",
+    nativeQuery = true,
+  )
+  fun findByDocumentUuidIncludingSoftDeleted(documentUuid: UUID): Document?
 }
 
 fun DocumentRepository.findByDocumentUuidOrThrowNotFound(documentUuid: UUID) =

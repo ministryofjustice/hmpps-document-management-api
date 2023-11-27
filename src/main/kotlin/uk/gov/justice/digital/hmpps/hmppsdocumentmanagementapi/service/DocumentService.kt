@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentAlreadyUploadedException
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
@@ -33,10 +34,8 @@ class DocumentService(
     metadata: JsonNode,
     documentRequestContext: DocumentRequestContext,
   ): DocumentModel {
-    // TODO: UUID check should include soft deleted documents
-    // TODO: Translate exception to 409 conflict
-    require(documentRepository.findByDocumentUuid(documentUuid) == null) {
-      "Document with UUID '$documentUuid' already exists in service"
+    if (documentRepository.findByDocumentUuidIncludingSoftDeleted(documentUuid) != null) {
+      throw DocumentAlreadyUploadedException(documentUuid)
     }
 
     // Save document first to "reserve" UUID
