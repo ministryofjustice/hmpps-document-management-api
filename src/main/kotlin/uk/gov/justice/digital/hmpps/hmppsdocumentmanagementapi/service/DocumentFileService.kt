@@ -5,7 +5,9 @@ import org.springframework.web.multipart.MultipartFile
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentFileNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.HmppsS3Properties
 import java.util.UUID
 
@@ -40,7 +42,10 @@ class DocumentFileService(
       .key(documentUuid.toString())
       .build()
 
-    // TODO: Translate NoSuchKeyException to DocumentFileNotFoundException
-    return s3Client.getObjectAsBytes(request).asByteArray()
+    try {
+      return s3Client.getObject(request).readAllBytes()
+    } catch (e: NoSuchKeyException) {
+      throw DocumentFileNotFoundException(documentUuid)
+    }
   }
 }

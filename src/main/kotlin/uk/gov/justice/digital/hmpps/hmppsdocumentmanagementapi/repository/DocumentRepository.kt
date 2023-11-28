@@ -25,4 +25,4 @@ interface DocumentRepository :
 }
 
 fun DocumentRepository.findByDocumentUuidOrThrowNotFound(documentUuid: UUID) =
-  this.findByDocumentUuid(documentUuid) ?: throw EntityNotFoundException("Document with UUID '$documentUuid' not found")
+  this.findByDocumentUuid(documentUuid) ?: throw EntityNotFoundException("Document with UUID '$documentUuid' not found.")

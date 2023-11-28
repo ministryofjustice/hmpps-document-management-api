@@ -190,3 +190,5 @@ data class ErrorResponse(
 }
 
 class DocumentAlreadyUploadedException(documentUuid: UUID) : Exception("Document with UUID '$documentUuid' already uploaded.")
+
+class DocumentFileNotFoundException(documentUuid: UUID) : Exception("Document file with UUID '$documentUuid' not found.")
