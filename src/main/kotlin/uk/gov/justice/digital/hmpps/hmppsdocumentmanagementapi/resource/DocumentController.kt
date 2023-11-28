@@ -93,7 +93,7 @@ class DocumentController(
     value = [
       ApiResponse(
         responseCode = "200",
-        description = "Document found",
+        description = "Document file found",
       ),
       ApiResponse(
         responseCode = "401",
@@ -107,7 +107,7 @@ class DocumentController(
       ),
       ApiResponse(
         responseCode = "404",
-        description = "The document associated with this unique identifier was not found.",
+        description = "The document file associated with this unique identifier was not found.",
         content = [Content(schema = Schema(implementation = ErrorResponse::class))],
       ),
     ],
@@ -125,7 +125,7 @@ class DocumentController(
     val documentFile = documentService.getDocumentFile(documentUuid)
     return ResponseEntity.ok()
       .contentType(MediaType.parseMediaType(document.mimeType))
-      .contentLength(document.fileSize)
+      .contentLength(documentFile.size.toLong())
       .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"${document.filename}.${document.fileExtension}\"")
       .body(documentFile)
   }

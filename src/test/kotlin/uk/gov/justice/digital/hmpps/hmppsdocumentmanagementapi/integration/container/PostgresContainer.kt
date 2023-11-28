@@ -19,7 +19,6 @@ object PostgresContainer {
 
     return PostgreSQLContainer<Nothing>("postgres:15").apply {
       withEnv("HOSTNAME_EXTERNAL", "localhost")
-      withExposedPorts(5432)
       withDatabaseName("document-management")
       withUsername("document-management")
       withPassword("document-management")

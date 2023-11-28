@@ -21,7 +21,7 @@ services:
     ports:
       - "4567:4566"
     environment:
-      - SERVICES=sqs,sns
+      - SERVICES=s3,sqs,sns
       - DEBUG=${DEBUG-}
       - DOCKER_HOST=unix:///var/run/docker.sock
     volumes:

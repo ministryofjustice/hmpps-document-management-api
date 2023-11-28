@@ -13,6 +13,9 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
+import org.springframework.web.multipart.MultipartException
+import org.springframework.web.multipart.support.MissingServletRequestPartException
+import java.util.UUID
 
 @RestControllerAdvice
 class HmppsDocumentManagementApiExceptionHandler {
@@ -66,6 +69,34 @@ class HmppsDocumentManagementApiExceptionHandler {
       )
   }
 
+  @ExceptionHandler(MultipartException::class)
+  fun handleNoBodyValidationException(e: MultipartException): ResponseEntity<ErrorResponse> {
+    log.info("Validation exception: {}", e.message)
+    return ResponseEntity
+      .status(BAD_REQUEST)
+      .body(
+        ErrorResponse(
+          status = BAD_REQUEST,
+          userMessage = "Validation failure: ${e.message}",
+          developerMessage = e.message,
+        ),
+      )
+  }
+
+  @ExceptionHandler(MissingServletRequestPartException::class)
+  fun handleNoBodyValidationException(e: MissingServletRequestPartException): ResponseEntity<ErrorResponse> {
+    log.info("Validation exception: {}", e.message)
+    return ResponseEntity
+      .status(BAD_REQUEST)
+      .body(
+        ErrorResponse(
+          status = BAD_REQUEST,
+          userMessage = "Validation failure: ${e.message}",
+          developerMessage = e.message,
+        ),
+      )
+  }
+
   @ExceptionHandler(ValidationException::class)
   fun handleValidationException(e: Exception): ResponseEntity<ErrorResponse> {
     log.info("Validation exception: {}", e.message)
@@ -108,6 +139,34 @@ class HmppsDocumentManagementApiExceptionHandler {
       )
   }
 
+  @ExceptionHandler(DocumentFileNotFoundException::class)
+  fun handleEntityNotFoundException(e: DocumentFileNotFoundException): ResponseEntity<ErrorResponse> {
+    log.info("Document file not found exception: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.NOT_FOUND)
+      .body(
+        ErrorResponse(
+          status = HttpStatus.NOT_FOUND.value(),
+          userMessage = "Not found: ${e.message}",
+          developerMessage = e.message,
+        ),
+      )
+  }
+
+  @ExceptionHandler(DocumentAlreadyUploadedException::class)
+  fun handleEntityNotFoundException(e: DocumentAlreadyUploadedException): ResponseEntity<ErrorResponse> {
+    log.info("Document already uploaded exception: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.CONFLICT)
+      .body(
+        ErrorResponse(
+          status = HttpStatus.CONFLICT.value(),
+          userMessage = e.message,
+          developerMessage = e.message,
+        ),
+      )
+  }
+
   @ExceptionHandler(java.lang.Exception::class)
   fun handleException(e: java.lang.Exception): ResponseEntity<ErrorResponse?>? {
     log.error("Unexpected exception", e)
@@ -143,3 +202,7 @@ data class ErrorResponse(
   ) :
     this(status.value(), errorCode, userMessage, developerMessage, moreInfo)
 }
+
+class DocumentAlreadyUploadedException(documentUuid: UUID) : Exception("Document with UUID '$documentUuid' already uploaded.")
+
+class DocumentFileNotFoundException(documentUuid: UUID) : Exception("Document file with UUID '$documentUuid' not found.")

@@ -87,3 +87,9 @@ management:
     info:
       cache:
         time-to-live: 2000ms
+
+hmpps.s3:
+  buckets:
+    document-management:
+      bucketName: ${S3_DOCUMENT_BUCKET_NAME}
+      bucketArn: ${S3_DOCUMENT_BUCKET_ARN}

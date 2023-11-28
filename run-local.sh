@@ -18,6 +18,9 @@ export DB_USER=document-management
 export DB_PASS=document-management
 export DB_SSL_MODE=prefer
 
+# AWS configuration
+export AWS_REGION=eu-west-2
+
 # Provide URLs to other dependent services. Dev services used here (can be local if you set uo the dependent services locally)
 export HMPPS_AUTH_URL=https://sign-in-dev.hmpps.service.justice.gov.uk/auth
 

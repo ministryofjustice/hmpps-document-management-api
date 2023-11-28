@@ -22,12 +22,17 @@ dependencies {
   runtimeOnly("org.postgresql:postgresql")
   implementation("io.hypersistence:hypersistence-utils-hibernate-62:3.6.1")
 
+  // AWS
+  implementation("io.awspring.cloud:spring-cloud-aws-starter-s3")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.1.1")
+
   // OpenAPI
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
 
   // Test dependencies
   testImplementation("org.wiremock:wiremock:3.3.1")
   testImplementation("org.testcontainers:postgresql:1.19.2")
+  testImplementation("org.testcontainers:localstack:1.19.2")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.3")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.3")
 }

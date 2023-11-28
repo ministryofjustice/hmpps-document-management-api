@@ -15,6 +15,8 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.conta
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.wiremock.OAuthExtension
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.SERVICE_NAME
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.USERNAME
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.LocalStackContainer
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.LocalStackContainer.setLocalStackProperties
 
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
 @Sql("classpath:test_data/reset-database.sql")
@@ -44,6 +46,7 @@ abstract class IntegrationTestBase {
 
   companion object {
     private val pgContainer = PostgresContainer.instance
+    private val localStackContainer = LocalStackContainer.instance
 
     @JvmStatic
     @DynamicPropertySource
@@ -53,6 +56,10 @@ abstract class IntegrationTestBase {
         registry.add("spring.datasource.username", pgContainer::getUsername)
         registry.add("spring.datasource.password", pgContainer::getPassword)
       }
+
+      System.setProperty("aws.region", "eu-west-2")
+
+      localStackContainer?.also { setLocalStackProperties(it, registry) }
     }
   }
 }

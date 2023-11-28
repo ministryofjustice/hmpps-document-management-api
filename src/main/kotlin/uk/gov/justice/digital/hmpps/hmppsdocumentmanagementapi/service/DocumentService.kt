@@ -1,15 +1,13 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service
 
 import com.fasterxml.jackson.databind.JsonNode
-import jakarta.persistence.EntityNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentAlreadyUploadedException
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.DocumentFile
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentFileRepository
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.findByDocumentUuidOrThrowNotFound
 import java.util.UUID
@@ -19,7 +17,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as
 @Transactional
 class DocumentService(
   private val documentRepository: DocumentRepository,
-  private val documentFileRepository: DocumentFileRepository,
+  private val documentFileService: DocumentFileService,
 ) {
   fun getDocument(documentUuid: UUID): DocumentModel {
     val document = documentRepository.findByDocumentUuidOrThrowNotFound(documentUuid)
@@ -27,12 +25,7 @@ class DocumentService(
     return document.toModel()
   }
 
-  fun getDocumentFile(documentUuid: UUID): ByteArray {
-    val documentFile = documentFileRepository.findByDocumentUuid(documentUuid)
-      ?: throw EntityNotFoundException("Document file with UUID '$documentUuid' not found")
-
-    return documentFile.fileData
-  }
+  fun getDocumentFile(documentUuid: UUID) = documentFileService.getDocumentFile(documentUuid)
 
   fun uploadDocument(
     documentType: DocumentType,
@@ -41,19 +34,11 @@ class DocumentService(
     metadata: JsonNode,
     documentRequestContext: DocumentRequestContext,
   ): DocumentModel {
-    // TODO: UUID check should include soft deleted documents
-    // TODO: Translate exception to 409 conflict
-    require(documentRepository.findByDocumentUuid(documentUuid) == null) {
-      "Document with UUID '$documentUuid' already exists in service"
+    if (documentRepository.findByDocumentUuidIncludingSoftDeleted(documentUuid) != null) {
+      throw DocumentAlreadyUploadedException(documentUuid)
     }
 
-    documentFileRepository.saveAndFlush(
-      DocumentFile(
-        documentUuid = documentUuid,
-        fileData = file.bytes,
-      ),
-    )
-
+    // Save document first to "reserve" UUID
     val document = documentRepository.saveAndFlush(
       Document(
         documentUuid = documentUuid,
@@ -70,6 +55,9 @@ class DocumentService(
         createdByUsername = documentRequestContext.username,
       ),
     )
+
+    // Any thrown exception will cause the database transaction to roll back allowing the request to be retried
+    documentFileService.saveDocumentFile(documentUuid, file)
 
     return document.toModel()
   }

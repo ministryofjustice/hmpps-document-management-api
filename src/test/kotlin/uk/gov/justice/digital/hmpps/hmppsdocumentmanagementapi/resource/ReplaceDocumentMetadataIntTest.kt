@@ -133,8 +133,8 @@ class ReplaceDocumentMetadataIntTest : IntegrationTestBase() {
     with(response!!) {
       assertThat(status).isEqualTo(404)
       assertThat(errorCode).isNull()
-      assertThat(userMessage).isEqualTo("Not found: Document with UUID '$documentUuid' not found")
-      assertThat(developerMessage).isEqualTo("Document with UUID '$documentUuid' not found")
+      assertThat(userMessage).isEqualTo("Not found: Document with UUID '$documentUuid' not found.")
+      assertThat(developerMessage).isEqualTo("Document with UUID '$documentUuid' not found.")
       assertThat(moreInfo).isNull()
     }
   }
