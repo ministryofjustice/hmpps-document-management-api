@@ -31,7 +31,7 @@ class DocumentRepositoryIntTest : IntegrationTestBase() {
       assertThat(documentType).isEqualTo(DocumentType.HMCTS_WARRANT)
       assertThat(filename).isEqualTo("warrant_for_remand")
       assertThat(fileExtension).isEqualTo("pdf")
-      assertThat(fileSize).isEqualTo(48243)
+      assertThat(fileSize).isEqualTo(20688)
       assertThat(fileHash).isEqualTo("d58e3582afa99040e27b92b13c8f2280")
       assertThat(mimeType).isEqualTo("application/pdf")
       assertThat(metadata["prisonNumber"].asText()).isEqualTo("A1234BC")

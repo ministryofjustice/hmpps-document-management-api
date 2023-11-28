@@ -9,6 +9,7 @@ import software.amazon.awssdk.services.s3.model.NoSuchKeyException
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentFileNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.HmppsS3Properties
+import java.io.InputStream
 import java.util.UUID
 
 @Service
@@ -36,14 +37,14 @@ class DocumentFileService(
     s3Client.putObject(request, RequestBody.fromInputStream(file.inputStream, file.size))
   }
 
-  fun getDocumentFile(documentUuid: UUID): ByteArray {
+  fun getDocumentFile(documentUuid: UUID): InputStream {
     val request = GetObjectRequest.builder()
       .bucket(bucketName)
       .key(documentUuid.toString())
       .build()
 
     try {
-      return s3Client.getObject(request).readAllBytes()
+      return s3Client.getObject(request)
     } catch (e: NoSuchKeyException) {
       throw DocumentFileNotFoundException(documentUuid)
     }
