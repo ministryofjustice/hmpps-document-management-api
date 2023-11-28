@@ -12,6 +12,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.Docume
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.findByDocumentUuidOrThrowNotFound
 import java.util.UUID
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as DocumentModel
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentFile as DocumentFileModel
 
 @Service
 @Transactional
@@ -25,7 +26,16 @@ class DocumentService(
     return document.toModel()
   }
 
-  fun getDocumentFile(documentUuid: UUID) = documentFileService.getDocumentFile(documentUuid)
+  fun getDocumentFile(documentUuid: UUID): DocumentFileModel {
+    val document = getDocument(documentUuid)
+    val inputStream = documentFileService.getDocumentFile(documentUuid)
+    return DocumentFileModel(
+      "${document.filename}.${document.fileExtension}",
+      document.fileSize,
+      document.mimeType,
+      inputStream,
+    )
+  }
 
   fun uploadDocument(
     documentType: DocumentType,

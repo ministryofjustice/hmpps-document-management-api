@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
+import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -120,14 +121,14 @@ class DocumentController(
       required = true,
     )
     documentUuid: UUID,
-  ): ResponseEntity<ByteArray> {
-    val document = documentService.getDocument(documentUuid)
+  ): ResponseEntity<InputStreamResource> {
     val documentFile = documentService.getDocumentFile(documentUuid)
+    val inputStreamResource = InputStreamResource(documentFile.inputStream)
     return ResponseEntity.ok()
-      .contentType(MediaType.parseMediaType(document.mimeType))
-      .contentLength(documentFile.size.toLong())
-      .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"${document.filename}.${document.fileExtension}\"")
-      .body(documentFile)
+      .contentType(MediaType.parseMediaType(documentFile.mimeType))
+      .contentLength(documentFile.fileSize)
+      .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"${documentFile.filename}\"")
+      .body(inputStreamResource)
   }
 
   @ResponseStatus(HttpStatus.CREATED)

@@ -20,7 +20,7 @@ VALUES
     'HMCTS_WARRANT',
     'warrant_for_remand',
     'pdf',
-    48243,
+    20688,
     'd58e3582afa99040e27b92b13c8f2280',
     'application/pdf',
     JSON '{ "prisonCode": "KMI", "prisonNumber": "A1234BC" }',

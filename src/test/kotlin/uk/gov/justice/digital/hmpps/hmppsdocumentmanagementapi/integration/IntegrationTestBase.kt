@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration
 
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -11,6 +12,10 @@ import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.context.jdbc.SqlMergeMode
 import org.springframework.test.web.reactive.server.WebTestClient
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.HmppsS3Properties
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.container.PostgresContainer
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.wiremock.OAuthExtension
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.SERVICE_NAME
@@ -30,6 +35,17 @@ abstract class IntegrationTestBase {
   @Autowired
   lateinit var jwtAuthHelper: JwtAuthHelper
 
+  @Autowired
+  private lateinit var hmppsS3Properties: HmppsS3Properties
+
+  @Autowired
+  lateinit var s3Client: S3Client
+
+  @AfterEach
+  fun afterEach() {
+    deleteAllDocumentsInS3()
+  }
+
   internal fun setAuthorisation(
     user: String? = null,
     client: String = CLIENT_ID,
@@ -42,6 +58,20 @@ abstract class IntegrationTestBase {
   ): (HttpHeaders) -> Unit = {
     it.set(SERVICE_NAME, serviceName)
     it.set(USERNAME, username)
+  }
+
+  internal fun bucketName() = hmppsS3Properties.buckets["document-management"]!!.bucketName
+
+  internal fun deleteAllDocumentsInS3() {
+    val listObjectsResponse = s3Client.listObjectsV2(ListObjectsV2Request.builder().bucket(bucketName()).build())
+
+    for (s3Object in listObjectsResponse.contents()) {
+      val request = DeleteObjectRequest.builder()
+        .bucket(bucketName())
+        .key(s3Object.key())
+        .build()
+      s3Client.deleteObject(request)
+    }
   }
 
   companion object {

@@ -2,27 +2,18 @@ package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.ContentDisposition
 import org.springframework.http.MediaType
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.reactive.server.WebTestClient
 import software.amazon.awssdk.core.sync.RequestBody
-import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.HmppsS3Properties
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.IntegrationTestBase
 import java.util.UUID
 
 class DownloadDocumentIntTest : IntegrationTestBase() {
-  @Autowired
-  lateinit var hmppsS3Properties: HmppsS3Properties
-
-  @Autowired
-  lateinit var s3Client: S3Client
-
   private val documentUuid = UUID.fromString("f73a0f91-2957-4224-b477-714370c04d37")
   private val serviceName = "Uploaded via service name"
   private val username = "UPLOADED_BY_USERNAME"
@@ -94,9 +85,29 @@ class DownloadDocumentIntTest : IntegrationTestBase() {
     }
   }
 
+  @Test
+  fun `404 document not found`() {
+    val response = webTestClient.get()
+      .uri("/documents/$documentUuid/file")
+      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
+      .headers(setDocumentContext(serviceName, username))
+      .exchange()
+      .expectStatus().isNotFound
+      .expectBody(ErrorResponse::class.java)
+      .returnResult().responseBody
+
+    with(response!!) {
+      assertThat(status).isEqualTo(404)
+      assertThat(errorCode).isNull()
+      assertThat(userMessage).isEqualTo("Not found: Document with UUID '$documentUuid' not found.")
+      assertThat(developerMessage).isEqualTo("Document with UUID '$documentUuid' not found.")
+      assertThat(moreInfo).isNull()
+    }
+  }
+
   @Sql("classpath:test_data/document-with-no-metadata-history-id-1.sql")
   @Test
-  fun `404 not found`() {
+  fun `404 file not found`() {
     val response = webTestClient.get()
       .uri("/documents/$documentUuid/file")
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
@@ -131,9 +142,8 @@ class DownloadDocumentIntTest : IntegrationTestBase() {
   }
 
   private fun putDocumentInS3(documentUuid: UUID): ByteArray {
-    val bucketName = hmppsS3Properties.buckets["document-management"]!!.bucketName
     val request = PutObjectRequest.builder()
-      .bucket(bucketName)
+      .bucket(bucketName())
       .key(documentUuid.toString())
       .build()
     val fileBytes = ClassPathResource("test_data/warrant-for-remand.pdf").contentAsByteArray
