@@ -125,7 +125,7 @@ class DocumentController(
     val documentFile = documentService.getDocumentFile(documentUuid)
     return ResponseEntity.ok()
       .contentType(MediaType.parseMediaType(document.mimeType))
-      .contentLength(document.fileSize)
+      .contentLength(documentFile.size.toLong())
       .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"${document.filename}.${document.fileExtension}\"")
       .body(documentFile)
   }

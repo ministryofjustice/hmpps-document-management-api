@@ -139,6 +139,20 @@ class HmppsDocumentManagementApiExceptionHandler {
       )
   }
 
+  @ExceptionHandler(DocumentFileNotFoundException::class)
+  fun handleEntityNotFoundException(e: DocumentFileNotFoundException): ResponseEntity<ErrorResponse> {
+    log.info("Document file not found exception: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.NOT_FOUND)
+      .body(
+        ErrorResponse(
+          status = HttpStatus.NOT_FOUND.value(),
+          userMessage = "Not found: ${e.message}",
+          developerMessage = e.message,
+        ),
+      )
+  }
+
   @ExceptionHandler(DocumentAlreadyUploadedException::class)
   fun handleEntityNotFoundException(e: DocumentAlreadyUploadedException): ResponseEntity<ErrorResponse> {
     log.info("Document already uploaded exception: {}", e.message)
