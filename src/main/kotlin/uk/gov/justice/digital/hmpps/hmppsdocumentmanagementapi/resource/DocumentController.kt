@@ -75,7 +75,7 @@ class DocumentController(
       ),
     ],
   )
-  @PreAuthorize("hasAnyRole('DOCUMENT_READER', 'DOCUMENT_ADMIN')")
+  @PreAuthorize("hasAnyRole('$ROLE_DOCUMENT_READER', '$ROLE_DOCUMENT_ADMIN')")
   fun getDocument(
     @PathVariable
     @Parameter(
@@ -113,7 +113,7 @@ class DocumentController(
       ),
     ],
   )
-  @PreAuthorize("hasAnyRole('DOCUMENT_READER', 'DOCUMENT_ADMIN')")
+  @PreAuthorize("hasAnyRole('$ROLE_DOCUMENT_READER', '$ROLE_DOCUMENT_ADMIN')")
   fun downloadDocumentFile(
     @PathVariable
     @Parameter(
@@ -169,7 +169,7 @@ class DocumentController(
       ),
     ],
   )
-  @PreAuthorize("hasAnyRole('DOCUMENT_WRITER', 'DOCUMENT_ADMIN')")
+  @PreAuthorize("hasAnyRole('$ROLE_DOCUMENT_WRITER', '$ROLE_DOCUMENT_ADMIN')")
   fun uploadDocument(
     @PathVariable
     @Parameter(
@@ -248,7 +248,7 @@ class DocumentController(
       ),
     ],
   )
-  @PreAuthorize("hasAnyRole('DOCUMENT_WRITER', 'DOCUMENT_ADMIN')")
+  @PreAuthorize("hasAnyRole('$ROLE_DOCUMENT_WRITER', '$ROLE_DOCUMENT_ADMIN')")
   fun replaceDocumentMetadata(
     @PathVariable
     @Parameter(
@@ -309,7 +309,7 @@ class DocumentController(
       ),
     ],
   )
-  @PreAuthorize("hasAnyRole('DOCUMENT_WRITER', 'DOCUMENT_ADMIN')")
+  @PreAuthorize("hasAnyRole('$ROLE_DOCUMENT_WRITER', '$ROLE_DOCUMENT_ADMIN')")
   fun deleteDocument(
     @PathVariable
     @Parameter(
@@ -354,7 +354,7 @@ class DocumentController(
       ),
     ],
   )
-  @PreAuthorize("hasAnyRole('DOCUMENT_READER', 'DOCUMENT_ADMIN')")
+  @PreAuthorize("hasAnyRole('$ROLE_DOCUMENT_READER', '$ROLE_DOCUMENT_ADMIN')")
   fun searchDocuments(
     @Valid
     @RequestBody
