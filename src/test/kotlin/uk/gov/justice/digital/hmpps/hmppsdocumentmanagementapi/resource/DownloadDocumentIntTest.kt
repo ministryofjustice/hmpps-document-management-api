@@ -2,13 +2,10 @@ package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.core.io.ClassPathResource
 import org.springframework.http.ContentDisposition
 import org.springframework.http.MediaType
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.reactive.server.WebTestClient
-import software.amazon.awssdk.core.sync.RequestBody
-import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.IntegrationTestBase
 import java.util.UUID
@@ -129,7 +126,7 @@ class DownloadDocumentIntTest : IntegrationTestBase() {
   @Sql("classpath:test_data/document-with-no-metadata-history-id-1.sql")
   @Test
   fun `download document success`() {
-    val fileBytes = putDocumentInS3(documentUuid)
+    val fileBytes = putDocumentInS3(documentUuid, "test_data/warrant-for-remand.pdf")
 
     val response = webTestClient.downloadDocument(
       documentUuid,
@@ -139,16 +136,6 @@ class DownloadDocumentIntTest : IntegrationTestBase() {
     )
 
     assertThat(response.responseBody).isEqualTo(fileBytes)
-  }
-
-  private fun putDocumentInS3(documentUuid: UUID): ByteArray {
-    val request = PutObjectRequest.builder()
-      .bucket(bucketName())
-      .key(documentUuid.toString())
-      .build()
-    val fileBytes = ClassPathResource("test_data/warrant-for-remand.pdf").contentAsByteArray
-    s3Client.putObject(request, RequestBody.fromBytes(fileBytes))
-    return fileBytes
   }
 
   private fun WebTestClient.downloadDocument(

@@ -112,7 +112,7 @@ class GetDocumentIntTest : IntegrationTestBase() {
     val response = webTestClient.getDocument(documentUuid)
 
     with(response) {
-      assertThat(this.documentUuid).isEqualTo(documentUuid)
+      assertThat(documentUuid).isEqualTo(this@GetDocumentIntTest.documentUuid)
       assertThat(documentType).isEqualTo(DocumentType.HMCTS_WARRANT)
       assertThat(filename).isEqualTo("warrant_for_remand")
       assertThat(fileExtension).isEqualTo("pdf")

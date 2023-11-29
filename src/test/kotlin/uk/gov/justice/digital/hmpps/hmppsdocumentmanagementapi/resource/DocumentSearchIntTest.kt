@@ -96,8 +96,8 @@ class DocumentSearchIntTest : IntegrationTestBase() {
     val response = webTestClient.searchDocuments(documentType, metadata)
 
     with(response.request) {
-      assertThat(this.documentType).isEqualTo(documentType)
-      assertThat(this.metadata).isEqualTo(metadata)
+      assertThat(documentType).isEqualTo(this@DocumentSearchIntTest.documentType)
+      assertThat(metadata).isEqualTo(this@DocumentSearchIntTest.metadata)
     }
   }
 

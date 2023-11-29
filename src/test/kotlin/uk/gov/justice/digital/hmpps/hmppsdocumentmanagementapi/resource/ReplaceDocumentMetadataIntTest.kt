@@ -183,11 +183,11 @@ class ReplaceDocumentMetadataIntTest : IntegrationTestBase() {
   }
 
   private fun WebTestClient.replaceDocumentMetadata(
-    documentUUID: UUID,
+    documentUuid: UUID,
     metadata: JsonNode,
   ) =
     put()
-      .uri("/documents/$documentUUID/metadata")
+      .uri("/documents/$documentUuid/metadata")
       .bodyValue(metadata)
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
       .headers(setDocumentContext(serviceName, username))

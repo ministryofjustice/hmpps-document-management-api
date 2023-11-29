@@ -70,7 +70,7 @@ data class Document(
     documentMetadataHistory.add(
       DocumentMetadataHistory(
         document = this,
-        metadata = this.metadata,
+        metadata = metadata,
         supersededTime = supersededTime,
         supersededByServiceName = supersededByServiceName,
         supersededByUsername = supersededByUsername,
