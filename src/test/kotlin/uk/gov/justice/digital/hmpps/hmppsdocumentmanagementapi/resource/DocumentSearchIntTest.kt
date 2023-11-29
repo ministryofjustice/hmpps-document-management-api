@@ -194,7 +194,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
       .headers(setDocumentContext())
       .exchange()
-      .expectStatus().isAccepted
+      .expectStatus().isOk
       .expectHeader().contentType(MediaType.APPLICATION_JSON)
       .expectBody(DocumentSearchResult::class.java)
       .returnResult().responseBody!!

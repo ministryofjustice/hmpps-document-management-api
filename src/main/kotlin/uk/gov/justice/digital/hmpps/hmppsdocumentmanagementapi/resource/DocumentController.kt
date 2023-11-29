@@ -216,7 +216,7 @@ class DocumentController(
       request.getAttribute(DocumentRequestContext::class.simpleName) as DocumentRequestContext,
     )
 
-  @ResponseStatus(HttpStatus.ACCEPTED)
+  @ResponseStatus(HttpStatus.OK)
   @PutMapping("/{documentUuid}/metadata")
   @Operation(
     summary = "Replace the metadata associated with a document",
@@ -227,7 +227,7 @@ class DocumentController(
   @ApiResponses(
     value = [
       ApiResponse(
-        responseCode = "202",
+        responseCode = "200",
         description = "Document metadata replaced successfully",
         content = [Content(schema = Schema(implementation = Document::class))],
       ),
@@ -281,7 +281,7 @@ class DocumentController(
       request.getAttribute(DocumentRequestContext::class.simpleName) as DocumentRequestContext,
     )
 
-  @ResponseStatus(HttpStatus.ACCEPTED)
+  @ResponseStatus(HttpStatus.NO_CONTENT)
   @DeleteMapping("/{documentUuid}")
   @Operation(
     summary = "Delete a document by its unique identifier",
@@ -289,7 +289,7 @@ class DocumentController(
   @ApiResponses(
     value = [
       ApiResponse(
-        responseCode = "202",
+        responseCode = "204",
         description = "Document deleted",
       ),
       ApiResponse(
@@ -321,7 +321,7 @@ class DocumentController(
     throw NotImplementedError()
   }
 
-  @ResponseStatus(HttpStatus.ACCEPTED)
+  @ResponseStatus(HttpStatus.OK)
   @PostMapping("/search")
   @Operation(
     summary = "Search for documents with matching metadata and optionally document type",
@@ -333,7 +333,7 @@ class DocumentController(
   @ApiResponses(
     value = [
       ApiResponse(
-        responseCode = "202",
+        responseCode = "200",
         description = "Search request accepted and results returned",
         content = [Content(schema = Schema(implementation = DocumentSearchResult::class))],
       ),

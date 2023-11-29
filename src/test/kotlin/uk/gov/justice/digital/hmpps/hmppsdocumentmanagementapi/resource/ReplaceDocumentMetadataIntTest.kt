@@ -192,7 +192,7 @@ class ReplaceDocumentMetadataIntTest : IntegrationTestBase() {
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
       .headers(setDocumentContext(serviceName, username))
       .exchange()
-      .expectStatus().isAccepted
+      .expectStatus().isOk
       .expectHeader().contentType(MediaType.APPLICATION_JSON)
       .expectBody(DocumentModel::class.java)
       .returnResult().responseBody!!
