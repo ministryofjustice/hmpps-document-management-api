@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import java.util.UUID
 
 @Repository
@@ -22,6 +23,9 @@ interface DocumentRepository :
     nativeQuery = true,
   )
   fun findByDocumentUuidIncludingSoftDeleted(documentUuid: UUID): Document?
+
+  @Query("SELECT d.documentType FROM Document d WHERE d.documentUuid = :documentUuid")
+  fun getDocumentTypeByDocumentUuid(documentUuid: UUID): DocumentType?
 }
 
 fun DocumentRepository.findByDocumentUuidOrThrowNotFound(documentUuid: UUID) =

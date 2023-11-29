@@ -25,7 +25,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.SERVICE_
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.USERNAME
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.LocalStackContainer
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.LocalStackContainer.setLocalStackProperties
-import java.util.*
+import java.util.UUID
 
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
 @Sql("classpath:test_data/reset-database.sql")

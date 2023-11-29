@@ -79,6 +79,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
     }
   }
 
+  @Sql("classpath:test_data/subject-access-request-report-id-4.sql")
   @Test
   fun `get document - 403 forbidden - document reader only`() {
     webTestClient.get()
@@ -89,6 +90,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
       .expectStatus().isForbidden
   }
 
+  @Sql("classpath:test_data/subject-access-request-report-id-4.sql")
   @Test
   fun `get document - 403 forbidden - document type SAR only`() {
     webTestClient.get()
@@ -132,7 +134,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
   @Test
   fun `get document file - 403 forbidden - document reader only`() {
     webTestClient.get()
-      .uri("/documents/${UUID.randomUUID()}/file")
+      .uri("/documents/$documentUuid/file")
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
       .headers(setDocumentContext(serviceName, username))
       .exchange()
@@ -143,7 +145,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
   @Test
   fun `get document file - 403 forbidden - document type SAR only`() {
     webTestClient.get()
-      .uri("/documents/${UUID.randomUUID()}/file")
+      .uri("/documents/$documentUuid/file")
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_TYPE_SAR)))
       .headers(setDocumentContext(serviceName, username))
       .exchange()
@@ -157,7 +159,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
 
     val response = webTestClient.get()
       .uri("/documents/$documentUuid/file")
-      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
+      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER, ROLE_DOCUMENT_TYPE_SAR)))
       .headers(setDocumentContext(serviceName, username))
       .exchange()
       .expectStatus().isOk
@@ -198,7 +200,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
     val response = webTestClient.post()
       .uri("/documents/search")
       .bodyValue(DocumentSearchRequest(documentType, metadata))
-      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
+      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER, ROLE_DOCUMENT_TYPE_SAR)))
       .headers(setDocumentContext(serviceName, username))
       .exchange()
       .expectStatus().isOk
@@ -213,6 +215,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
     assertThat(response.results).isNotEmpty()
   }
 
+  @Sql("classpath:test_data/subject-access-request-report-id-4.sql")
   @Test
   fun `replace document metadata - 403 forbidden - document writer only`() {
     webTestClient.put()
@@ -224,6 +227,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
       .expectStatus().isForbidden
   }
 
+  @Sql("classpath:test_data/subject-access-request-report-id-4.sql")
   @Test
   fun `replace document metadata - 403 forbidden - document type SAR only`() {
     webTestClient.put()
@@ -243,7 +247,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
     val response = webTestClient.put()
       .uri("/documents/$documentUuid/metadata")
       .bodyValue(metadata)
-      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
+      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER, ROLE_DOCUMENT_TYPE_SAR)))
       .headers(setDocumentContext(serviceName, username))
       .exchange()
       .expectStatus().isOk
@@ -254,6 +258,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
     assertThat(response.metadata).isEqualTo(metadata)
   }
 
+  @Sql("classpath:test_data/subject-access-request-report-id-4.sql")
   @Test
   fun `delete document - 403 forbidden - document writer only`() {
     webTestClient.delete()
@@ -264,6 +269,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
       .expectStatus().isForbidden
   }
 
+  @Sql("classpath:test_data/subject-access-request-report-id-4.sql")
   @Test
   fun `delete document - 403 forbidden - document type SAR only`() {
     webTestClient.delete()
