@@ -32,22 +32,36 @@ class DocumentTypeAuthorisationInterceptor(
   private val documentRepository: DocumentRepository,
 ) : HandlerInterceptor {
   override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
-    val authorisedDocumentTypes = DocumentType.entries.filter { it.additionalRoles.isEmpty() || it.additionalRoles.any { role -> request.isUserInRole(role) } }
+    val authorisedDocumentTypes = request.authorisedDocumentTypes()
     request.setAttribute(AUTHORISED_DOCUMENT_TYPES, authorisedDocumentTypes)
 
-    val pathVariables = request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE) as Map<*, *>
-
-    val documentType = pathVariables["documentUuid"]
-      ?.let { try { UUID.fromString(it.toString()) } catch (e: IllegalArgumentException) { null } }
-      ?.let { documentRepository.getDocumentTypeByDocumentUuid(it) }
-      ?: pathVariables["documentType"]?.let { try { DocumentType.valueOf(it.toString()) } catch (e: IllegalArgumentException) { null } }
+    val documentType = request.documentTypeFromUuidOrTypePathVariables()
 
     documentType?.also {
-      if (!authorisedDocumentTypes.contains(documentType)) {
-        throw AccessDeniedException("Document type '$documentType' requires additional role")
+      if (!authorisedDocumentTypes.contains(it)) {
+        throw AccessDeniedException("Document type '$it' requires additional role")
       }
     }
 
     return true
   }
+
+  private fun HttpServletRequest.authorisedDocumentTypes() =
+    DocumentType.entries.filter { it.additionalRoles.isEmpty() || it.additionalRoles.any { role -> isUserInRole(role) } }
+
+  private fun HttpServletRequest.pathVariables() =
+    getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE) as Map<*, *>
+
+  private fun HttpServletRequest.documentUuid() =
+    pathVariables()["documentUuid"]
+      ?.let { try { UUID.fromString(it.toString()) } catch (e: IllegalArgumentException) { null } }
+
+  private fun HttpServletRequest.documentType() =
+    pathVariables()["documentType"]
+      ?.let { try { DocumentType.valueOf(it.toString()) } catch (e: IllegalArgumentException) { null } }
+
+  private fun HttpServletRequest.documentTypeFromUuidOrTypePathVariables() =
+    documentUuid()
+      ?.let { documentRepository.getDocumentTypeByDocumentUuid(it) }
+      ?: documentType()
 }

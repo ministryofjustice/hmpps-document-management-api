@@ -291,8 +291,6 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
       .headers(setDocumentContext(serviceName, username))
       .exchange()
       .expectStatus().isNoContent
-      .expectBody(Document::class.java)
-      .returnResult().responseBody!!
   }
 
   private fun documentMetadataMultipartBody() =

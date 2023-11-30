@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.AUTHORISED_DOCUMENT_TYPES
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
@@ -213,7 +214,7 @@ class DocumentController(
       documentUuid,
       file,
       JacksonUtil.toJsonNode(metadata),
-      request.getAttribute(DocumentRequestContext::class.simpleName) as DocumentRequestContext,
+      request.documentRequestContext(),
     )
 
   @ResponseStatus(HttpStatus.OK)
@@ -278,7 +279,7 @@ class DocumentController(
     documentService.replaceDocumentMetadata(
       documentUuid,
       metadata,
-      request.getAttribute(DocumentRequestContext::class.simpleName) as DocumentRequestContext,
+      request.documentRequestContext(),
     )
 
   @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -317,9 +318,12 @@ class DocumentController(
       required = true,
     )
     documentUuid: UUID,
-  ) {
-    throw NotImplementedError()
-  }
+    request: HttpServletRequest,
+  ) =
+    documentService.deleteDocument(
+      documentUuid,
+      request.documentRequestContext(),
+    )
 
   @ResponseStatus(HttpStatus.OK)
   @PostMapping("/search")
@@ -362,6 +366,16 @@ class DocumentController(
       description = "The search parameters to use to filter documents",
       required = true,
     )
-    request: DocumentSearchRequest,
-  ) = documentSearchService.searchDocuments(request)
+    searchRequest: DocumentSearchRequest,
+    request: HttpServletRequest,
+  ) = documentSearchService.searchDocuments(
+    searchRequest,
+    request.authorisedDocumentTypes(),
+  )
+
+  private fun HttpServletRequest.authorisedDocumentTypes() =
+    (getAttribute(AUTHORISED_DOCUMENT_TYPES) as List<*>).filterIsInstance<DocumentType>()
+
+  private fun HttpServletRequest.documentRequestContext() =
+    getAttribute(DocumentRequestContext::class.simpleName) as DocumentRequestContext
 }
