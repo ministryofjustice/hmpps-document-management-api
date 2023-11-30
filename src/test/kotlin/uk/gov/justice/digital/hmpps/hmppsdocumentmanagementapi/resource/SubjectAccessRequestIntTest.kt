@@ -1,8 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource
 
 import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Test
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.ContentDisposition
@@ -73,7 +73,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
       assertThat(metadata["sarCaseReference"].asText()).isEqualTo("SAR-1234")
       assertThat(metadata["prisonNumber"].asText()).isEqualTo("A1234BC")
       assertThat(metadata).isEqualTo(this@SubjectAccessRequestIntTest.metadata)
-      assertThat(createdTime).isCloseTo(LocalDateTime.now(), Assertions.within(3, ChronoUnit.SECONDS))
+      assertThat(createdTime).isCloseTo(LocalDateTime.now(), within(3, ChronoUnit.SECONDS))
       assertThat(createdByServiceName).isEqualTo(serviceName)
       assertThat(createdByUsername).isEqualTo(username)
     }
@@ -124,7 +124,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
       assertThat(metadata["sarCaseReference"].asText()).isEqualTo("SAR-1234")
       assertThat(metadata["prisonNumber"].asText()).isEqualTo("A1234BC")
       assertThat(metadata).isEqualTo(this@SubjectAccessRequestIntTest.metadata)
-      assertThat(createdTime).isCloseTo(LocalDateTime.now(), Assertions.within(3, ChronoUnit.SECONDS))
+      assertThat(createdTime).isCloseTo(LocalDateTime.now(), within(3, ChronoUnit.SECONDS))
       assertThat(createdByServiceName).isEqualTo(serviceName)
       assertThat(createdByUsername).isEqualTo(username)
     }
