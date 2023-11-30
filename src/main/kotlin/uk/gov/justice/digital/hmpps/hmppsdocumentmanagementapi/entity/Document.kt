@@ -80,7 +80,7 @@ data class Document(
     this.metadata = metadata
   }
 
-  fun deleteDocument(deletedTime: LocalDateTime = LocalDateTime.now(), deletedByServiceName: String, deletedByUsername: String?) {
+  fun delete(deletedTime: LocalDateTime = LocalDateTime.now(), deletedByServiceName: String, deletedByUsername: String?) {
     this.deletedTime = deletedTime
     this.deletedByServiceName = deletedByServiceName
     this.deletedByUsername = deletedByUsername

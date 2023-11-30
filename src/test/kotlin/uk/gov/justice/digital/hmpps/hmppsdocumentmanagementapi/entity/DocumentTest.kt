@@ -71,6 +71,28 @@ class DocumentTest {
   }
 
   @Test
+  fun `delete document stores audit information`() {
+    val now = LocalDateTime.now()
+    val serviceName = "Deleted using service name"
+    val username = "DELETED_BY_USERNAME"
+
+    document.delete(now, serviceName, username)
+
+    with(document) {
+      assertThat(deletedTime).isEqualTo(now)
+      assertThat(deletedByServiceName).isEqualTo(serviceName)
+      assertThat(deletedByUsername).isEqualTo(username)
+    }
+  }
+
+  @Test
+  fun `delete uses now as the default`() {
+    document.delete(deletedByServiceName = "Deleted using service name", deletedByUsername = "DELETED_BY_USERNAME")
+
+    assertThat(document.deletedTime).isCloseTo(LocalDateTime.now(), within(3, ChronoUnit.SECONDS))
+  }
+
+  @Test
   fun `to model`() {
     assertThat(document.toModel()).isEqualTo(
       with(document) {

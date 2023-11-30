@@ -25,8 +25,8 @@ class DocumentRequestContextConfigurationTest {
   @Autowired
   private lateinit var interceptor: DocumentRequestContextInterceptor
 
-  private val res = MockHttpServletResponse()
   private val req = MockHttpServletRequest()
+  private val res = MockHttpServletResponse()
 
   private val serviceName = "Test Service Name"
   private val username = "TEST_USER"

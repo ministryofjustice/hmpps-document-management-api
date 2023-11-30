@@ -35,7 +35,7 @@ class DocumentTypeAuthorisationInterceptor(
     val authorisedDocumentTypes = request.authorisedDocumentTypes()
     request.setAttribute(AUTHORISED_DOCUMENT_TYPES, authorisedDocumentTypes)
 
-    val documentType = request.documentTypeFromUuidOrTypePathVariables()
+    val documentType = request.documentTypeFromUuidOrTypePathVariable()
 
     documentType?.also {
       if (!authorisedDocumentTypes.contains(it)) {
@@ -50,18 +50,18 @@ class DocumentTypeAuthorisationInterceptor(
     DocumentType.entries.filter { it.additionalRoles.isEmpty() || it.additionalRoles.any { role -> isUserInRole(role) } }
 
   private fun HttpServletRequest.pathVariables() =
-    getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE) as Map<*, *>
+    getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE) as Map<*, *>? ?: emptyMap<String, String>()
 
-  private fun HttpServletRequest.documentUuid() =
+  private fun HttpServletRequest.documentUuidFromPathVariable() =
     pathVariables()["documentUuid"]
       ?.let { try { UUID.fromString(it.toString()) } catch (e: IllegalArgumentException) { null } }
 
-  private fun HttpServletRequest.documentType() =
+  private fun HttpServletRequest.documentTypeFromPathVariable() =
     pathVariables()["documentType"]
       ?.let { try { DocumentType.valueOf(it.toString()) } catch (e: IllegalArgumentException) { null } }
 
-  private fun HttpServletRequest.documentTypeFromUuidOrTypePathVariables() =
-    documentUuid()
+  private fun HttpServletRequest.documentTypeFromUuidOrTypePathVariable() =
+    documentUuidFromPathVariable()
       ?.let { documentRepository.getDocumentTypeByDocumentUuid(it) }
-      ?: documentType()
+      ?: documentTypeFromPathVariable()
 }

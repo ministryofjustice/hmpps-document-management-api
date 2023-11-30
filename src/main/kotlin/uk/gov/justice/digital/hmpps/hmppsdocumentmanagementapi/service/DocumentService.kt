@@ -95,7 +95,7 @@ class DocumentService(
     val document = documentRepository.findByDocumentUuid(documentUuid)
 
     document?.apply {
-      deleteDocument(
+      delete(
         deletedByServiceName = documentRequestContext.serviceName,
         deletedByUsername = documentRequestContext.username,
       )
