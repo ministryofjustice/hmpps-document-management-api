@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config
+package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.container
 
 import org.slf4j.LoggerFactory
 import org.springframework.test.context.DynamicPropertyRegistry
