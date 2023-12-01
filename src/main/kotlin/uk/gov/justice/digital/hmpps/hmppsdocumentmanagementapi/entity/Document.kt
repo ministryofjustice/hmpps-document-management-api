@@ -14,8 +14,8 @@ import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OrderBy
 import jakarta.persistence.Table
+import org.hibernate.annotations.SQLRestriction
 import org.hibernate.annotations.Type
-import org.hibernate.annotations.Where
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import java.time.LocalDateTime
 import java.util.UUID
@@ -23,7 +23,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as
 
 @Entity
 @Table
-@Where(clause = "deleted_time IS NULL")
+@SQLRestriction("deleted_time IS NULL")
 data class Document(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
