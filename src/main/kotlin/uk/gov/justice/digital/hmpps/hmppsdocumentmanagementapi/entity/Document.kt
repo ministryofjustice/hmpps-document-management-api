@@ -80,6 +80,12 @@ data class Document(
     this.metadata = metadata
   }
 
+  fun delete(deletedTime: LocalDateTime = LocalDateTime.now(), deletedByServiceName: String, deletedByUsername: String?) {
+    this.deletedTime = deletedTime
+    this.deletedByServiceName = deletedByServiceName
+    this.deletedByUsername = deletedByUsername
+  }
+
   fun toModel() =
     DocumentModel(
       documentUuid,

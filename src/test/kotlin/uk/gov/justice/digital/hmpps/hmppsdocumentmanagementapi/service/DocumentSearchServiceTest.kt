@@ -41,7 +41,7 @@ class DocumentSearchServiceTest {
     val documentType = DocumentType.HMCTS_WARRANT
     val metadata = JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")
 
-    service.searchDocuments(DocumentSearchRequest(documentType, metadata))
+    service.searchDocuments(DocumentSearchRequest(documentType, metadata), DocumentType.entries)
 
     verify(documentSearchSpecification).prisonCodeEquals(documentType)
     verify(documentSearchSpecification).metadataContains("prisonNumber", "A1234BC")
@@ -56,7 +56,7 @@ class DocumentSearchServiceTest {
     val documentType = null
     val metadata = JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")
 
-    service.searchDocuments(DocumentSearchRequest(documentType, metadata))
+    service.searchDocuments(DocumentSearchRequest(documentType, metadata), DocumentType.entries)
 
     verify(documentSearchSpecification).prisonCodeEquals(null)
     verify(documentSearchSpecification).metadataContains("prisonNumber", "A1234BC")
@@ -71,7 +71,7 @@ class DocumentSearchServiceTest {
     val documentType = DocumentType.HMCTS_WARRANT
     val metadata = JacksonUtil.toJsonNode("{ \"prisonCode\": \"KPI\", \"prisonNumber\": \"A1234BC\" }")
 
-    service.searchDocuments(DocumentSearchRequest(documentType, metadata))
+    service.searchDocuments(DocumentSearchRequest(documentType, metadata), DocumentType.entries)
 
     verify(documentSearchSpecification).prisonCodeEquals(documentType)
     verify(documentSearchSpecification).metadataContains("prisonCode", "KPI")
@@ -90,7 +90,7 @@ class DocumentSearchServiceTest {
 
     whenever(documentRepository.findAll(any<Specification<Document>>())).thenReturn(listOf(document))
 
-    val response = service.searchDocuments(request)
+    val response = service.searchDocuments(request, DocumentType.entries)
 
     assertThat(response).isEqualTo(DocumentSearchResult(request, listOf(document).toModels()))
   }

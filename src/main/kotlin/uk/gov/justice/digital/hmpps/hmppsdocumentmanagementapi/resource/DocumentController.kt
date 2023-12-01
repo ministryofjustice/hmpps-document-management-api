@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.AUTHORISED_DOCUMENT_TYPES
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
@@ -75,7 +76,7 @@ class DocumentController(
       ),
     ],
   )
-  @PreAuthorize("hasAnyRole('DOCUMENT_READER', 'DOCUMENT_ADMIN')")
+  @PreAuthorize("hasAnyRole('$ROLE_DOCUMENT_READER', '$ROLE_DOCUMENT_ADMIN')")
   fun getDocument(
     @PathVariable
     @Parameter(
@@ -113,7 +114,7 @@ class DocumentController(
       ),
     ],
   )
-  @PreAuthorize("hasAnyRole('DOCUMENT_READER', 'DOCUMENT_ADMIN')")
+  @PreAuthorize("hasAnyRole('$ROLE_DOCUMENT_READER', '$ROLE_DOCUMENT_ADMIN')")
   fun downloadDocumentFile(
     @PathVariable
     @Parameter(
@@ -169,7 +170,7 @@ class DocumentController(
       ),
     ],
   )
-  @PreAuthorize("hasAnyRole('DOCUMENT_WRITER', 'DOCUMENT_ADMIN')")
+  @PreAuthorize("hasAnyRole('$ROLE_DOCUMENT_WRITER', '$ROLE_DOCUMENT_ADMIN')")
   fun uploadDocument(
     @PathVariable
     @Parameter(
@@ -213,10 +214,10 @@ class DocumentController(
       documentUuid,
       file,
       JacksonUtil.toJsonNode(metadata),
-      request.getAttribute(DocumentRequestContext::class.simpleName) as DocumentRequestContext,
+      request.documentRequestContext(),
     )
 
-  @ResponseStatus(HttpStatus.ACCEPTED)
+  @ResponseStatus(HttpStatus.OK)
   @PutMapping("/{documentUuid}/metadata")
   @Operation(
     summary = "Replace the metadata associated with a document",
@@ -227,7 +228,7 @@ class DocumentController(
   @ApiResponses(
     value = [
       ApiResponse(
-        responseCode = "202",
+        responseCode = "200",
         description = "Document metadata replaced successfully",
         content = [Content(schema = Schema(implementation = Document::class))],
       ),
@@ -248,7 +249,7 @@ class DocumentController(
       ),
     ],
   )
-  @PreAuthorize("hasAnyRole('DOCUMENT_WRITER', 'DOCUMENT_ADMIN')")
+  @PreAuthorize("hasAnyRole('$ROLE_DOCUMENT_WRITER', '$ROLE_DOCUMENT_ADMIN')")
   fun replaceDocumentMetadata(
     @PathVariable
     @Parameter(
@@ -278,10 +279,10 @@ class DocumentController(
     documentService.replaceDocumentMetadata(
       documentUuid,
       metadata,
-      request.getAttribute(DocumentRequestContext::class.simpleName) as DocumentRequestContext,
+      request.documentRequestContext(),
     )
 
-  @ResponseStatus(HttpStatus.ACCEPTED)
+  @ResponseStatus(HttpStatus.NO_CONTENT)
   @DeleteMapping("/{documentUuid}")
   @Operation(
     summary = "Delete a document by its unique identifier",
@@ -289,7 +290,7 @@ class DocumentController(
   @ApiResponses(
     value = [
       ApiResponse(
-        responseCode = "202",
+        responseCode = "204",
         description = "Document deleted",
       ),
       ApiResponse(
@@ -309,7 +310,7 @@ class DocumentController(
       ),
     ],
   )
-  @PreAuthorize("hasAnyRole('DOCUMENT_WRITER', 'DOCUMENT_ADMIN')")
+  @PreAuthorize("hasAnyRole('$ROLE_DOCUMENT_WRITER', '$ROLE_DOCUMENT_ADMIN')")
   fun deleteDocument(
     @PathVariable
     @Parameter(
@@ -317,11 +318,14 @@ class DocumentController(
       required = true,
     )
     documentUuid: UUID,
-  ) {
-    throw NotImplementedError()
-  }
+    request: HttpServletRequest,
+  ) =
+    documentService.deleteDocument(
+      documentUuid,
+      request.documentRequestContext(),
+    )
 
-  @ResponseStatus(HttpStatus.ACCEPTED)
+  @ResponseStatus(HttpStatus.OK)
   @PostMapping("/search")
   @Operation(
     summary = "Search for documents with matching metadata and optionally document type",
@@ -333,7 +337,7 @@ class DocumentController(
   @ApiResponses(
     value = [
       ApiResponse(
-        responseCode = "202",
+        responseCode = "200",
         description = "Search request accepted and results returned",
         content = [Content(schema = Schema(implementation = DocumentSearchResult::class))],
       ),
@@ -354,7 +358,7 @@ class DocumentController(
       ),
     ],
   )
-  @PreAuthorize("hasAnyRole('DOCUMENT_READER', 'DOCUMENT_ADMIN')")
+  @PreAuthorize("hasAnyRole('$ROLE_DOCUMENT_READER', '$ROLE_DOCUMENT_ADMIN')")
   fun searchDocuments(
     @Valid
     @RequestBody
@@ -362,6 +366,16 @@ class DocumentController(
       description = "The search parameters to use to filter documents",
       required = true,
     )
-    request: DocumentSearchRequest,
-  ) = documentSearchService.searchDocuments(request)
+    searchRequest: DocumentSearchRequest,
+    request: HttpServletRequest,
+  ) = documentSearchService.searchDocuments(
+    searchRequest,
+    request.authorisedDocumentTypes(),
+  )
+
+  private fun HttpServletRequest.authorisedDocumentTypes() =
+    (getAttribute(AUTHORISED_DOCUMENT_TYPES) as List<*>).filterIsInstance<DocumentType>()
+
+  private fun HttpServletRequest.documentRequestContext() =
+    getAttribute(DocumentRequestContext::class.simpleName) as DocumentRequestContext
 }

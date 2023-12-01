@@ -42,13 +42,9 @@ class UploadDocumentIntTest : IntegrationTestBase() {
 
   @Test
   fun `403 forbidden - no roles`() {
-    val builder = MultipartBodyBuilder()
-    builder.part("file", ClassPathResource("test_data/warrant-for-remand.pdf"))
-    builder.part("metadata", metadata)
-
     webTestClient.post()
       .uri("/documents/${DocumentType.HMCTS_WARRANT}/${UUID.randomUUID()}")
-      .bodyValue(builder.build())
+      .bodyValue(documentMetadataMultipartBody())
       .headers(setAuthorisation())
       .headers(setDocumentContext())
       .exchange()
@@ -57,13 +53,9 @@ class UploadDocumentIntTest : IntegrationTestBase() {
 
   @Test
   fun `403 forbidden - document reader`() {
-    val builder = MultipartBodyBuilder()
-    builder.part("file", ClassPathResource("test_data/warrant-for-remand.pdf"))
-    builder.part("metadata", metadata)
-
     webTestClient.post()
       .uri("/documents/${DocumentType.HMCTS_WARRANT}/${UUID.randomUUID()}")
-      .bodyValue(builder.build())
+      .bodyValue(documentMetadataMultipartBody())
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
       .headers(setDocumentContext())
       .exchange()
@@ -202,13 +194,9 @@ class UploadDocumentIntTest : IntegrationTestBase() {
   fun `409 conflict - document unique identifier already used`() {
     val documentUuid = UUID.fromString("f73a0f91-2957-4224-b477-714370c04d37")
 
-    val builder = MultipartBodyBuilder()
-    builder.part("file", ClassPathResource("test_data/warrant-for-remand.pdf"))
-    builder.part("metadata", metadata)
-
     val response = webTestClient.post()
       .uri("/documents/${DocumentType.HMCTS_WARRANT}/$documentUuid")
-      .bodyValue(builder.build())
+      .bodyValue(documentMetadataMultipartBody())
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
       .headers(setDocumentContext(serviceName, username))
       .exchange()
@@ -230,13 +218,9 @@ class UploadDocumentIntTest : IntegrationTestBase() {
   fun `409 conflict - document unique identifier already used - soft deleted document`() {
     val documentUuid = UUID.fromString("c671814d-7c32-4394-b46d-a70957148925")
 
-    val builder = MultipartBodyBuilder()
-    builder.part("file", ClassPathResource("test_data/warrant-for-remand.pdf"))
-    builder.part("metadata", metadata)
-
     val response = webTestClient.post()
       .uri("/documents/${DocumentType.HMCTS_WARRANT}/$documentUuid")
-      .bodyValue(builder.build())
+      .bodyValue(documentMetadataMultipartBody())
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
       .headers(setDocumentContext(serviceName, username))
       .exchange()
@@ -354,17 +338,19 @@ class UploadDocumentIntTest : IntegrationTestBase() {
     assertThat(documentFile).hasSize(20688)
   }
 
+  private fun documentMetadataMultipartBody() =
+    MultipartBodyBuilder().apply {
+      part("file", ClassPathResource("test_data/warrant-for-remand.pdf"))
+      part("metadata", metadata)
+    }.build()
+
   private fun WebTestClient.uploadDocument(
     documentType: DocumentType = DocumentType.HMCTS_WARRANT,
     documentUuid: UUID = UUID.randomUUID(),
-  ): DocumentModel {
-    val builder = MultipartBodyBuilder()
-    builder.part("file", ClassPathResource("test_data/warrant-for-remand.pdf"))
-    builder.part("metadata", metadata)
-
-    return post()
+  ) =
+    post()
       .uri("/documents/$documentType/$documentUuid")
-      .bodyValue(builder.build())
+      .bodyValue(documentMetadataMultipartBody())
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
       .headers(setDocumentContext(serviceName, username))
       .exchange()
@@ -372,5 +358,4 @@ class UploadDocumentIntTest : IntegrationTestBase() {
       .expectHeader().contentType(MediaType.APPLICATION_JSON)
       .expectBody(DocumentModel::class.java)
       .returnResult().responseBody!!
-  }
 }

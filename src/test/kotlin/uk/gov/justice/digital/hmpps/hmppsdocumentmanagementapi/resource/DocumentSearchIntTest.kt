@@ -84,8 +84,8 @@ class DocumentSearchIntTest : IntegrationTestBase() {
     with(response!!) {
       assertThat(status).isEqualTo(400)
       assertThat(errorCode).isNull()
-      assertThat(userMessage).isEqualTo("Validation failure: Couldn't read request body: Required request body is missing: public uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResult uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentController.searchDocuments(uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest)")
-      assertThat(developerMessage).isEqualTo("Required request body is missing: public uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResult uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentController.searchDocuments(uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest)")
+      assertThat(userMessage).isEqualTo("Validation failure: Couldn't read request body: Required request body is missing: public uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResult uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentController.searchDocuments(uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest,jakarta.servlet.http.HttpServletRequest)")
+      assertThat(developerMessage).isEqualTo("Required request body is missing: public uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResult uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentController.searchDocuments(uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest,jakarta.servlet.http.HttpServletRequest)")
       assertThat(moreInfo).isNull()
     }
   }
@@ -96,8 +96,8 @@ class DocumentSearchIntTest : IntegrationTestBase() {
     val response = webTestClient.searchDocuments(documentType, metadata)
 
     with(response.request) {
-      assertThat(this.documentType).isEqualTo(documentType)
-      assertThat(this.metadata).isEqualTo(metadata)
+      assertThat(documentType).isEqualTo(this@DocumentSearchIntTest.documentType)
+      assertThat(metadata).isEqualTo(this@DocumentSearchIntTest.metadata)
     }
   }
 
@@ -194,7 +194,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
       .headers(setDocumentContext())
       .exchange()
-      .expectStatus().isAccepted
+      .expectStatus().isOk
       .expectHeader().contentType(MediaType.APPLICATION_JSON)
       .expectBody(DocumentSearchResult::class.java)
       .returnResult().responseBody!!

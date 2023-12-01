@@ -87,4 +87,19 @@ class DocumentService(
 
     return documentRepository.saveAndFlush(document).toModel()
   }
+
+  fun deleteDocument(
+    documentUuid: UUID,
+    documentRequestContext: DocumentRequestContext,
+  ) {
+    val document = documentRepository.findByDocumentUuid(documentUuid)
+
+    document?.apply {
+      delete(
+        deletedByServiceName = documentRequestContext.serviceName,
+        deletedByUsername = documentRequestContext.username,
+      )
+      documentRepository.saveAndFlush(this)
+    }
+  }
 }
