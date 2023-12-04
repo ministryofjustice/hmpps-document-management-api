@@ -30,7 +30,7 @@ class DocumentService(
     val document = getDocument(documentUuid)
     val inputStream = documentFileService.getDocumentFile(documentUuid)
     return DocumentFileModel(
-      "${document.filename}.${document.fileExtension}",
+      document.documentFilename,
       document.fileSize,
       document.mimeType,
       inputStream,

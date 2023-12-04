@@ -25,6 +25,14 @@ data class Document(
   val documentType: DocumentType,
 
   @Schema(
+    description = "The generated filename the document file will be given when downloaded. The format of this filename " +
+      "can be document type specific and may include type information. the filename of the document file when it was uploaded " +
+      "as well as relevant metadata e.g. case reference or prison number",
+    example = "warrant_for_remand",
+  )
+  val documentFilename: String,
+
+  @Schema(
     description = "The filename of the document file when it was uploaded with the file extension removed",
     example = "warrant_for_remand",
   )

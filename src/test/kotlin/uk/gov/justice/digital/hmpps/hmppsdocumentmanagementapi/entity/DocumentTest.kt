@@ -27,6 +27,16 @@ class DocumentTest {
   private val replacementMetadata = JacksonUtil.toJsonNode("{ \"prisonCode\": \"RSI\", \"prisonNumber\": \"B2345CD\" }")
 
   @Test
+  fun `document filename uses filename and extension`() {
+    assertThat(document.documentFilename()).isEqualTo("${document.filename}.${document.fileExtension}")
+  }
+
+  @Test
+  fun `document filename removes extension if it is empty`() {
+    assertThat(document.copy(fileExtension = "").documentFilename()).isEqualTo(document.filename)
+  }
+
+  @Test
   fun `document contains replaced metadata`() {
     document.replaceMetadata(replacementMetadata, supersededByServiceName = "Replaced metadata using service name", supersededByUsername = "REPLACED_BY_USERNAME")
 
@@ -102,6 +112,7 @@ class DocumentTest {
         DocumentModel(
           documentUuid,
           documentType,
+          documentFilename(),
           filename,
           fileExtension,
           fileSize,
@@ -124,6 +135,7 @@ class DocumentTest {
           DocumentModel(
             documentUuid,
             documentType,
+            documentFilename(),
             filename,
             fileExtension,
             fileSize,

@@ -66,6 +66,14 @@ data class Document(
 
   fun documentMetadataHistory() = documentMetadataHistory
 
+  fun documentFilename(): String {
+    val sb = StringBuilder(filename)
+    if (fileExtension.isNotEmpty()) {
+      sb.append(".$fileExtension")
+    }
+    return sb.toString()
+  }
+
   fun replaceMetadata(metadata: JsonNode, supersededTime: LocalDateTime = LocalDateTime.now(), supersededByServiceName: String, supersededByUsername: String?) {
     documentMetadataHistory.add(
       DocumentMetadataHistory(
@@ -90,6 +98,7 @@ data class Document(
     DocumentModel(
       documentUuid,
       documentType,
+      documentFilename(),
       filename,
       fileExtension,
       fileSize,
