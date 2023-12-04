@@ -24,19 +24,35 @@ class DocumentTest {
       createdByUsername = "CREATED_BY_USERNAME",
     )
 
+  private val replacementMetadata = JacksonUtil.toJsonNode("{ \"prisonCode\": \"RSI\", \"prisonNumber\": \"B2345CD\" }")
+
+  @Test
+  fun `document filename uses filename and extension`() {
+    assertThat(document.documentFilename()).isEqualTo("${document.filename}.${document.fileExtension}")
+  }
+
+  @Test
+  fun `document filename removes extension if it is empty`() {
+    assertThat(document.copy(fileExtension = "").documentFilename()).isEqualTo(document.filename)
+  }
+
   @Test
   fun `document contains replaced metadata`() {
-    val replacementMetadata = JacksonUtil.toJsonNode("{ \"prisonCode\": \"RSI\", \"prisonNumber\": \"B2345CD\" }")
-
     document.replaceMetadata(replacementMetadata, supersededByServiceName = "Replaced metadata using service name", supersededByUsername = "REPLACED_BY_USERNAME")
 
     assertThat(document.metadata).isEqualTo(replacementMetadata)
   }
 
   @Test
+  fun `metadata history references document`() {
+    document.replaceMetadata(replacementMetadata, supersededByServiceName = "Replaced metadata using service name", supersededByUsername = "REPLACED_BY_USERNAME")
+
+    assertThat(document.documentMetadataHistory().single().document).isEqualTo(document)
+  }
+
+  @Test
   fun `metadata history contains original metadata`() {
     val originalMetadata = document.metadata
-    val replacementMetadata = JacksonUtil.toJsonNode("{ \"prisonCode\": \"RSI\", \"prisonNumber\": \"B2345CD\" }")
 
     document.replaceMetadata(replacementMetadata, supersededByServiceName = "Replaced metadata using service name", supersededByUsername = "REPLACED_BY_USERNAME")
 
@@ -45,7 +61,6 @@ class DocumentTest {
 
   @Test
   fun `metadata history contains audit information`() {
-    val replacementMetadata = JacksonUtil.toJsonNode("{ \"prisonCode\": \"RSI\", \"prisonNumber\": \"B2345CD\" }")
     val now = LocalDateTime.now()
     val serviceName = "Replaced metadata using service name"
     val username = "REPLACED_BY_USERNAME"
@@ -63,8 +78,6 @@ class DocumentTest {
 
   @Test
   fun `metadata history uses now as the default`() {
-    val replacementMetadata = JacksonUtil.toJsonNode("{ \"prisonCode\": \"RSI\", \"prisonNumber\": \"B2345CD\" }")
-
     document.replaceMetadata(replacementMetadata, supersededByServiceName = "Replaced metadata using service name", supersededByUsername = "REPLACED_BY_USERNAME")
 
     assertThat(document.documentMetadataHistory().single().supersededTime).isCloseTo(LocalDateTime.now(), within(3, ChronoUnit.SECONDS))
@@ -99,6 +112,7 @@ class DocumentTest {
         DocumentModel(
           documentUuid,
           documentType,
+          documentFilename(),
           filename,
           fileExtension,
           fileSize,
@@ -121,6 +135,7 @@ class DocumentTest {
           DocumentModel(
             documentUuid,
             documentType,
+            documentFilename(),
             filename,
             fileExtension,
             fileSize,
