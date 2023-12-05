@@ -12,7 +12,8 @@ data class DocumentSearchResult(
   val request: DocumentSearchRequest,
 
   @Schema(
-    description = "The documents matching the supplied search parameters",
+    description = "The documents matching the supplied search parameters. Note that documents with types that require " +
+      "additional roles will have been filtered out of these results if the client does not have the required roles.",
   )
   val results: Collection<Document>,
 )

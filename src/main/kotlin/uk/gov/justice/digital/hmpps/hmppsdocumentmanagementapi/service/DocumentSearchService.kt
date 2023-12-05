@@ -30,6 +30,7 @@ class DocumentSearchService(
     }
 
     val results = documentRepository.findAll(spec)
+      .filter { authorisedDocumentTypes.contains(it.documentType) }
 
     return DocumentSearchResult(
       request,

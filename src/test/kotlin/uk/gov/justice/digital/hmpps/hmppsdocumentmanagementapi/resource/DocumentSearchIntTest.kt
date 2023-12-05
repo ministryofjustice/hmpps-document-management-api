@@ -166,11 +166,32 @@ class DocumentSearchIntTest : IntegrationTestBase() {
 
   @Sql("classpath:test_data/document-search.sql")
   @Test
-  fun `search all document types by prison number`() {
-    val response = webTestClient.searchDocuments(null, metadata)
+  fun `search all document types by prison number - client has document type additional role`() {
+    val response = webTestClient.searchDocuments(
+      null,
+      metadata,
+      listOf(ROLE_DOCUMENT_READER, ROLE_DOCUMENT_TYPE_SAR),
+    )
 
     with(response.results) {
       assertThat(map { it.documentType }).isEqualTo(listOf(DocumentType.HMCTS_WARRANT, DocumentType.SUBJECT_ACCESS_REQUEST_REPORT))
+      onEach {
+        assertThat(it.metadata["prisonNumber"].asText()).isEqualTo("A1234BC")
+      }
+    }
+  }
+
+  @Sql("classpath:test_data/document-search.sql")
+  @Test
+  fun `search all document types by prison number - client does not have document type additional role`() {
+    val response = webTestClient.searchDocuments(
+      null,
+      metadata,
+      listOf(ROLE_DOCUMENT_READER),
+    )
+
+    with(response.results) {
+      assertThat(map { it.documentType }).isEqualTo(listOf(DocumentType.HMCTS_WARRANT))
       onEach {
         assertThat(it.metadata["prisonNumber"].asText()).isEqualTo("A1234BC")
       }
@@ -239,11 +260,12 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   private fun WebTestClient.searchDocuments(
     documentType: DocumentType?,
     metadata: JsonNode?,
+    roles: List<String> = listOf(ROLE_DOCUMENT_READER),
   ) =
     post()
       .uri("/documents/search")
       .bodyValue(DocumentSearchRequest(documentType, metadata))
-      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
+      .headers(setAuthorisation(roles = roles))
       .headers(setDocumentContext())
       .exchange()
       .expectStatus().isOk

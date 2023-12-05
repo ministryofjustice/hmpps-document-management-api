@@ -24,7 +24,7 @@ class DocumentSearchServiceTest {
 
   private val service = DocumentSearchService(documentRepository, documentSearchSpecification)
 
-  private val document = Document(
+  private val warrantDocument = Document(
     documentType = DocumentType.HMCTS_WARRANT,
     filename = "warrant_for_remand",
     fileExtension = "pdf",
@@ -34,6 +34,18 @@ class DocumentSearchServiceTest {
     metadata = JacksonUtil.toJsonNode("{ \"prisonCode\": \"KPI\", \"prisonNumber\": \"A1234BC\" }"),
     createdByServiceName = "Remand and Sentencing",
     createdByUsername = "CREATED_BY_USER",
+  )
+
+  private val sarDocument = Document(
+    documentType = DocumentType.SUBJECT_ACCESS_REQUEST_REPORT,
+    filename = "subject_access_request_report",
+    fileExtension = "pdf",
+    fileSize = 63621,
+    fileHash = "0e0396b7a0e931762c167abb7da85398",
+    mimeType = "application/pdf",
+    metadata = JacksonUtil.toJsonNode("{ \"sarCaseReference\": \"SAR-1234\", \"prisonCode\": \"KPI\", \"prisonNumber\": \"A1234BC\" }"),
+    createdByServiceName = "Manage Subject Access Requests",
+    createdByUsername = "SAR_USER",
   )
 
   @Test
@@ -116,10 +128,23 @@ class DocumentSearchServiceTest {
     val metadata = JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")
     val request = DocumentSearchRequest(documentType, metadata)
 
-    whenever(documentRepository.findAll(any<Specification<Document>>())).thenReturn(listOf(document))
+    whenever(documentRepository.findAll(any<Specification<Document>>())).thenReturn(listOf(warrantDocument))
 
     val response = service.searchDocuments(request, DocumentType.entries)
 
-    assertThat(response).isEqualTo(DocumentSearchResult(request, listOf(document).toModels()))
+    assertThat(response).isEqualTo(DocumentSearchResult(request, listOf(warrantDocument).toModels()))
+  }
+
+  @Test
+  fun `returns results filtered by authorised document types`() {
+    val documentType = DocumentType.HMCTS_WARRANT
+    val metadata = JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")
+    val request = DocumentSearchRequest(documentType, metadata)
+
+    whenever(documentRepository.findAll(any<Specification<Document>>())).thenReturn(listOf(warrantDocument, sarDocument))
+
+    val response = service.searchDocuments(request, listOf(DocumentType.HMCTS_WARRANT))
+
+    assertThat(response).isEqualTo(DocumentSearchResult(request, listOf(warrantDocument).toModels()))
   }
 }
