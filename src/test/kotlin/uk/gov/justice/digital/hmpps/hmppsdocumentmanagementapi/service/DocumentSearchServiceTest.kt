@@ -37,6 +37,20 @@ class DocumentSearchServiceTest {
   )
 
   @Test
+  fun `search by document type only`() {
+    val documentType = DocumentType.HMCTS_WARRANT
+    val metadata = null
+
+    service.searchDocuments(DocumentSearchRequest(documentType, metadata), DocumentType.entries)
+
+    verify(documentSearchSpecification).documentTypeEquals(documentType)
+    verifyNoMoreInteractions(documentSearchSpecification)
+
+    verify(documentRepository).findAll(any<Specification<Document>>())
+    verifyNoMoreInteractions(documentRepository)
+  }
+
+  @Test
   fun `search by document type and metadata property`() {
     val documentType = DocumentType.HMCTS_WARRANT
     val metadata = JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")
@@ -76,6 +90,20 @@ class DocumentSearchServiceTest {
     verify(documentSearchSpecification).documentTypeEquals(documentType)
     verify(documentSearchSpecification).metadataContains("prisonCode", "KPI")
     verify(documentSearchSpecification).metadataContains("prisonNumber", "A1234BC")
+    verifyNoMoreInteractions(documentSearchSpecification)
+
+    verify(documentRepository).findAll(any<Specification<Document>>())
+    verifyNoMoreInteractions(documentRepository)
+  }
+
+  @Test
+  fun `ignores non object metadata`() {
+    val documentType = null
+    val metadata = JacksonUtil.toJsonNode("[ \"test\" ]")
+
+    service.searchDocuments(DocumentSearchRequest(documentType, metadata), DocumentType.entries)
+
+    verify(documentSearchSpecification).documentTypeEquals(null)
     verifyNoMoreInteractions(documentSearchSpecification)
 
     verify(documentRepository).findAll(any<Specification<Document>>())

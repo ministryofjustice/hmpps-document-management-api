@@ -9,11 +9,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSea
 import kotlin.reflect.KClass
 
 class DocumentTypeOrMetadataCriteriaRequiredValidator : ConstraintValidator<DocumentTypeOrMetadataCriteriaRequired, DocumentSearchRequest> {
-  override fun isValid(value: DocumentSearchRequest?, context: ConstraintValidatorContext): Boolean {
-    if (value == null) {
-      return false
-    }
-
+  override fun isValid(value: DocumentSearchRequest, context: ConstraintValidatorContext): Boolean {
     if (value.documentType != null) {
       return true
     }

@@ -22,8 +22,8 @@ class NoNullOrEmptyStringMetadataValuesValidator : ConstraintValidator<NoNullOrE
     return true
   }
 
-  private fun JsonNode?.isNullOrEmpty() =
-    this == null || !isTextual || asText().isEmpty()
+  private fun JsonNode.isNullOrEmpty() =
+    !isTextual || asText().isEmpty()
 }
 
 @Target(AnnotationTarget.FIELD, AnnotationTarget.PROPERTY)
