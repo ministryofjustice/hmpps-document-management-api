@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.security.access.AccessDeniedException
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
@@ -56,8 +57,8 @@ class HmppsDocumentManagementApiExceptionHandler {
   }
 
   @ExceptionHandler(HttpMessageNotReadableException::class)
-  fun handleNoBodyValidationException(e: HttpMessageNotReadableException): ResponseEntity<ErrorResponse> {
-    log.info("Validation exception: Couldn't read request body: {}", e.message)
+  fun handleHttpMessageNotReadableException(e: HttpMessageNotReadableException): ResponseEntity<ErrorResponse> {
+    log.info("HTTP message not readable exception: {}", e.message)
     return ResponseEntity
       .status(BAD_REQUEST)
       .body(
@@ -70,8 +71,8 @@ class HmppsDocumentManagementApiExceptionHandler {
   }
 
   @ExceptionHandler(MultipartException::class)
-  fun handleNoBodyValidationException(e: MultipartException): ResponseEntity<ErrorResponse> {
-    log.info("Validation exception: {}", e.message)
+  fun handleMultipartException(e: MultipartException): ResponseEntity<ErrorResponse> {
+    log.info("Multipart exception: {}", e.message)
     return ResponseEntity
       .status(BAD_REQUEST)
       .body(
@@ -84,8 +85,8 @@ class HmppsDocumentManagementApiExceptionHandler {
   }
 
   @ExceptionHandler(MissingServletRequestPartException::class)
-  fun handleNoBodyValidationException(e: MissingServletRequestPartException): ResponseEntity<ErrorResponse> {
-    log.info("Validation exception: {}", e.message)
+  fun handleMissingServletRequestPartException(e: MissingServletRequestPartException): ResponseEntity<ErrorResponse> {
+    log.info("Missing servlet request part exception: {}", e.message)
     return ResponseEntity
       .status(BAD_REQUEST)
       .body(
@@ -111,9 +112,24 @@ class HmppsDocumentManagementApiExceptionHandler {
       )
   }
 
+  @ExceptionHandler(MethodArgumentNotValidException::class)
+  fun handleMethodArgumentNotValidException(e: MethodArgumentNotValidException): ResponseEntity<ErrorResponse>? {
+    log.debug("Method argument not valid exception: {}", e.message)
+    val errors = e.bindingResult.allErrors.map { it.defaultMessage }.joinToString(", ")
+    return ResponseEntity
+      .status(BAD_REQUEST)
+      .body(
+        ErrorResponse(
+          status = BAD_REQUEST,
+          userMessage = "Validation failure: $errors",
+          developerMessage = errors,
+        ),
+      )
+  }
+
   @ExceptionHandler(IllegalArgumentException::class)
   fun handleIllegalArgumentException(e: IllegalArgumentException): ResponseEntity<ErrorResponse> {
-    log.info("Exception: {}", e.message)
+    log.info("Illegal argument exception: {}", e.message)
     return ResponseEntity
       .status(BAD_REQUEST)
       .body(
@@ -140,7 +156,7 @@ class HmppsDocumentManagementApiExceptionHandler {
   }
 
   @ExceptionHandler(DocumentFileNotFoundException::class)
-  fun handleEntityNotFoundException(e: DocumentFileNotFoundException): ResponseEntity<ErrorResponse> {
+  fun handleDocumentFileNotFoundException(e: DocumentFileNotFoundException): ResponseEntity<ErrorResponse> {
     log.info("Document file not found exception: {}", e.message)
     return ResponseEntity
       .status(HttpStatus.NOT_FOUND)
@@ -154,7 +170,7 @@ class HmppsDocumentManagementApiExceptionHandler {
   }
 
   @ExceptionHandler(DocumentAlreadyUploadedException::class)
-  fun handleEntityNotFoundException(e: DocumentAlreadyUploadedException): ResponseEntity<ErrorResponse> {
+  fun handleDocumentAlreadyUploadedException(e: DocumentAlreadyUploadedException): ResponseEntity<ErrorResponse> {
     log.info("Document already uploaded exception: {}", e.message)
     return ResponseEntity
       .status(HttpStatus.CONFLICT)

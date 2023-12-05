@@ -328,11 +328,13 @@ class DocumentController(
   @ResponseStatus(HttpStatus.OK)
   @PostMapping("/search")
   @Operation(
-    summary = "Search for documents with matching metadata and optionally document type",
-    description = "Uses the supplied metadata and optional document type to filter and return documents. " +
-      "Documents will match if they are of the supplied type (optional) and/or their metadata contains all the supplied " +
+    summary = "Search for documents with matching document type and/or metadata criteria",
+    description = "Uses the supplied document type and metadata criteria to filter and return documents. " +
+      "Documents will match if they are of the supplied type and/or their metadata contains all the supplied " +
       "properties and their values e.g. prisonCode = \"KMI\" AND prisonNumber = \"A1234BC\". Value matching is partial " +
-      "and case insensitive so court = \"ham magis\" will match \"Birmingham Magistrates\".",
+      "and case insensitive so court = \"ham magis\" will match \"Birmingham Magistrates\". Document type or metadata " +
+      "criteria must be supplied. Note that documents with types that require additional roles will be filtered out of " +
+      "the search results if the client does not have the required roles.",
   )
   @ApiResponses(
     value = [

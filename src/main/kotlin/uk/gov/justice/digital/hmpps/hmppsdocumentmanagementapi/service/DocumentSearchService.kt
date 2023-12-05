@@ -23,13 +23,14 @@ class DocumentSearchService(
       }
     }
 
-    var spec = documentSearchSpecification.prisonCodeEquals(request.documentType)
+    var spec = documentSearchSpecification.documentTypeEquals(request.documentType)
 
-    request.metadata.fields().forEach {
+    request.metadata?.fields()?.forEach {
       spec = spec.and(documentSearchSpecification.metadataContains(it.key, it.value.asText()))
     }
 
     val results = documentRepository.findAll(spec)
+      .filter { authorisedDocumentTypes.contains(it.documentType) }
 
     return DocumentSearchResult(
       request,
