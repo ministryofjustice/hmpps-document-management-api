@@ -17,7 +17,7 @@ import java.util.UUID
 class DocumentSearchIntTest : IntegrationTestBase() {
   private val deletedDocumentUuid = UUID.fromString("f73a0f91-2957-4224-b477-714370c04d37")
   val documentType = DocumentType.HMCTS_WARRANT
-  val metadata = JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")
+  val metadata: JsonNode = JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")
 
   @Test
   fun `401 unauthorised`() {
@@ -94,7 +94,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   fun `400 bad request - document type or metadata criteria must be supplied`() {
     val response = webTestClient.post()
       .uri("/documents/search")
-      .bodyValue(DocumentSearchRequest(null, JacksonUtil.toJsonNode("{}")))
+      .bodyValue(DocumentSearchRequest(null, null))
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
       .headers(setDocumentContext())
       .exchange()
@@ -111,6 +111,27 @@ class DocumentSearchIntTest : IntegrationTestBase() {
     }
   }
 
+  @Test
+  fun `400 bad request - metadata property values must not be empty`() {
+    val response = webTestClient.post()
+      .uri("/documents/search")
+      .bodyValue(DocumentSearchRequest(null, JacksonUtil.toJsonNode("{ \"prisonNumber\": \"\" }")))
+      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
+      .headers(setDocumentContext())
+      .exchange()
+      .expectStatus().isBadRequest
+      .expectBody(ErrorResponse::class.java)
+      .returnResult().responseBody
+
+    with(response!!) {
+      assertThat(status).isEqualTo(400)
+      assertThat(errorCode).isNull()
+      assertThat(userMessage).isEqualTo("Validation failure: Metadata property values must be non null or empty strings.")
+      assertThat(developerMessage).isEqualTo("Metadata property values must be non null or empty strings.")
+      assertThat(moreInfo).isNull()
+    }
+  }
+
   @Sql("classpath:test_data/document-search.sql")
   @Test
   fun `response contains search request`() {
@@ -119,6 +140,16 @@ class DocumentSearchIntTest : IntegrationTestBase() {
     with(response.request) {
       assertThat(documentType).isEqualTo(this@DocumentSearchIntTest.documentType)
       assertThat(metadata).isEqualTo(this@DocumentSearchIntTest.metadata)
+    }
+  }
+
+  @Sql("classpath:test_data/document-search.sql")
+  @Test
+  fun `find all warrants`() {
+    val response = webTestClient.searchDocuments(documentType, null)
+
+    response.results.onEach {
+      assertThat(it.documentType).isEqualTo(documentType)
     }
   }
 
@@ -207,7 +238,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
 
   private fun WebTestClient.searchDocuments(
     documentType: DocumentType?,
-    metadata: JsonNode,
+    metadata: JsonNode?,
   ) =
     post()
       .uri("/documents/search")
