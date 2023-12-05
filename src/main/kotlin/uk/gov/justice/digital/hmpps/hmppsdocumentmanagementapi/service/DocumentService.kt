@@ -10,6 +10,9 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.findByDocumentUuidOrThrowNotFound
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.utils.fileExtension
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.utils.filenameWithoutExtension
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.utils.mimeType
 import java.util.UUID
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as DocumentModel
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentFile as DocumentFileModel
@@ -53,13 +56,12 @@ class DocumentService(
       Document(
         documentUuid = documentUuid,
         documentType = documentType,
-        // TODO: filename parser to remove any path information and return an acceptable default
-        filename = (file.originalFilename ?: "UNKNOWN").trim().let { it.substring(0, it.lastIndexOf('.')) },
-        fileExtension = "pdf",
+        filename = file.filenameWithoutExtension(documentType),
+        fileExtension = file.fileExtension(documentType),
         fileSize = file.size,
         // TODO: Agree on a hashing algorithm and implement
         fileHash = "",
-        mimeType = file.contentType ?: "application/pdf",
+        mimeType = file.mimeType(),
         metadata = metadata,
         createdByServiceName = documentRequestContext.serviceName,
         createdByUsername = documentRequestContext.username,
