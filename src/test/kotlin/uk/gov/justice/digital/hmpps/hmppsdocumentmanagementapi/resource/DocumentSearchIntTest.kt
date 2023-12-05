@@ -90,6 +90,27 @@ class DocumentSearchIntTest : IntegrationTestBase() {
     }
   }
 
+  @Test
+  fun `400 bad request - document type or metadata criteria must be supplied`() {
+    val response = webTestClient.post()
+      .uri("/documents/search")
+      .bodyValue(DocumentSearchRequest(null, JacksonUtil.toJsonNode("{}")))
+      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
+      .headers(setDocumentContext())
+      .exchange()
+      .expectStatus().isBadRequest
+      .expectBody(ErrorResponse::class.java)
+      .returnResult().responseBody
+
+    with(response!!) {
+      assertThat(status).isEqualTo(400)
+      assertThat(errorCode).isNull()
+      assertThat(userMessage).isEqualTo("Validation failure: Document type or metadata criteria must be supplied.")
+      assertThat(developerMessage).isEqualTo("Document type or metadata criteria must be supplied.")
+      assertThat(moreInfo).isNull()
+    }
+  }
+
   @Sql("classpath:test_data/document-search.sql")
   @Test
   fun `response contains search request`() {

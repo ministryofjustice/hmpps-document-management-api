@@ -7,7 +7,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.Docum
 
 @Component
 class DocumentSearchSpecification {
-  fun prisonCodeEquals(documentType: DocumentType?) =
+  fun documentTypeEquals(documentType: DocumentType?) =
     if (documentType == null) {
       Specification<Document> { _, _, cb -> cb.conjunction() }
     } else {

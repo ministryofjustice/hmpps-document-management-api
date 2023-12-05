@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.AssertTrue
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 
 @Schema(
@@ -27,4 +28,7 @@ data class DocumentSearchRequest(
     """,
   )
   val metadata: JsonNode,
-)
+) {
+  @AssertTrue(message = "Document type or metadata criteria must be supplied.")
+  fun isValid() = documentType != null || metadata.size() > 0
+}

@@ -43,7 +43,7 @@ class DocumentSearchServiceTest {
 
     service.searchDocuments(DocumentSearchRequest(documentType, metadata), DocumentType.entries)
 
-    verify(documentSearchSpecification).prisonCodeEquals(documentType)
+    verify(documentSearchSpecification).documentTypeEquals(documentType)
     verify(documentSearchSpecification).metadataContains("prisonNumber", "A1234BC")
     verifyNoMoreInteractions(documentSearchSpecification)
 
@@ -58,7 +58,7 @@ class DocumentSearchServiceTest {
 
     service.searchDocuments(DocumentSearchRequest(documentType, metadata), DocumentType.entries)
 
-    verify(documentSearchSpecification).prisonCodeEquals(null)
+    verify(documentSearchSpecification).documentTypeEquals(null)
     verify(documentSearchSpecification).metadataContains("prisonNumber", "A1234BC")
     verifyNoMoreInteractions(documentSearchSpecification)
 
@@ -73,7 +73,7 @@ class DocumentSearchServiceTest {
 
     service.searchDocuments(DocumentSearchRequest(documentType, metadata), DocumentType.entries)
 
-    verify(documentSearchSpecification).prisonCodeEquals(documentType)
+    verify(documentSearchSpecification).documentTypeEquals(documentType)
     verify(documentSearchSpecification).metadataContains("prisonCode", "KPI")
     verify(documentSearchSpecification).metadataContains("prisonNumber", "A1234BC")
     verifyNoMoreInteractions(documentSearchSpecification)

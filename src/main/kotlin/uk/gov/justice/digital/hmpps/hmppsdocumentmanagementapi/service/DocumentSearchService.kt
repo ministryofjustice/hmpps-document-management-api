@@ -23,7 +23,7 @@ class DocumentSearchService(
       }
     }
 
-    var spec = documentSearchSpecification.prisonCodeEquals(request.documentType)
+    var spec = documentSearchSpecification.documentTypeEquals(request.documentType)
 
     request.metadata.fields().forEach {
       spec = spec.and(documentSearchSpecification.metadataContains(it.key, it.value.asText()))
