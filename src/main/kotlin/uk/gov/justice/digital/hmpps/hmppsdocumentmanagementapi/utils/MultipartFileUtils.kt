@@ -8,12 +8,7 @@ fun MultipartFile.filename(documentType: DocumentType) =
     if (it.isNullOrEmpty()) {
       documentType.toString()
     } else {
-      val matchResult = Regex("[\\\\/]").findAll(it).lastOrNull()
-      if (matchResult != null) {
-        it.substring(matchResult.range.last + 1)
-      } else {
-        it
-      }
+      it.withoutPath()
     }
   }
 
