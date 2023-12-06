@@ -10,6 +10,8 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.Event
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 @Service
 class AuditService(
@@ -35,7 +37,7 @@ class AuditService(
       who = documentRequestContext.username ?: documentRequestContext.serviceName,
       service = documentRequestContext.serviceName,
       details = details.toJson(),
-      `when` = `when`,
+      `when` = DateTimeFormatter.ISO_INSTANT.format(`when`.toInstant(ZoneOffset.UTC)),
     )
     log.debug("Audit {}", auditEvent)
 
@@ -51,7 +53,7 @@ class AuditService(
 
   data class AuditEvent(
     val what: String,
-    val `when`: LocalDateTime,
+    val `when`: String,
     val who: String,
     val service: String,
     val details: String,
