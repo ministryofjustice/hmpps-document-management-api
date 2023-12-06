@@ -23,8 +23,9 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as
 
 class DocumentServiceReplaceMetadataTest {
   private val documentRepository: DocumentRepository = mock()
+  private val eventService: EventService = mock()
 
-  private val service = DocumentService(documentRepository, mock())
+  private val service = DocumentService(documentRepository, mock(), eventService)
 
   private val documentUuid = UUID.randomUUID()
   private val document = spy(
@@ -81,9 +82,16 @@ class DocumentServiceReplaceMetadataTest {
   fun `saves and flushes document`() {
     service.replaceDocumentMetadata(documentUuid, replacementMetadata, documentRequestContext)
 
-    verify(document).toModel()
-
     verify(documentRepository).saveAndFlush(document)
+  }
+
+  @Test
+  fun `records event`() {
+    val originalMetadata = document.metadata
+
+    service.replaceDocumentMetadata(documentUuid, replacementMetadata, documentRequestContext)
+
+    verify(eventService).recordDocumentMetadataReplacedEvent(document.toModel(), originalMetadata, documentRequestContext)
   }
 
   @Test

@@ -22,16 +22,20 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentFil
 class DocumentService(
   private val documentRepository: DocumentRepository,
   private val documentFileService: DocumentFileService,
+  private val eventService: EventService,
 ) {
-  fun getDocument(documentUuid: UUID): DocumentModel {
+  fun getDocument(documentUuid: UUID, documentRequestContext: DocumentRequestContext): DocumentModel {
     val document = documentRepository.findByDocumentUuidOrThrowNotFound(documentUuid)
 
-    return document.toModel()
+    return document.toModel().also {
+      eventService.recordDocumentRetrievedEvent(it, documentRequestContext)
+    }
   }
 
-  fun getDocumentFile(documentUuid: UUID): DocumentFileModel {
-    val document = getDocument(documentUuid)
+  fun getDocumentFile(documentUuid: UUID, documentRequestContext: DocumentRequestContext): DocumentFileModel {
+    val document = documentRepository.findByDocumentUuidOrThrowNotFound(documentUuid).toModel()
     val inputStream = documentFileService.getDocumentFile(documentUuid)
+    eventService.recordDocumentFileDownloadedEvent(document, documentRequestContext)
     return DocumentFileModel(
       document.documentFilename,
       document.fileSize,
@@ -71,7 +75,9 @@ class DocumentService(
     // Any thrown exception will cause the database transaction to roll back allowing the request to be retried
     documentFileService.saveDocumentFile(documentUuid, file)
 
-    return document.toModel()
+    return document.toModel().also {
+      eventService.recordDocumentUploadedEvent(it, documentRequestContext)
+    }
   }
 
   fun replaceDocumentMetadata(
@@ -81,13 +87,17 @@ class DocumentService(
   ): DocumentModel {
     val document = documentRepository.findByDocumentUuidOrThrowNotFound(documentUuid)
 
+    val originalMetadata = document.metadata
+
     document.replaceMetadata(
       metadata = metadata,
       supersededByServiceName = documentRequestContext.serviceName,
       supersededByUsername = documentRequestContext.username,
     )
 
-    return documentRepository.saveAndFlush(document).toModel()
+    return documentRepository.saveAndFlush(document).toModel().also {
+      eventService.recordDocumentMetadataReplacedEvent(it, originalMetadata, documentRequestContext)
+    }
   }
 
   fun deleteDocument(
@@ -101,7 +111,9 @@ class DocumentService(
         deletedByServiceName = documentRequestContext.serviceName,
         deletedByUsername = documentRequestContext.username,
       )
-      documentRepository.saveAndFlush(this)
+      documentRepository.saveAndFlush(this).toModel().also {
+        eventService.recordDocumentDeletedEvent(it, documentRequestContext)
+      }
     }
   }
 }

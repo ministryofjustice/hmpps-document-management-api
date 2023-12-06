@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service
 
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.AdditionalAnswers
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -13,14 +14,17 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
 import java.time.LocalDateTime
 import java.util.UUID
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as DocumentModel
 
 class DocumentServiceDeleteDocumentTest {
   private val documentRepository: DocumentRepository = mock()
+  private val eventService: EventService = mock()
 
-  private val service = DocumentService(documentRepository, mock())
+  private val service = DocumentService(documentRepository, mock(), eventService)
 
   private val documentUuid = UUID.randomUUID()
   private val document = mock<Document>()
+  private val documentModel = mock<DocumentModel>()
 
   private val documentRequestContext = DocumentRequestContext(
     "Deleted using service name",
@@ -30,6 +34,8 @@ class DocumentServiceDeleteDocumentTest {
   @BeforeEach
   fun setUp() {
     whenever(documentRepository.findByDocumentUuid(documentUuid)).thenReturn(document)
+    whenever(documentRepository.saveAndFlush(any<Document>())).thenAnswer(AdditionalAnswers.returnsFirstArg<Document>())
+    whenever(document.toModel()).thenReturn(documentModel)
   }
 
   @Test
@@ -55,5 +61,12 @@ class DocumentServiceDeleteDocumentTest {
     service.deleteDocument(documentUuid, documentRequestContext)
 
     verify(documentRepository).saveAndFlush(document)
+  }
+
+  @Test
+  fun `records event`() {
+    service.deleteDocument(documentUuid, documentRequestContext)
+
+    verify(eventService).recordDocumentDeletedEvent(documentModel, documentRequestContext)
   }
 }
