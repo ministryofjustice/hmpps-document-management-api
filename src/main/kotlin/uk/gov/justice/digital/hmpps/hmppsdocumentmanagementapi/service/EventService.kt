@@ -18,14 +18,17 @@ class EventService(
   }
 
   fun recordDocumentUploadedEvent(document: DocumentModel, documentRequestContext: DocumentRequestContext) {
+    log.info("Document uploaded {}", document)
     auditService.auditEvent(EventType.DOCUMENT_UPLOADED, document, documentRequestContext, document.createdTime)
   }
 
   fun recordDocumentRetrievedEvent(document: DocumentModel, documentRequestContext: DocumentRequestContext) {
+    log.info("Document retrieved {}", document)
     auditService.auditEvent(EventType.DOCUMENT_RETRIEVED, document, documentRequestContext)
   }
 
   fun recordDocumentFileDownloadedEvent(document: DocumentModel, documentRequestContext: DocumentRequestContext) {
+    log.info("Document file downloaded {}", document)
     auditService.auditEvent(EventType.DOCUMENT_FILE_DOWNLOADED, document, documentRequestContext)
   }
 
@@ -34,10 +37,12 @@ class EventService(
     documentRequestContext: DocumentRequestContext,
     eventTime: LocalDateTime,
   ) {
+    log.info("Document metadata replaced {}", event)
     auditService.auditEvent(EventType.DOCUMENT_METADATA_REPLACED, event, documentRequestContext, eventTime)
   }
 
   fun recordDocumentDeletedEvent(document: DocumentModel, documentRequestContext: DocumentRequestContext) {
+    log.info("Document deleted {}", document)
     auditService.auditEvent(EventType.DOCUMENT_DELETED, document, documentRequestContext)
   }
 }
