@@ -8,6 +8,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentAl
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentMetadataReplacedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.findByDocumentUuidOrThrowNotFound
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.utils.fileExtension
@@ -89,14 +90,18 @@ class DocumentService(
 
     val originalMetadata = document.metadata
 
-    document.replaceMetadata(
+    val metadataHistory = document.replaceMetadata(
       metadata = metadata,
       supersededByServiceName = documentRequestContext.serviceName,
       supersededByUsername = documentRequestContext.username,
     )
 
     return documentRepository.saveAndFlush(document).toModel().also {
-      eventService.recordDocumentMetadataReplacedEvent(it, originalMetadata, documentRequestContext)
+      eventService.recordDocumentMetadataReplacedEvent(
+        DocumentMetadataReplacedEvent(it, originalMetadata),
+        documentRequestContext,
+        metadataHistory.supersededTime,
+      )
     }
   }
 

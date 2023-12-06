@@ -16,6 +16,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentMetadataReplacedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
 import java.time.LocalDateTime
 import java.util.UUID
@@ -91,7 +92,11 @@ class DocumentServiceReplaceMetadataTest {
 
     service.replaceDocumentMetadata(documentUuid, replacementMetadata, documentRequestContext)
 
-    verify(eventService).recordDocumentMetadataReplacedEvent(document.toModel(), originalMetadata, documentRequestContext)
+    verify(eventService).recordDocumentMetadataReplacedEvent(
+      DocumentMetadataReplacedEvent(document.toModel(), originalMetadata),
+      documentRequestContext,
+      document.documentMetadataHistory().single().supersededTime,
+    )
   }
 
   @Test
