@@ -18,6 +18,7 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.HmppsS3Properties
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.container.LocalStackContainer
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.container.LocalStackContainer.setLocalStackProperties
@@ -25,6 +26,9 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.conta
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.wiremock.OAuthExtension
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.SERVICE_NAME
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.USERNAME
+import uk.gov.justice.hmpps.sqs.HmppsQueueService
+import uk.gov.justice.hmpps.sqs.HmppsSqsProperties
+import uk.gov.justice.hmpps.sqs.MissingQueueException
 import java.util.UUID
 
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
@@ -43,11 +47,24 @@ abstract class IntegrationTestBase {
   private lateinit var hmppsS3Properties: HmppsS3Properties
 
   @Autowired
-  lateinit var s3Client: S3Client
+  protected lateinit var s3Client: S3Client
+
+  @Autowired
+  protected lateinit var hmppsQueueService: HmppsQueueService
+
+  fun HmppsSqsProperties.auditQueueConfig() =
+    queues["audit"] ?: throw MissingQueueException("audit has not been loaded from configuration properties")
+
+  private val auditQueue by lazy { hmppsQueueService.findByQueueId("audit") ?: throw MissingQueueException("HmppsQueue audit not found") }
+
+  protected val auditSqsClient by lazy { auditQueue.sqsClient }
+
+  protected val auditQueueUrl by lazy { auditQueue.queueUrl }
 
   @AfterEach
   fun afterEach() {
     deleteAllDocumentsInS3()
+    auditSqsClient.purgeQueue(PurgeQueueRequest.builder().queueUrl(auditQueueUrl).build()).get()
   }
 
   internal fun setAuthorisation(
