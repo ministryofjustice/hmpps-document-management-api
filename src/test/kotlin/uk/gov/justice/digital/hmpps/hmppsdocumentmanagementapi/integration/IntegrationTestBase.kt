@@ -1,5 +1,10 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,13 +23,20 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.HmppsS3Properties
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.container.LocalStackContainer
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.container.LocalStackContainer.setLocalStackProperties
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.container.PostgresContainer
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.wiremock.OAuthExtension
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.SERVICE_NAME
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.USERNAME
+import uk.gov.justice.hmpps.sqs.HmppsQueueService
+import uk.gov.justice.hmpps.sqs.MissingQueueException
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
@@ -43,11 +55,24 @@ abstract class IntegrationTestBase {
   private lateinit var hmppsS3Properties: HmppsS3Properties
 
   @Autowired
-  lateinit var s3Client: S3Client
+  protected lateinit var s3Client: S3Client
+
+  @Autowired
+  protected lateinit var hmppsQueueService: HmppsQueueService
+
+  @Autowired
+  protected lateinit var objectMapper: ObjectMapper
+
+  private val auditQueue by lazy { hmppsQueueService.findByQueueId("audit") ?: throw MissingQueueException("HmppsQueue audit not found") }
+
+  protected val auditSqsClient by lazy { auditQueue.sqsClient }
+
+  protected val auditQueueUrl by lazy { auditQueue.queueUrl }
 
   @AfterEach
   fun afterEach() {
     deleteAllDocumentsInS3()
+    auditSqsClient.purgeQueue(PurgeQueueRequest.builder().queueUrl(auditQueueUrl).build()).get()
   }
 
   internal fun setAuthorisation(
@@ -106,4 +131,20 @@ abstract class IntegrationTestBase {
       localStackContainer?.also { setLocalStackProperties(it, registry) }
     }
   }
+}
+
+fun Document.assertIsDocumentWithNoMetadataHistoryId1(
+  metadata: JsonNode = JacksonUtil.toJsonNode("{\"prisonNumber\": \"A1234BC\", \"prisonCode\": \"KMI\"}"),
+) {
+  assertThat(documentUuid).isEqualTo(UUID.fromString("f73a0f91-2957-4224-b477-714370c04d37"))
+  assertThat(documentType).isEqualTo(DocumentType.HMCTS_WARRANT)
+  assertThat(filename).isEqualTo("warrant_for_remand")
+  assertThat(fileExtension).isEqualTo("pdf")
+  assertThat(fileSize).isEqualTo(20688)
+  assertThat(fileHash).isEqualTo("d58e3582afa99040e27b92b13c8f2280")
+  assertThat(mimeType).isEqualTo("application/pdf")
+  assertThat(this.metadata).isEqualTo(metadata)
+  assertThat(createdTime).isCloseTo(LocalDateTime.now(), within(3, ChronoUnit.SECONDS))
+  assertThat(createdByServiceName).isEqualTo("Remand and Sentencing")
+  assertThat(createdByUsername).isEqualTo("CREATED_BY_USER")
 }

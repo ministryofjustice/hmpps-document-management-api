@@ -1,17 +1,28 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.matches
+import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.reactive.server.WebTestClient
+import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.EventType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.assertIsDocumentWithNoMetadataHistoryId1
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentMetadataReplacedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.AuditService
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.whenLocalDateTime
+import uk.gov.justice.hmpps.sqs.countMessagesOnQueue
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -179,6 +190,27 @@ class ReplaceDocumentMetadataIntTest : IntegrationTestBase() {
       assertThat(supersededTime).isCloseTo(LocalDateTime.now(), within(3, ChronoUnit.SECONDS))
       assertThat(supersededByServiceName).isEqualTo(serviceName)
       assertThat(supersededByUsername).isEqualTo(username)
+    }
+  }
+
+  @Sql("classpath:test_data/document-with-no-metadata-history-id-1.sql")
+  @Test
+  fun `audits event`() {
+    webTestClient.replaceDocumentMetadata(documentUuid, metadata)
+
+    await untilCallTo { auditSqsClient.countMessagesOnQueue(auditQueueUrl).get() } matches { it == 1 }
+
+    val messageBody = auditSqsClient.receiveMessage(ReceiveMessageRequest.builder().queueUrl(auditQueueUrl).build()).get().messages()[0].body()
+    with(objectMapper.readValue<AuditService.AuditEvent>(messageBody)) {
+      assertThat(what).isEqualTo(EventType.DOCUMENT_METADATA_REPLACED.name)
+      assertThat(whenLocalDateTime()).isCloseTo(LocalDateTime.now(), within(3, ChronoUnit.SECONDS))
+      assertThat(who).isEqualTo(username)
+      assertThat(service).isEqualTo(serviceName)
+      with(objectMapper.readValue<DocumentMetadataReplacedEvent>(details)) {
+        document.assertIsDocumentWithNoMetadataHistoryId1(metadata)
+        assertThat(originalMetadata)
+          .isEqualTo(JacksonUtil.toJsonNode("{ \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\" }"))
+      }
     }
   }
 

@@ -1,13 +1,27 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.matches
+import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
 import org.springframework.http.ContentDisposition
 import org.springframework.http.MediaType
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.reactive.server.WebTestClient
+import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.EventType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.assertIsDocumentWithNoMetadataHistoryId1
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.AuditService
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.whenLocalDateTime
+import uk.gov.justice.hmpps.sqs.countMessagesOnQueue
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class DownloadDocumentIntTest : IntegrationTestBase() {
@@ -136,6 +150,30 @@ class DownloadDocumentIntTest : IntegrationTestBase() {
     )
 
     assertThat(response.responseBody).isEqualTo(fileBytes)
+  }
+
+  @Sql("classpath:test_data/document-with-no-metadata-history-id-1.sql")
+  @Test
+  fun `audits event`() {
+    putDocumentInS3(documentUuid, "test_data/warrant-for-remand.pdf")
+
+    webTestClient.downloadDocument(
+      documentUuid,
+      MediaType.APPLICATION_PDF,
+      20688,
+      "warrant_for_remand.pdf",
+    )
+
+    await untilCallTo { auditSqsClient.countMessagesOnQueue(auditQueueUrl).get() } matches { it == 1 }
+
+    val messageBody = auditSqsClient.receiveMessage(ReceiveMessageRequest.builder().queueUrl(auditQueueUrl).build()).get().messages()[0].body()
+    with(objectMapper.readValue<AuditService.AuditEvent>(messageBody)) {
+      assertThat(what).isEqualTo(EventType.DOCUMENT_FILE_DOWNLOADED.name)
+      assertThat(whenLocalDateTime()).isCloseTo(LocalDateTime.now(), Assertions.within(3, ChronoUnit.SECONDS))
+      assertThat(who).isEqualTo(username)
+      assertThat(service).isEqualTo(serviceName)
+      objectMapper.readValue<Document>(details).assertIsDocumentWithNoMetadataHistoryId1()
+    }
   }
 
   private fun WebTestClient.downloadDocument(

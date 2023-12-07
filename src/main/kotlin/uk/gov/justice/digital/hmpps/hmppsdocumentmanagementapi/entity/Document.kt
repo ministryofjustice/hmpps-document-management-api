@@ -74,18 +74,25 @@ data class Document(
     return sb.toString()
   }
 
-  fun replaceMetadata(metadata: JsonNode, supersededTime: LocalDateTime = LocalDateTime.now(), supersededByServiceName: String, supersededByUsername: String?) {
-    documentMetadataHistory.add(
-      DocumentMetadataHistory(
-        document = this,
-        metadata = this.metadata,
-        supersededTime = supersededTime,
-        supersededByServiceName = supersededByServiceName,
-        supersededByUsername = supersededByUsername,
-      ),
+  fun replaceMetadata(
+    metadata: JsonNode,
+    supersededTime: LocalDateTime = LocalDateTime.now(),
+    supersededByServiceName: String,
+    supersededByUsername: String?,
+  ): DocumentMetadataHistory {
+    val metadataHistory = DocumentMetadataHistory(
+      document = this,
+      metadata = this.metadata,
+      supersededTime = supersededTime,
+      supersededByServiceName = supersededByServiceName,
+      supersededByUsername = supersededByUsername,
     )
 
+    documentMetadataHistory.add(metadataHistory)
+
     this.metadata = metadata
+
+    return metadataHistory
   }
 
   fun delete(deletedTime: LocalDateTime = LocalDateTime.now(), deletedByServiceName: String, deletedByUsername: String?) {

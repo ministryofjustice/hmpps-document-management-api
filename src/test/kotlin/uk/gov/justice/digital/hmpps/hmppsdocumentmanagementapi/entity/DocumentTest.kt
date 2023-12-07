@@ -44,19 +44,26 @@ class DocumentTest {
   }
 
   @Test
-  fun `metadata history references document`() {
+  fun `replace metadata adds to metadata history`() {
     document.replaceMetadata(replacementMetadata, supersededByServiceName = "Replaced metadata using service name", supersededByUsername = "REPLACED_BY_USERNAME")
 
-    assertThat(document.documentMetadataHistory().single().document).isEqualTo(document)
+    assertThat(document.documentMetadataHistory()).hasSize(1)
+  }
+
+  @Test
+  fun `metadata history references document`() {
+    val metadataHistory = document.replaceMetadata(replacementMetadata, supersededByServiceName = "Replaced metadata using service name", supersededByUsername = "REPLACED_BY_USERNAME")
+
+    assertThat(metadataHistory.document).isEqualTo(document)
   }
 
   @Test
   fun `metadata history contains original metadata`() {
     val originalMetadata = document.metadata
 
-    document.replaceMetadata(replacementMetadata, supersededByServiceName = "Replaced metadata using service name", supersededByUsername = "REPLACED_BY_USERNAME")
+    val metadataHistory = document.replaceMetadata(replacementMetadata, supersededByServiceName = "Replaced metadata using service name", supersededByUsername = "REPLACED_BY_USERNAME")
 
-    assertThat(document.documentMetadataHistory().single().metadata).isEqualTo(originalMetadata)
+    assertThat(metadataHistory.metadata).isEqualTo(originalMetadata)
   }
 
   @Test
@@ -65,9 +72,9 @@ class DocumentTest {
     val serviceName = "Replaced metadata using service name"
     val username = "REPLACED_BY_USERNAME"
 
-    document.replaceMetadata(replacementMetadata, now, serviceName, username)
+    val metadataHistory = document.replaceMetadata(replacementMetadata, now, serviceName, username)
 
-    with(document.documentMetadataHistory().single()) {
+    with(metadataHistory) {
       assertThat(supersededTime).isEqualTo(now)
       assertThat(supersededByServiceName).isEqualTo(serviceName)
       assertThat(supersededByUsername).isEqualTo(username)
@@ -78,9 +85,9 @@ class DocumentTest {
 
   @Test
   fun `metadata history uses now as the default`() {
-    document.replaceMetadata(replacementMetadata, supersededByServiceName = "Replaced metadata using service name", supersededByUsername = "REPLACED_BY_USERNAME")
+    val metadataHistory = document.replaceMetadata(replacementMetadata, supersededByServiceName = "Replaced metadata using service name", supersededByUsername = "REPLACED_BY_USERNAME")
 
-    assertThat(document.documentMetadataHistory().single().supersededTime).isCloseTo(LocalDateTime.now(), within(3, ChronoUnit.SECONDS))
+    assertThat(metadataHistory.supersededTime).isCloseTo(LocalDateTime.now(), within(3, ChronoUnit.SECONDS))
   }
 
   @Test

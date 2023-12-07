@@ -8,6 +8,7 @@ import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
 import java.io.InputStream
@@ -17,8 +18,9 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as
 class DocumentServiceGetDocumentFileTest {
   private val documentRepository: DocumentRepository = mock()
   private val documentFileService: DocumentFileService = mock()
+  private val eventService: EventService = mock()
 
-  private val service = DocumentService(documentRepository, documentFileService)
+  private val service = DocumentService(documentRepository, documentFileService, eventService)
 
   private val documentUuid = UUID.randomUUID()
   private val documentFilename = "test.pdf"
@@ -27,6 +29,11 @@ class DocumentServiceGetDocumentFileTest {
   private val document = mock<Document>()
   private val documentModel = mock<DocumentModel>()
   private val documentFile = mock<InputStream>()
+
+  private val documentRequestContext = DocumentRequestContext(
+    "Retrieved using service name",
+    "RETRIEVED_BY_USERNAME",
+  )
 
   @BeforeEach
   fun setUp() {
@@ -42,28 +49,28 @@ class DocumentServiceGetDocumentFileTest {
   fun `throws exception when document not found`() {
     UUID.randomUUID().apply {
       assertThrows<EntityNotFoundException>("Document with UUID '$this' not found.") {
-        service.getDocumentFile(this)
+        service.getDocumentFile(this, documentRequestContext)
       }
     }
   }
 
   @Test
   fun `finds document by unique identifier`() {
-    service.getDocumentFile(documentUuid)
+    service.getDocumentFile(documentUuid, documentRequestContext)
 
     verify(documentRepository).findByDocumentUuid(documentUuid)
   }
 
   @Test
   fun `gets document file by unique identifier`() {
-    service.getDocumentFile(documentUuid)
+    service.getDocumentFile(documentUuid, documentRequestContext)
 
     verify(documentFileService).getDocumentFile(documentUuid)
   }
 
   @Test
   fun `populates document file model from document model`() {
-    with(service.getDocumentFile(documentUuid)) {
+    with(service.getDocumentFile(documentUuid, documentRequestContext)) {
       assertThat(filename).isEqualTo(documentFilename)
       assertThat(fileSize).isEqualTo(this@DocumentServiceGetDocumentFileTest.fileSize)
       assertThat(mimeType).isEqualTo(this@DocumentServiceGetDocumentFileTest.mimeType)
@@ -74,6 +81,13 @@ class DocumentServiceGetDocumentFileTest {
 
   @Test
   fun `assigns document file input stream to model`() {
-    assertThat(service.getDocumentFile(documentUuid).inputStream).isEqualTo(documentFile)
+    assertThat(service.getDocumentFile(documentUuid, documentRequestContext).inputStream).isEqualTo(documentFile)
+  }
+
+  @Test
+  fun `records event`() {
+    service.getDocumentFile(documentUuid, documentRequestContext)
+
+    verify(eventService).recordDocumentFileDownloadedEvent(documentModel, documentRequestContext)
   }
 }

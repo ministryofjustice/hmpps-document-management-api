@@ -84,7 +84,8 @@ class DocumentController(
       required = true,
     )
     documentUuid: UUID,
-  ) = documentService.getDocument(documentUuid)
+    request: HttpServletRequest,
+  ) = documentService.getDocument(documentUuid, request.documentRequestContext())
 
   @GetMapping("/{documentUuid}/file", produces = [MediaType.APPLICATION_PDF_VALUE])
   @Operation(
@@ -122,8 +123,9 @@ class DocumentController(
       required = true,
     )
     documentUuid: UUID,
+    request: HttpServletRequest,
   ): ResponseEntity<InputStreamResource> {
-    val documentFile = documentService.getDocumentFile(documentUuid)
+    val documentFile = documentService.getDocumentFile(documentUuid, request.documentRequestContext())
     val inputStreamResource = InputStreamResource(documentFile.inputStream)
     return ResponseEntity.ok()
       .contentType(MediaType.parseMediaType(documentFile.mimeType))

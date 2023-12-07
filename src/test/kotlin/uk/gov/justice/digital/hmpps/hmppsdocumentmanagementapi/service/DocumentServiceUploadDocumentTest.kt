@@ -24,8 +24,9 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as
 class DocumentServiceUploadDocumentTest {
   private val documentRepository: DocumentRepository = mock()
   private val documentFileService: DocumentFileService = mock()
+  private val eventService: EventService = mock()
 
-  private val service = DocumentService(documentRepository, documentFileService)
+  private val service = DocumentService(documentRepository, documentFileService, eventService)
 
   private val documentType = DocumentType.HMCTS_WARRANT
   private val documentUuid = UUID.randomUUID()
@@ -111,6 +112,13 @@ class DocumentServiceUploadDocumentTest {
     service.uploadDocument(documentType, documentUuid, file, mock(), documentRequestContext)
 
     verify(documentFileService).saveDocumentFile(documentUuid, file)
+  }
+
+  @Test
+  fun `records event`() {
+    service.uploadDocument(documentType, documentUuid, file, mock(), documentRequestContext)
+
+    verify(eventService).recordDocumentUploadedEvent(documentModel, documentRequestContext)
   }
 
   @Test

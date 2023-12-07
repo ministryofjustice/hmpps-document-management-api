@@ -16,6 +16,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentMetadataReplacedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
 import java.time.LocalDateTime
 import java.util.UUID
@@ -23,8 +24,9 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as
 
 class DocumentServiceReplaceMetadataTest {
   private val documentRepository: DocumentRepository = mock()
+  private val eventService: EventService = mock()
 
-  private val service = DocumentService(documentRepository, mock())
+  private val service = DocumentService(documentRepository, mock(), eventService)
 
   private val documentUuid = UUID.randomUUID()
   private val document = spy(
@@ -81,9 +83,20 @@ class DocumentServiceReplaceMetadataTest {
   fun `saves and flushes document`() {
     service.replaceDocumentMetadata(documentUuid, replacementMetadata, documentRequestContext)
 
-    verify(document).toModel()
-
     verify(documentRepository).saveAndFlush(document)
+  }
+
+  @Test
+  fun `records event`() {
+    val originalMetadata = document.metadata
+
+    service.replaceDocumentMetadata(documentUuid, replacementMetadata, documentRequestContext)
+
+    verify(eventService).recordDocumentMetadataReplacedEvent(
+      DocumentMetadataReplacedEvent(document.toModel(), originalMetadata),
+      documentRequestContext,
+      document.documentMetadataHistory().single().supersededTime,
+    )
   }
 
   @Test
