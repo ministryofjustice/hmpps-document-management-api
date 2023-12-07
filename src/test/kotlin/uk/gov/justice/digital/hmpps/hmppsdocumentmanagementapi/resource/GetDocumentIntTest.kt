@@ -1,14 +1,22 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource
 
-import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
+import com.fasterxml.jackson.module.kotlin.readValue
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.matches
+import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.reactive.server.WebTestClient
+import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.EventType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.assertIsDocumentWithNoMetadataHistoryId1
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.AuditService
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.whenLocalDateTime
+import uk.gov.justice.hmpps.sqs.countMessagesOnQueue
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -111,20 +119,23 @@ class GetDocumentIntTest : IntegrationTestBase() {
   fun `get document success`() {
     val response = webTestClient.getDocument(documentUuid)
 
-    with(response) {
-      assertThat(documentUuid).isEqualTo(this@GetDocumentIntTest.documentUuid)
-      assertThat(documentType).isEqualTo(DocumentType.HMCTS_WARRANT)
-      assertThat(filename).isEqualTo("warrant_for_remand")
-      assertThat(fileExtension).isEqualTo("pdf")
-      assertThat(fileSize).isEqualTo(20688)
-      assertThat(fileHash).isEqualTo("d58e3582afa99040e27b92b13c8f2280")
-      assertThat(mimeType).isEqualTo("application/pdf")
-      assertThat(metadata["prisonNumber"].asText()).isEqualTo("A1234BC")
-      assertThat(metadata["prisonCode"].asText()).isEqualTo("KMI")
-      assertThat(metadata).isEqualTo(JacksonUtil.toJsonNode("{\"prisonNumber\": \"A1234BC\", \"prisonCode\": \"KMI\"}"))
-      assertThat(createdTime).isCloseTo(LocalDateTime.now(), within(3, ChronoUnit.SECONDS))
-      assertThat(createdByServiceName).isEqualTo("Remand and Sentencing")
-      assertThat(createdByUsername).isEqualTo("CREATED_BY_USER")
+    response.assertIsDocumentWithNoMetadataHistoryId1()
+  }
+
+  @Sql("classpath:test_data/document-with-no-metadata-history-id-1.sql")
+  @Test
+  fun `audits event`() {
+    webTestClient.getDocument(documentUuid)
+
+    await untilCallTo { auditSqsClient.countMessagesOnQueue(auditQueueUrl).get() } matches { it == 1 }
+
+    val messageBody = auditSqsClient.receiveMessage(ReceiveMessageRequest.builder().queueUrl(auditQueueUrl).build()).get().messages()[0].body()
+    with(objectMapper.readValue<AuditService.AuditEvent>(messageBody)) {
+      assertThat(what).isEqualTo(EventType.DOCUMENT_RETRIEVED.name)
+      assertThat(whenLocalDateTime()).isCloseTo(LocalDateTime.now(), within(3, ChronoUnit.SECONDS))
+      assertThat(who).isEqualTo(username)
+      assertThat(service).isEqualTo(serviceName)
+      objectMapper.readValue<DocumentModel>(details).assertIsDocumentWithNoMetadataHistoryId1()
     }
   }
 

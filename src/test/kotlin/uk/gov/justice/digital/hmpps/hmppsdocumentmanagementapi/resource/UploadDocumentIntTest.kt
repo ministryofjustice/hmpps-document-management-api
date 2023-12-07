@@ -1,8 +1,12 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.matches
+import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
@@ -11,11 +15,16 @@ import org.springframework.http.MediaType
 import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.reactive.server.WebTestClient
+import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.EventType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.AuditService
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.DocumentFileService
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.whenLocalDateTime
+import uk.gov.justice.hmpps.sqs.countMessagesOnQueue
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -249,7 +258,7 @@ class UploadDocumentIntTest : IntegrationTestBase() {
   }
 
   @Test
-  fun `document contains replaced metadata`() {
+  fun `document contains supplied document type and unique id`() {
     val documentType = DocumentType.HMCTS_WARRANT
     val documentUuid = UUID.randomUUID()
 
@@ -266,6 +275,7 @@ class UploadDocumentIntTest : IntegrationTestBase() {
     val response = webTestClient.uploadDocument()
 
     with(response) {
+      assertThat(documentFilename).isEqualTo("warrant-for-remand.pdf")
       assertThat(filename).isEqualTo("warrant-for-remand")
       assertThat(fileExtension).isEqualTo("pdf")
       assertThat(fileSize).isEqualTo(20688)
@@ -336,6 +346,38 @@ class UploadDocumentIntTest : IntegrationTestBase() {
     val documentFile = fileService.getDocumentFile(response.documentUuid).readAllBytes()
 
     assertThat(documentFile).hasSize(20688)
+  }
+
+  @Test
+  fun `audits event`() {
+    val documentType = DocumentType.HMCTS_WARRANT
+    val documentUuid = UUID.randomUUID()
+
+    webTestClient.uploadDocument(documentType, documentUuid)
+
+    await untilCallTo { auditSqsClient.countMessagesOnQueue(auditQueueUrl).get() } matches { it == 1 }
+
+    val messageBody = auditSqsClient.receiveMessage(ReceiveMessageRequest.builder().queueUrl(auditQueueUrl).build()).get().messages()[0].body()
+    with(objectMapper.readValue<AuditService.AuditEvent>(messageBody)) {
+      assertThat(what).isEqualTo(EventType.DOCUMENT_UPLOADED.name)
+      assertThat(whenLocalDateTime()).isCloseTo(LocalDateTime.now(), within(3, ChronoUnit.SECONDS))
+      assertThat(who).isEqualTo(username)
+      assertThat(service).isEqualTo(serviceName)
+      with(objectMapper.readValue<DocumentModel>(details)) {
+        assertThat(this.documentUuid).isEqualTo(documentUuid)
+        assertThat(this.documentType).isEqualTo(documentType)
+        assertThat(documentFilename).isEqualTo("warrant-for-remand.pdf")
+        assertThat(filename).isEqualTo("warrant-for-remand")
+        assertThat(fileExtension).isEqualTo("pdf")
+        assertThat(fileSize).isEqualTo(20688)
+        assertThat(fileHash).isEqualTo("")
+        assertThat(mimeType).isEqualTo("application/pdf")
+        assertThat(metadata).isEqualTo(metadata)
+        assertThat(createdTime).isCloseTo(LocalDateTime.now(), within(3, ChronoUnit.SECONDS))
+        assertThat(createdByServiceName).isEqualTo(serviceName)
+        assertThat(createdByUsername).isEqualTo(username)
+      }
+    }
   }
 
   private fun documentMetadataMultipartBody() =

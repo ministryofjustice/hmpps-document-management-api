@@ -9,6 +9,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRe
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.EventType
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -59,3 +60,5 @@ class AuditService(
     val details: String,
   )
 }
+
+fun AuditService.AuditEvent.whenLocalDateTime() = LocalDateTime.ofInstant(Instant.parse(`when`), ZoneOffset.UTC)

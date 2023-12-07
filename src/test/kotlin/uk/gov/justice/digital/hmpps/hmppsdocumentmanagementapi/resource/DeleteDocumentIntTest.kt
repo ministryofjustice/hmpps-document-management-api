@@ -1,14 +1,25 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.matches
+import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.reactive.server.WebTestClient
+import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.EventType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.assertIsDocumentWithNoMetadataHistoryId1
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.AuditService
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.whenLocalDateTime
+import uk.gov.justice.hmpps.sqs.countMessagesOnQueue
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -104,6 +115,23 @@ class DeleteDocumentIntTest : IntegrationTestBase() {
       assertThat(deletedTime).isCloseTo(LocalDateTime.now(), within(3, ChronoUnit.SECONDS))
       assertThat(deletedByServiceName).isEqualTo(serviceName)
       assertThat(deletedByUsername).isEqualTo(username)
+    }
+  }
+
+  @Sql("classpath:test_data/document-with-no-metadata-history-id-1.sql")
+  @Test
+  fun `audits event`() {
+    webTestClient.deleteDocument(documentUuid)
+
+    await untilCallTo { auditSqsClient.countMessagesOnQueue(auditQueueUrl).get() } matches { it == 1 }
+
+    val messageBody = auditSqsClient.receiveMessage(ReceiveMessageRequest.builder().queueUrl(auditQueueUrl).build()).get().messages()[0].body()
+    with(objectMapper.readValue<AuditService.AuditEvent>(messageBody)) {
+      assertThat(what).isEqualTo(EventType.DOCUMENT_DELETED.name)
+      assertThat(whenLocalDateTime()).isCloseTo(LocalDateTime.now(), within(3, ChronoUnit.SECONDS))
+      assertThat(who).isEqualTo(username)
+      assertThat(service).isEqualTo(serviceName)
+      objectMapper.readValue<Document>(details).assertIsDocumentWithNoMetadataHistoryId1()
     }
   }
 
