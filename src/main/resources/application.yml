@@ -93,3 +93,6 @@ hmpps.s3:
     document-management:
       bucketName: ${S3_DOCUMENT_BUCKET_NAME}
       bucketArn: ${S3_DOCUMENT_BUCKET_ARN}
+
+hmpps.sqs:
+  queueAdminRole: ROLE_DOCUMENT_ADMIN

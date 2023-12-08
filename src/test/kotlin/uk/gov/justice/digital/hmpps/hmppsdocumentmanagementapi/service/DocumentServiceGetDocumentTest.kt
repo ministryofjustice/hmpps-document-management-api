@@ -5,6 +5,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -55,7 +57,7 @@ class DocumentServiceGetDocumentTest {
   fun `records event`() {
     service.getDocument(documentUuid, documentRequestContext)
 
-    verify(eventService).recordDocumentRetrievedEvent(documentModel, documentRequestContext)
+    verify(eventService).recordDocumentRetrievedEvent(eq(documentModel), eq(documentRequestContext), any<Long>())
   }
 
   @Test
