@@ -92,10 +92,13 @@ class DocumentServiceReplaceMetadataTest {
 
     service.replaceDocumentMetadata(documentUuid, replacementMetadata, documentRequestContext)
 
+    val supersededTime = document.documentMetadataHistory().single().supersededTime
+
     verify(eventService).recordDocumentMetadataReplacedEvent(
-      DocumentMetadataReplacedEvent(document.toModel(), originalMetadata),
-      documentRequestContext,
-      document.documentMetadataHistory().single().supersededTime,
+      eq(DocumentMetadataReplacedEvent(document.toModel(), originalMetadata)),
+      eq(documentRequestContext),
+      eq(supersededTime),
+      any<Long>(),
     )
   }
 

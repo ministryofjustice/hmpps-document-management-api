@@ -375,6 +375,7 @@ class DocumentController(
   ) = documentSearchService.searchDocuments(
     searchRequest,
     request.authorisedDocumentTypes(),
+    request.documentRequestContext(),
   )
 
   private fun HttpServletRequest.authorisedDocumentTypes() =

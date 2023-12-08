@@ -67,6 +67,6 @@ class DocumentServiceDeleteDocumentTest {
   fun `records event`() {
     service.deleteDocument(documentUuid, documentRequestContext)
 
-    verify(eventService).recordDocumentDeletedEvent(documentModel, documentRequestContext)
+    verify(eventService).recordDocumentDeletedEvent(eq(documentModel), eq(documentRequestContext), any<Long>())
   }
 }

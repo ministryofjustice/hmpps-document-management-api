@@ -26,17 +26,18 @@ class DocumentService(
   private val eventService: EventService,
 ) {
   fun getDocument(documentUuid: UUID, documentRequestContext: DocumentRequestContext): DocumentModel {
+    val startTimeInMs = System.currentTimeMillis()
     val document = documentRepository.findByDocumentUuidOrThrowNotFound(documentUuid)
-
     return document.toModel().also {
-      eventService.recordDocumentRetrievedEvent(it, documentRequestContext)
+      eventService.recordDocumentRetrievedEvent(it, documentRequestContext, System.currentTimeMillis() - startTimeInMs)
     }
   }
 
   fun getDocumentFile(documentUuid: UUID, documentRequestContext: DocumentRequestContext): DocumentFileModel {
+    val startTimeInMs = System.currentTimeMillis()
     val document = documentRepository.findByDocumentUuidOrThrowNotFound(documentUuid).toModel()
     val inputStream = documentFileService.getDocumentFile(documentUuid)
-    eventService.recordDocumentFileDownloadedEvent(document, documentRequestContext)
+    eventService.recordDocumentFileDownloadedEvent(document, documentRequestContext, System.currentTimeMillis() - startTimeInMs)
     return DocumentFileModel(
       document.documentFilename,
       document.fileSize,
@@ -52,6 +53,8 @@ class DocumentService(
     metadata: JsonNode,
     documentRequestContext: DocumentRequestContext,
   ): DocumentModel {
+    val startTimeInMs = System.currentTimeMillis()
+
     if (documentRepository.findByDocumentUuidIncludingSoftDeleted(documentUuid) != null) {
       throw DocumentAlreadyUploadedException(documentUuid)
     }
@@ -77,7 +80,7 @@ class DocumentService(
     documentFileService.saveDocumentFile(documentUuid, file)
 
     return document.toModel().also {
-      eventService.recordDocumentUploadedEvent(it, documentRequestContext)
+      eventService.recordDocumentUploadedEvent(it, documentRequestContext, System.currentTimeMillis() - startTimeInMs)
     }
   }
 
@@ -86,6 +89,8 @@ class DocumentService(
     metadata: JsonNode,
     documentRequestContext: DocumentRequestContext,
   ): DocumentModel {
+    val startTimeInMs = System.currentTimeMillis()
+
     val document = documentRepository.findByDocumentUuidOrThrowNotFound(documentUuid)
 
     val originalMetadata = document.metadata
@@ -101,6 +106,7 @@ class DocumentService(
         DocumentMetadataReplacedEvent(it, originalMetadata),
         documentRequestContext,
         metadataHistory.supersededTime,
+        System.currentTimeMillis() - startTimeInMs,
       )
     }
   }
@@ -109,6 +115,8 @@ class DocumentService(
     documentUuid: UUID,
     documentRequestContext: DocumentRequestContext,
   ) {
+    val startTimeInMs = System.currentTimeMillis()
+
     val document = documentRepository.findByDocumentUuid(documentUuid)
 
     document?.apply {
@@ -117,7 +125,7 @@ class DocumentService(
         deletedByUsername = documentRequestContext.username,
       )
       documentRepository.saveAndFlush(this).toModel().also {
-        eventService.recordDocumentDeletedEvent(it, documentRequestContext)
+        eventService.recordDocumentDeletedEvent(it, documentRequestContext, System.currentTimeMillis() - startTimeInMs)
       }
     }
   }

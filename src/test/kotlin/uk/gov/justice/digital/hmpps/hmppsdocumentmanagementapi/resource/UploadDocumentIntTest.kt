@@ -8,6 +8,9 @@ import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpStatus
@@ -24,6 +27,16 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.Docume
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.AuditService
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.DocumentFileService
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.whenLocalDateTime
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.DOCUMENT_TYPE_DESCRIPTION_PROPERTY_KEY
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.DOCUMENT_TYPE_PROPERTY_KEY
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.DOCUMENT_UUID_PROPERTY_KEY
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.EVENT_TIME_MS_METRIC_KEY
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.FILE_EXTENSION_PROPERTY_KEY
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.FILE_SIZE_METRIC_KEY
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.METADATA_FIELD_COUNT_METRIC_KEY
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.MIME_TYPE_PROPERTY_KEY
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.SERVICE_NAME_PROPERTY_KEY
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.USERNAME_PROPERTY_KEY
 import uk.gov.justice.hmpps.sqs.countMessagesOnQueue
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -377,6 +390,34 @@ class UploadDocumentIntTest : IntegrationTestBase() {
         assertThat(createdByServiceName).isEqualTo(serviceName)
         assertThat(createdByUsername).isEqualTo(username)
       }
+    }
+  }
+
+  @Test
+  fun `tracks event`() {
+    val documentType = DocumentType.HMCTS_WARRANT
+    val documentUuid = UUID.randomUUID()
+
+    webTestClient.uploadDocument(documentType, documentUuid)
+
+    val customEventProperties = argumentCaptor<Map<String, String>>()
+    val customEventMetrics = argumentCaptor<Map<String, Double>>()
+    verify(telemetryClient).trackEvent(eq(EventType.DOCUMENT_UPLOADED.name), customEventProperties.capture(), customEventMetrics.capture())
+
+    with(customEventProperties.firstValue) {
+      assertThat(this[SERVICE_NAME_PROPERTY_KEY]).isEqualTo(serviceName)
+      assertThat(this[USERNAME_PROPERTY_KEY]).isEqualTo(username)
+      assertThat(this[DOCUMENT_UUID_PROPERTY_KEY]).isEqualTo(documentUuid.toString())
+      assertThat(this[DOCUMENT_TYPE_PROPERTY_KEY]).isEqualTo(documentType.name)
+      assertThat(this[DOCUMENT_TYPE_DESCRIPTION_PROPERTY_KEY]).isEqualTo(DocumentType.HMCTS_WARRANT.description)
+      assertThat(this[FILE_EXTENSION_PROPERTY_KEY]).isEqualTo("pdf")
+      assertThat(this[MIME_TYPE_PROPERTY_KEY]).isEqualTo("application/pdf")
+    }
+
+    with(customEventMetrics.firstValue) {
+      assertThat(this[EVENT_TIME_MS_METRIC_KEY]).isGreaterThan(0.0)
+      assertThat(this[FILE_SIZE_METRIC_KEY]).isEqualTo(20688.0)
+      assertThat(this[METADATA_FIELD_COUNT_METRIC_KEY]).isEqualTo(3.0)
     }
   }
 

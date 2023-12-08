@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.microsoft.applicationinsights.TelemetryClient
 import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
@@ -56,6 +58,9 @@ abstract class IntegrationTestBase {
 
   @Autowired
   protected lateinit var s3Client: S3Client
+
+  @MockBean
+  protected lateinit var telemetryClient: TelemetryClient
 
   @Autowired
   protected lateinit var hmppsQueueService: HmppsQueueService
