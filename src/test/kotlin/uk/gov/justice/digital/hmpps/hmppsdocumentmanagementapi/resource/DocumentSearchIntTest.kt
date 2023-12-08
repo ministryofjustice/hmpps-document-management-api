@@ -1,23 +1,38 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
+import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.matches
+import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.reactive.server.WebTestClient
+import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.EventType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResult
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsSearchedEvent
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.AuditService
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.whenLocalDateTime
+import uk.gov.justice.hmpps.sqs.countMessagesOnQueue
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class DocumentSearchIntTest : IntegrationTestBase() {
   private val deletedDocumentUuid = UUID.fromString("f73a0f91-2957-4224-b477-714370c04d37")
-  val documentType = DocumentType.HMCTS_WARRANT
-  val metadata: JsonNode = JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")
+  private val documentType = DocumentType.HMCTS_WARRANT
+  private val metadata: JsonNode = JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")
+  private val serviceName = "Searched using service name"
+  private val username = "SEARCHED_BY_USERNAME"
 
   @Test
   fun `401 unauthorised`() {
@@ -257,6 +272,26 @@ class DocumentSearchIntTest : IntegrationTestBase() {
     }
   }
 
+  @Sql("classpath:test_data/document-search.sql")
+  @Test
+  fun `audits event`() {
+    webTestClient.searchDocuments(documentType, metadata)
+
+    await untilCallTo { auditSqsClient.countMessagesOnQueue(auditQueueUrl).get() } matches { it == 1 }
+
+    val messageBody = auditSqsClient.receiveMessage(ReceiveMessageRequest.builder().queueUrl(auditQueueUrl).build()).get().messages()[0].body()
+    with(objectMapper.readValue<AuditService.AuditEvent>(messageBody)) {
+      assertThat(what).isEqualTo(EventType.DOCUMENTS_SEARCHED.name)
+      assertThat(whenLocalDateTime()).isCloseTo(LocalDateTime.now(), Assertions.within(3, ChronoUnit.SECONDS))
+      assertThat(who).isEqualTo(username)
+      assertThat(service).isEqualTo(serviceName)
+      with(objectMapper.readValue<DocumentsSearchedEvent>(details)) {
+        assertThat(request).isEqualTo(DocumentSearchRequest(documentType, metadata))
+        assertThat(resultsCount).isEqualTo(1)
+      }
+    }
+  }
+
   private fun WebTestClient.searchDocuments(
     documentType: DocumentType?,
     metadata: JsonNode?,
@@ -266,7 +301,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
       .uri("/documents/search")
       .bodyValue(DocumentSearchRequest(documentType, metadata))
       .headers(setAuthorisation(roles = roles))
-      .headers(setDocumentContext())
+      .headers(setDocumentContext(serviceName, username))
       .exchange()
       .expectStatus().isOk
       .expectHeader().contentType(MediaType.APPLICATION_JSON)

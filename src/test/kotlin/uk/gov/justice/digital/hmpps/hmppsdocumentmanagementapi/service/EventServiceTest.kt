@@ -10,7 +10,9 @@ import org.mockito.kotlin.verify
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.EventType
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentMetadataReplacedEvent
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsSearchedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.toCustomEventMetrics
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.toCustomEventProperties
 import java.time.LocalDateTime
@@ -139,6 +141,34 @@ class EventServiceTest {
       EventType.DOCUMENT_DELETED.name,
       document.toCustomEventProperties(documentRequestContext),
       document.toCustomEventMetrics(eventTimeMs),
+    )
+  }
+
+  @Test
+  fun `record documents searched audits event`() {
+    val event = DocumentsSearchedEvent(
+      DocumentSearchRequest(DocumentType.HMCTS_WARRANT, JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")),
+      3,
+    )
+
+    service.recordDocumentsSearchedEvent(event, documentRequestContext, eventTimeMs)
+
+    verify(auditService).auditEvent(eq(EventType.DOCUMENTS_SEARCHED), eq(event), eq(documentRequestContext), any<LocalDateTime>())
+  }
+
+  @Test
+  fun `record documents searched tracks event`() {
+    val event = DocumentsSearchedEvent(
+      DocumentSearchRequest(DocumentType.HMCTS_WARRANT, JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")),
+      3,
+    )
+
+    service.recordDocumentsSearchedEvent(event, documentRequestContext, eventTimeMs)
+
+    verify(telemetryClient).trackEvent(
+      EventType.DOCUMENTS_SEARCHED.name,
+      event.toCustomEventProperties(documentRequestContext),
+      event.toCustomEventMetrics(eventTimeMs),
     )
   }
 }

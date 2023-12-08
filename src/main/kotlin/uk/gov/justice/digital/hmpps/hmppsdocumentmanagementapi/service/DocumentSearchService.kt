@@ -3,10 +3,12 @@ package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.toModels
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResult
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsSearchedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentSearchSpecification
 
@@ -15,8 +17,15 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.Document
 class DocumentSearchService(
   private val documentRepository: DocumentRepository,
   private val documentSearchSpecification: DocumentSearchSpecification,
+  private val eventService: EventService,
 ) {
-  fun searchDocuments(request: DocumentSearchRequest, authorisedDocumentTypes: Collection<DocumentType>): DocumentSearchResult {
+  fun searchDocuments(
+    request: DocumentSearchRequest,
+    authorisedDocumentTypes: Collection<DocumentType>,
+    documentRequestContext: DocumentRequestContext,
+  ): DocumentSearchResult {
+    val startTimeInMs = System.currentTimeMillis()
+
     request.documentType?.also {
       if (!authorisedDocumentTypes.contains(it)) {
         throw AccessDeniedException("Document type '$it' requires additional role")
@@ -35,6 +44,12 @@ class DocumentSearchService(
     return DocumentSearchResult(
       request,
       results.toModels(),
-    )
+    ).also {
+      eventService.recordDocumentsSearchedEvent(
+        DocumentsSearchedEvent(it.request, it.results.size),
+        documentRequestContext,
+        System.currentTimeMillis() - startTimeInMs,
+      )
+    }
   }
 }

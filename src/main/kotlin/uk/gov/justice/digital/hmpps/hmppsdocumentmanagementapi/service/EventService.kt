@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.EventType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentMetadataReplacedEvent
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsSearchedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.toCustomEventMetrics
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.toCustomEventProperties
 import java.time.LocalDateTime
@@ -73,6 +74,20 @@ class EventService(
       EventType.DOCUMENT_DELETED.name,
       document.toCustomEventProperties(documentRequestContext),
       document.toCustomEventMetrics(eventTimeMs),
+    )
+  }
+
+  fun recordDocumentsSearchedEvent(
+    event: DocumentsSearchedEvent,
+    documentRequestContext: DocumentRequestContext,
+    eventTimeMs: Long,
+  ) {
+    log.info("Documents searched {}", event)
+    auditService.auditEvent(EventType.DOCUMENTS_SEARCHED, event, documentRequestContext)
+    telemetryClient.trackEvent(
+      EventType.DOCUMENTS_SEARCHED.name,
+      event.toCustomEventProperties(documentRequestContext),
+      event.toCustomEventMetrics(eventTimeMs),
     )
   }
 }
