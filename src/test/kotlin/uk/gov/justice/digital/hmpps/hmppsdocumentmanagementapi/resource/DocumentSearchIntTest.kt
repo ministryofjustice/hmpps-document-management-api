@@ -9,6 +9,9 @@ import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.verify
 import org.springframework.http.MediaType
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.reactive.server.WebTestClient
@@ -22,6 +25,13 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSea
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsSearchedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.AuditService
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.whenLocalDateTime
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.DOCUMENT_TYPE_DESCRIPTION_PROPERTY_KEY
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.DOCUMENT_TYPE_PROPERTY_KEY
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.EVENT_TIME_MS_METRIC_KEY
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.METADATA_FIELD_COUNT_METRIC_KEY
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.RESULTS_COUNT_METRIC_KEY
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.SERVICE_NAME_PROPERTY_KEY
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.USERNAME_PROPERTY_KEY
 import uk.gov.justice.hmpps.sqs.countMessagesOnQueue
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -289,6 +299,29 @@ class DocumentSearchIntTest : IntegrationTestBase() {
         assertThat(request).isEqualTo(DocumentSearchRequest(documentType, metadata))
         assertThat(resultsCount).isEqualTo(1)
       }
+    }
+  }
+
+  @Sql("classpath:test_data/document-search.sql")
+  @Test
+  fun `tracks event`() {
+    webTestClient.searchDocuments(documentType, metadata)
+
+    val customEventProperties = argumentCaptor<Map<String, String>>()
+    val customEventMetrics = argumentCaptor<Map<String, Double>>()
+    verify(telemetryClient).trackEvent(eq(EventType.DOCUMENTS_SEARCHED.name), customEventProperties.capture(), customEventMetrics.capture())
+
+    with(customEventProperties.firstValue) {
+      assertThat(this[SERVICE_NAME_PROPERTY_KEY]).isEqualTo(serviceName)
+      assertThat(this[USERNAME_PROPERTY_KEY]).isEqualTo(username)
+      assertThat(this[DOCUMENT_TYPE_PROPERTY_KEY]).isEqualTo(documentType.name)
+      assertThat(this[DOCUMENT_TYPE_DESCRIPTION_PROPERTY_KEY]).isEqualTo(documentType.description)
+    }
+
+    with(customEventMetrics.firstValue) {
+      assertThat(this[EVENT_TIME_MS_METRIC_KEY]).isGreaterThan(0.0)
+      assertThat(this[METADATA_FIELD_COUNT_METRIC_KEY]).isEqualTo(1.0)
+      assertThat(this[RESULTS_COUNT_METRIC_KEY]).isEqualTo(1.0)
     }
   }
 
