@@ -28,6 +28,7 @@ class DocumentServiceDeleteDocumentTest {
 
   private val documentRequestContext = DocumentRequestContext(
     "Deleted using service name",
+    "RSI",
     "DELETED_BY_USERNAME",
   )
 

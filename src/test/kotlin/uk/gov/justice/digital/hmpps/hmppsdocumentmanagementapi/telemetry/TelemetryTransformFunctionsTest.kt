@@ -30,6 +30,7 @@ class TelemetryTransformFunctionsTest {
 
   private val documentRequestContext = DocumentRequestContext(
     "Service name",
+    "LPI",
     "USERNAME",
   )
 
@@ -50,7 +51,7 @@ class TelemetryTransformFunctionsTest {
 
   @Test
   fun `document model to custom event properties no username`() {
-    val eventProperties = document.toCustomEventProperties(DocumentRequestContext("Service name", null))
+    val eventProperties = document.toCustomEventProperties(DocumentRequestContext("Service name", null, null))
     assertThat(eventProperties[USERNAME_PROPERTY_KEY]).isEqualTo("")
   }
 
@@ -70,7 +71,7 @@ class TelemetryTransformFunctionsTest {
   fun `documents search event to custom event properties no username`() {
     val documentSearchRequest = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }"))
     val event = DocumentsSearchedEvent(documentSearchRequest, 3)
-    val eventProperties = event.toCustomEventProperties(DocumentRequestContext("Service name", null))
+    val eventProperties = event.toCustomEventProperties(DocumentRequestContext("Service name", null, null))
     assertThat(eventProperties[USERNAME_PROPERTY_KEY]).isEqualTo("")
   }
 

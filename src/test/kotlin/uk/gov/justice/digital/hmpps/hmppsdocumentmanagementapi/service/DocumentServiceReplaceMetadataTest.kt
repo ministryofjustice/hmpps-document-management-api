@@ -49,6 +49,7 @@ class DocumentServiceReplaceMetadataTest {
 
   private val documentRequestContext = DocumentRequestContext(
     "Replaced metadata using service name",
+    "KMI",
     "REPLACED_BY_USERNAME",
   )
 

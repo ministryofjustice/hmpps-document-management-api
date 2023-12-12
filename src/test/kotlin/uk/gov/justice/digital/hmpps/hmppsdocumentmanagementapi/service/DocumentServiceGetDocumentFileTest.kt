@@ -34,6 +34,7 @@ class DocumentServiceGetDocumentFileTest {
 
   private val documentRequestContext = DocumentRequestContext(
     "Retrieved using service name",
+    "LPI",
     "RETRIEVED_BY_USERNAME",
   )
 
