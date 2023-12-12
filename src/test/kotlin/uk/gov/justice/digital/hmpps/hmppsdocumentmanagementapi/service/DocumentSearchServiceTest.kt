@@ -142,7 +142,7 @@ class DocumentSearchServiceTest {
 
     val response = service.searchDocuments(request, DocumentType.entries, documentRequestContext)
 
-    assertThat(response).isEqualTo(DocumentSearchResult(request, listOf(warrantDocument).toModels()))
+    assertThat(response).isEqualTo(DocumentSearchResult(request, listOf(warrantDocument).toModels(), 1))
   }
 
   @Test
@@ -155,7 +155,7 @@ class DocumentSearchServiceTest {
 
     val response = service.searchDocuments(request, listOf(DocumentType.HMCTS_WARRANT), documentRequestContext)
 
-    assertThat(response).isEqualTo(DocumentSearchResult(request, listOf(warrantDocument).toModels()))
+    assertThat(response).isEqualTo(DocumentSearchResult(request, listOf(warrantDocument).toModels(), 1))
   }
 
   @Test
