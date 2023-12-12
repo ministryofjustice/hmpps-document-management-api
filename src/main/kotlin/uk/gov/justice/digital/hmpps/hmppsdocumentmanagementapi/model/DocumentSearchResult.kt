@@ -21,5 +21,5 @@ data class DocumentSearchResult(
     description = "The total number of available results not limited by page size",
     example = "56",
   )
-  val totalResults: Long,
+  val totalResultsCount: Long,
 )

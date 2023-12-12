@@ -42,15 +42,14 @@ class DocumentSearchService(
     val pageRequest = PageRequest.of(request.page, request.pageSize)
       .withSort(request.orderByDirection, request.orderBy.property)
     val page = documentRepository.findAll(spec, pageRequest)
-    val results = page.content.filter { authorisedDocumentTypes.contains(it.documentType) }
 
     return DocumentSearchResult(
       request,
-      results.toModels(),
+      page.content.toModels(),
       page.totalElements,
     ).also {
       eventService.recordDocumentsSearchedEvent(
-        DocumentsSearchedEvent(it.request, it.results.size),
+        DocumentsSearchedEvent(it.request, it.results.size, it.totalResultsCount),
         documentRequestContext,
         System.currentTimeMillis() - startTimeInMs,
       )

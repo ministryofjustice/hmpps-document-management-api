@@ -5,4 +5,5 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSea
 data class DocumentsSearchedEvent(
   val request: DocumentSearchRequest,
   val resultsCount: Int,
+  val totalResultsCount: Long,
 )

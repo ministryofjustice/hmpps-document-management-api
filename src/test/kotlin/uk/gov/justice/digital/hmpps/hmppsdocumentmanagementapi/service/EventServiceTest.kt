@@ -149,7 +149,8 @@ class EventServiceTest {
   fun `record documents searched audits event`() {
     val event = DocumentsSearchedEvent(
       DocumentSearchRequest(DocumentType.HMCTS_WARRANT, JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")),
-      3,
+      10,
+      13,
     )
 
     service.recordDocumentsSearchedEvent(event, documentRequestContext, eventTimeMs)
@@ -161,7 +162,8 @@ class EventServiceTest {
   fun `record documents searched tracks event`() {
     val event = DocumentsSearchedEvent(
       DocumentSearchRequest(DocumentType.HMCTS_WARRANT, JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")),
-      3,
+      10,
+      13,
     )
 
     service.recordDocumentsSearchedEvent(event, documentRequestContext, eventTimeMs)
