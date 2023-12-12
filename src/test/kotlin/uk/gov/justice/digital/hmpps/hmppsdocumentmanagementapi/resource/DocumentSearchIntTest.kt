@@ -166,6 +166,74 @@ class DocumentSearchIntTest : IntegrationTestBase() {
     }
   }
 
+  @Test
+  fun `400 bad request - page must be 0 or greater`() {
+    val response = webTestClient.post()
+      .uri("/documents/search")
+      .bodyValue(DocumentSearchRequest(documentType, null, page = -1))
+      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
+      .headers(setDocumentContext())
+      .exchange()
+      .expectStatus().isBadRequest
+      .expectBody(ErrorResponse::class.java)
+      .returnResult().responseBody
+
+    with(response!!) {
+      assertThat(status).isEqualTo(400)
+      assertThat(errorCode).isNull()
+      assertThat(userMessage).isEqualTo("Validation failure: Page must be 0 or greater.")
+      assertThat(developerMessage).isEqualTo("Page must be 0 or greater.")
+      assertThat(moreInfo).isNull()
+    }
+  }
+
+  @Test
+  fun `400 bad request - invalid order by`() {
+    webTestClient.post()
+      .uri("/documents/search")
+      .bodyValue(JacksonUtil.toJsonNode("{ \"documentType\": \"${documentType.name}\", \"orderBy\": \"INVALID\" }"))
+      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
+      .headers(setDocumentContext())
+      .exchange()
+      .expectStatus().isBadRequest
+      .expectBody(ErrorResponse::class.java)
+      .returnResult().responseBody
+  }
+
+  @Test
+  fun `400 bad request - invalid order by direction`() {
+    webTestClient.post()
+      .uri("/documents/search")
+      .bodyValue(JacksonUtil.toJsonNode("{ \"documentType\": \"${documentType.name}\", \"orderByDirection\": \"INVALID\" }"))
+      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
+      .headers(setDocumentContext())
+      .exchange()
+      .expectStatus().isBadRequest
+      .expectBody(ErrorResponse::class.java)
+      .returnResult().responseBody
+  }
+
+  @Test
+  fun `400 bad request - page size must be between 1 and 100`() {
+    val response = webTestClient.post()
+      .uri("/documents/search")
+      .bodyValue(DocumentSearchRequest(documentType, null, pageSize = 0))
+      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
+      .headers(setDocumentContext())
+      .exchange()
+      .expectStatus().isBadRequest
+      .expectBody(ErrorResponse::class.java)
+      .returnResult().responseBody
+
+    with(response!!) {
+      assertThat(status).isEqualTo(400)
+      assertThat(errorCode).isNull()
+      assertThat(userMessage).isEqualTo("Validation failure: Page size must be between 1 and 100.")
+      assertThat(developerMessage).isEqualTo("Page size must be between 1 and 100.")
+      assertThat(moreInfo).isNull()
+    }
+  }
+
   @Sql("classpath:test_data/document-search.sql")
   @Test
   fun `response contains search request`() {

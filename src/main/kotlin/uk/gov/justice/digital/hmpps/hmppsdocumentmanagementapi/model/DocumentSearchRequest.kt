@@ -43,7 +43,7 @@ data class DocumentSearchRequest(
     example = "5",
     defaultValue = "0",
   )
-  @field:Min(0, message = "page must be 0 or greater")
+  @field:Min(0, message = "Page must be 0 or greater.")
   val page: Int = 0,
 
   @Schema(
@@ -53,7 +53,7 @@ data class DocumentSearchRequest(
     minimum = "1",
     maximum = "100",
   )
-  @field:Between(min = 1, max = 100, message = "pageSize must be between 1 and 100")
+  @field:Between(min = 1, max = 100, message = "Page size must be between 1 and 100.")
   val pageSize: Int = 10,
 
   @Schema(

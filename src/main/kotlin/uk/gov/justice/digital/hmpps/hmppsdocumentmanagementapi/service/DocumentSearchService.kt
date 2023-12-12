@@ -33,7 +33,9 @@ class DocumentSearchService(
       }
     }
 
-    var spec = documentSearchSpecification.documentTypeEquals(request.documentType)
+    var spec = documentSearchSpecification.documentTypeIn(
+      if (request.documentType != null) setOf(request.documentType) else authorisedDocumentTypes,
+    )
 
     request.metadata?.fields()?.forEach {
       spec = spec.and(documentSearchSpecification.metadataContains(it.key, it.value.asText()))

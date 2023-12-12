@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
+import org.apache.commons.lang3.StringUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.awaitility.kotlin.await
@@ -119,7 +120,7 @@ class UploadDocumentIntTest : IntegrationTestBase() {
     with(response!!) {
       assertThat(status).isEqualTo(400)
       assertThat(errorCode).isNull()
-      assertThat(userMessage).isEqualTo("Validation failure: Parameter documentType must be one of the following HMCTS_WARRANT, SUBJECT_ACCESS_REQUEST_REPORT")
+      assertThat(userMessage).isEqualTo("Validation failure: Parameter documentType must be one of the following ${StringUtils.join(DocumentType.entries.toTypedArray(), ", ")}")
       assertThat(developerMessage).isEqualTo("Failed to convert value of type 'java.lang.String' to required type 'uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType'; Failed to convert from type [java.lang.String] to type [@org.springframework.web.bind.annotation.PathVariable @io.swagger.v3.oas.annotations.Parameter uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType] for value [INVALID]")
       assertThat(moreInfo).isNull()
     }

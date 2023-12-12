@@ -71,7 +71,7 @@ class DocumentSearchServiceTest {
 
     service.searchDocuments(DocumentSearchRequest(documentType, null), DocumentType.entries, documentRequestContext)
 
-    verify(documentSearchSpecification).documentTypeEquals(documentType)
+    verify(documentSearchSpecification).documentTypeIn(setOf(documentType))
     verifyNoMoreInteractions(documentSearchSpecification)
 
     verify(documentRepository).findAll(any<Specification<Document>>(), any<PageRequest>())
@@ -87,7 +87,7 @@ class DocumentSearchServiceTest {
 
     service.searchDocuments(DocumentSearchRequest(documentType, metadata), DocumentType.entries, documentRequestContext)
 
-    verify(documentSearchSpecification).documentTypeEquals(documentType)
+    verify(documentSearchSpecification).documentTypeIn(setOf(documentType))
     verify(documentSearchSpecification).metadataContains("prisonNumber", "A1234BC")
     verifyNoMoreInteractions(documentSearchSpecification)
 
@@ -103,7 +103,7 @@ class DocumentSearchServiceTest {
 
     service.searchDocuments(DocumentSearchRequest(null, metadata), DocumentType.entries, documentRequestContext)
 
-    verify(documentSearchSpecification).documentTypeEquals(null)
+    verify(documentSearchSpecification).documentTypeIn(DocumentType.entries)
     verify(documentSearchSpecification).metadataContains("prisonNumber", "A1234BC")
     verifyNoMoreInteractions(documentSearchSpecification)
 
@@ -120,7 +120,7 @@ class DocumentSearchServiceTest {
 
     service.searchDocuments(DocumentSearchRequest(documentType, metadata), DocumentType.entries, documentRequestContext)
 
-    verify(documentSearchSpecification).documentTypeEquals(documentType)
+    verify(documentSearchSpecification).documentTypeIn(setOf(documentType))
     verify(documentSearchSpecification).metadataContains("prisonCode", "KPI")
     verify(documentSearchSpecification).metadataContains("prisonNumber", "A1234BC")
     verifyNoMoreInteractions(documentSearchSpecification)
@@ -131,14 +131,13 @@ class DocumentSearchServiceTest {
 
   @Test
   fun `ignores non object metadata`() {
-    val documentType = null
     val metadata = JacksonUtil.toJsonNode("[ \"test\" ]")
 
     whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>())).thenReturn(Page.empty())
 
-    service.searchDocuments(DocumentSearchRequest(documentType, metadata), DocumentType.entries, documentRequestContext)
+    service.searchDocuments(DocumentSearchRequest(null, metadata), DocumentType.entries, documentRequestContext)
 
-    verify(documentSearchSpecification).documentTypeEquals(null)
+    verify(documentSearchSpecification).documentTypeIn(DocumentType.entries)
     verifyNoMoreInteractions(documentSearchSpecification)
 
     verify(documentRepository).findAll(any<Specification<Document>>(), any<PageRequest>())

@@ -7,12 +7,8 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.Docum
 
 @Component
 class DocumentSearchSpecification {
-  fun documentTypeEquals(documentType: DocumentType?) =
-    if (documentType == null) {
-      Specification<Document> { _, _, cb -> cb.conjunction() }
-    } else {
-      Specification<Document> { root, _, cb -> cb.equal(root.get<String>("documentType"), documentType) }
-    }
+  fun documentTypeIn(documentTypes: Collection<DocumentType>) =
+    Specification<Document> { root, _, _ -> root.get<String>("documentType").`in`(documentTypes) }
 
   fun metadataContains(property: String, value: String) =
     Specification<Document> { root, _, cb ->
