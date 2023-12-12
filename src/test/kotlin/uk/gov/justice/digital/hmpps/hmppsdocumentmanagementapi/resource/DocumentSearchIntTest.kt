@@ -25,6 +25,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSea
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsSearchedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.AuditService
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.whenLocalDateTime
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.ACTIVE_CASE_LOAD_ID_PROPERTY_KEY
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.DOCUMENT_TYPE_DESCRIPTION_PROPERTY_KEY
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.DOCUMENT_TYPE_PROPERTY_KEY
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.EVENT_TIME_MS_METRIC_KEY
@@ -42,6 +43,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   private val documentType = DocumentType.HMCTS_WARRANT
   private val metadata: JsonNode = JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")
   private val serviceName = "Searched using service name"
+  private val activeCaseLoadId = "KPI"
   private val username = "SEARCHED_BY_USERNAME"
 
   @Test
@@ -313,6 +315,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
 
     with(customEventProperties.firstValue) {
       assertThat(this[SERVICE_NAME_PROPERTY_KEY]).isEqualTo(serviceName)
+      assertThat(this[ACTIVE_CASE_LOAD_ID_PROPERTY_KEY]).isEqualTo(activeCaseLoadId)
       assertThat(this[USERNAME_PROPERTY_KEY]).isEqualTo(username)
       assertThat(this[DOCUMENT_TYPE_PROPERTY_KEY]).isEqualTo(documentType.name)
       assertThat(this[DOCUMENT_TYPE_DESCRIPTION_PROPERTY_KEY]).isEqualTo(documentType.description)
@@ -334,7 +337,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
       .uri("/documents/search")
       .bodyValue(DocumentSearchRequest(documentType, metadata))
       .headers(setAuthorisation(roles = roles))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isOk
       .expectHeader().contentType(MediaType.APPLICATION_JSON)

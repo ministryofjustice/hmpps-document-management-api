@@ -23,6 +23,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
   private val documentUuid = UUID.fromString("1f4e2c96-de62-4585-a79a-9a37c5506b1c")
   private val metadata = JacksonUtil.toJsonNode("{ \"sarCaseReference\": \"SAR-1234\", \"prisonNumber\": \"A1234BC\" }")
   private val serviceName = "Manage Subject Access Requests"
+  private val activeCaseLoadId = "STI"
   private val username = "SAR_USER"
 
   @Test
@@ -31,7 +32,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
       .uri("/documents/$documentType/${UUID.randomUUID()}")
       .bodyValue(documentMetadataMultipartBody())
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isForbidden
   }
@@ -42,7 +43,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
       .uri("/documents/$documentType/${UUID.randomUUID()}")
       .bodyValue(documentMetadataMultipartBody())
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_TYPE_SAR)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isForbidden
   }
@@ -55,7 +56,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
       .uri("/documents/$documentType/$documentUuid")
       .bodyValue(documentMetadataMultipartBody())
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER, ROLE_DOCUMENT_TYPE_SAR)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isCreated
       .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -85,7 +86,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
     webTestClient.get()
       .uri("/documents/$documentUuid")
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isForbidden
   }
@@ -96,7 +97,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
     webTestClient.get()
       .uri("/documents/$documentUuid")
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_TYPE_SAR)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isForbidden
   }
@@ -107,7 +108,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
     val response = webTestClient.get()
       .uri("/documents/$documentUuid")
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER, ROLE_DOCUMENT_TYPE_SAR)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isOk
       .expectBody(Document::class.java)
@@ -136,7 +137,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
     webTestClient.get()
       .uri("/documents/$documentUuid/file")
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isForbidden
   }
@@ -147,7 +148,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
     webTestClient.get()
       .uri("/documents/$documentUuid/file")
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_TYPE_SAR)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isForbidden
   }
@@ -160,7 +161,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
     val response = webTestClient.get()
       .uri("/documents/$documentUuid/file")
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER, ROLE_DOCUMENT_TYPE_SAR)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isOk
       .expectHeader().contentType(MediaType.APPLICATION_PDF)
@@ -178,7 +179,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
       .uri("/documents/search")
       .bodyValue(DocumentSearchRequest(documentType, metadata))
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isForbidden
   }
@@ -189,7 +190,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
       .uri("/documents/search")
       .bodyValue(DocumentSearchRequest(documentType, metadata))
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_TYPE_SAR)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isForbidden
   }
@@ -201,7 +202,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
       .uri("/documents/search")
       .bodyValue(DocumentSearchRequest(documentType, metadata))
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER, ROLE_DOCUMENT_TYPE_SAR)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isOk
       .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -222,7 +223,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
       .uri("/documents/$documentUuid/metadata")
       .bodyValue(metadata)
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isForbidden
   }
@@ -234,7 +235,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
       .uri("/documents/$documentUuid/metadata")
       .bodyValue(metadata)
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_TYPE_SAR)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isForbidden
   }
@@ -248,7 +249,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
       .uri("/documents/$documentUuid/metadata")
       .bodyValue(metadata)
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER, ROLE_DOCUMENT_TYPE_SAR)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isOk
       .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -264,7 +265,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
     webTestClient.delete()
       .uri("/documents/$documentUuid")
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isForbidden
   }
@@ -275,7 +276,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
     webTestClient.delete()
       .uri("/documents/$documentUuid")
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_TYPE_SAR)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isForbidden
   }
@@ -288,7 +289,7 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
     webTestClient.delete()
       .uri("/documents/$documentUuid")
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER, ROLE_DOCUMENT_TYPE_SAR)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isNoContent
   }

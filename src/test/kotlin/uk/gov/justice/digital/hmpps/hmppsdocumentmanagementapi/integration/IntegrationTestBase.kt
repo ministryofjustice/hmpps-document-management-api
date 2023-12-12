@@ -33,6 +33,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.conta
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.container.PostgresContainer
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.wiremock.OAuthExtension
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.ACTIVE_CASE_LOAD_ID
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.SERVICE_NAME
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.USERNAME
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
@@ -88,9 +89,11 @@ abstract class IntegrationTestBase {
 
   internal fun setDocumentContext(
     serviceName: String = "Test consuming service name",
+    activeCaseLoadId: String = "MDI",
     username: String? = "TEST_USERNAME",
   ): (HttpHeaders) -> Unit = {
     it.set(SERVICE_NAME, serviceName)
+    it.set(ACTIVE_CASE_LOAD_ID, activeCaseLoadId)
     it.set(USERNAME, username)
   }
 

@@ -27,6 +27,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.Docume
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.AuditService
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.DocumentFileService
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.whenLocalDateTime
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.ACTIVE_CASE_LOAD_ID_PROPERTY_KEY
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.DOCUMENT_TYPE_DESCRIPTION_PROPERTY_KEY
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.DOCUMENT_TYPE_PROPERTY_KEY
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.DOCUMENT_UUID_PROPERTY_KEY
@@ -52,6 +53,7 @@ class UploadDocumentIntTest : IntegrationTestBase() {
 
   private val metadata = JacksonUtil.toJsonNode("{ \"caseReferenceNumber\": \"T20231234\", \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\" }")
   private val serviceName = "Uploaded via service name"
+  private val activeCaseLoadId = "RSI"
   private val username = "UPLOADED_BY_USERNAME"
 
   @Test
@@ -108,7 +110,7 @@ class UploadDocumentIntTest : IntegrationTestBase() {
     val response = webTestClient.post()
       .uri("/documents/INVALID/${UUID.randomUUID()}")
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isBadRequest
       .expectBody(ErrorResponse::class.java)
@@ -128,7 +130,7 @@ class UploadDocumentIntTest : IntegrationTestBase() {
     val response = webTestClient.post()
       .uri("/documents/${DocumentType.HMCTS_WARRANT}/INVALID")
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isBadRequest
       .expectBody(ErrorResponse::class.java)
@@ -148,7 +150,7 @@ class UploadDocumentIntTest : IntegrationTestBase() {
     val response = webTestClient.post()
       .uri("/documents/${DocumentType.HMCTS_WARRANT}/${UUID.randomUUID()}")
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isBadRequest
       .expectBody(ErrorResponse::class.java)
@@ -172,7 +174,7 @@ class UploadDocumentIntTest : IntegrationTestBase() {
       .uri("/documents/${DocumentType.HMCTS_WARRANT}/${UUID.randomUUID()}")
       .bodyValue(builder.build())
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isBadRequest
       .expectBody(ErrorResponse::class.java)
@@ -196,7 +198,7 @@ class UploadDocumentIntTest : IntegrationTestBase() {
       .uri("/documents/${DocumentType.HMCTS_WARRANT}/${UUID.randomUUID()}")
       .bodyValue(builder.build())
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isBadRequest
       .expectBody(ErrorResponse::class.java)
@@ -220,7 +222,7 @@ class UploadDocumentIntTest : IntegrationTestBase() {
       .uri("/documents/${DocumentType.HMCTS_WARRANT}/$documentUuid")
       .bodyValue(documentMetadataMultipartBody())
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isEqualTo(HttpStatus.CONFLICT)
       .expectBody(ErrorResponse::class.java)
@@ -244,7 +246,7 @@ class UploadDocumentIntTest : IntegrationTestBase() {
       .uri("/documents/${DocumentType.HMCTS_WARRANT}/$documentUuid")
       .bodyValue(documentMetadataMultipartBody())
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isEqualTo(HttpStatus.CONFLICT)
       .expectBody(ErrorResponse::class.java)
@@ -406,6 +408,7 @@ class UploadDocumentIntTest : IntegrationTestBase() {
 
     with(customEventProperties.firstValue) {
       assertThat(this[SERVICE_NAME_PROPERTY_KEY]).isEqualTo(serviceName)
+      assertThat(this[ACTIVE_CASE_LOAD_ID_PROPERTY_KEY]).isEqualTo(activeCaseLoadId)
       assertThat(this[USERNAME_PROPERTY_KEY]).isEqualTo(username)
       assertThat(this[DOCUMENT_UUID_PROPERTY_KEY]).isEqualTo(documentUuid.toString())
       assertThat(this[DOCUMENT_TYPE_PROPERTY_KEY]).isEqualTo(documentType.name)
@@ -435,7 +438,7 @@ class UploadDocumentIntTest : IntegrationTestBase() {
       .uri("/documents/$documentType/$documentUuid")
       .bodyValue(documentMetadataMultipartBody())
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isCreated
       .expectHeader().contentType(MediaType.APPLICATION_JSON)

@@ -20,6 +20,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.Integ
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.assertIsDocumentWithNoMetadataHistoryId1
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.AuditService
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.whenLocalDateTime
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.ACTIVE_CASE_LOAD_ID_PROPERTY_KEY
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.DOCUMENT_TYPE_DESCRIPTION_PROPERTY_KEY
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.DOCUMENT_TYPE_PROPERTY_KEY
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.DOCUMENT_UUID_PROPERTY_KEY
@@ -39,6 +40,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as
 class GetDocumentIntTest : IntegrationTestBase() {
   private val documentUuid = UUID.fromString("f73a0f91-2957-4224-b477-714370c04d37")
   private val serviceName = "Uploaded via service name"
+  private val activeCaseLoadId = "LPI"
   private val username = "UPLOADED_BY_USERNAME"
 
   @Test
@@ -93,7 +95,7 @@ class GetDocumentIntTest : IntegrationTestBase() {
     val response = webTestClient.get()
       .uri("/documents/INVALID")
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isBadRequest
       .expectBody(ErrorResponse::class.java)
@@ -113,7 +115,7 @@ class GetDocumentIntTest : IntegrationTestBase() {
     val response = webTestClient.get()
       .uri("/documents/$documentUuid")
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isNotFound
       .expectBody(ErrorResponse::class.java)
@@ -164,6 +166,7 @@ class GetDocumentIntTest : IntegrationTestBase() {
 
     with(customEventProperties.firstValue) {
       assertThat(this[SERVICE_NAME_PROPERTY_KEY]).isEqualTo(serviceName)
+      assertThat(this[ACTIVE_CASE_LOAD_ID_PROPERTY_KEY]).isEqualTo(activeCaseLoadId)
       assertThat(this[USERNAME_PROPERTY_KEY]).isEqualTo(username)
       assertThat(this[DOCUMENT_UUID_PROPERTY_KEY]).isEqualTo("f73a0f91-2957-4224-b477-714370c04d37")
       assertThat(this[DOCUMENT_TYPE_PROPERTY_KEY]).isEqualTo(DocumentType.HMCTS_WARRANT.name)
@@ -185,7 +188,7 @@ class GetDocumentIntTest : IntegrationTestBase() {
     get()
       .uri("/documents/$documentUuid")
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isOk
       .expectBody(DocumentModel::class.java)
