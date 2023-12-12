@@ -28,6 +28,7 @@ class DocumentServiceGetDocumentTest {
 
   private val documentRequestContext = DocumentRequestContext(
     "Retrieved using service name",
+    "MDI",
     "RETRIEVED_BY_USERNAME",
   )
 

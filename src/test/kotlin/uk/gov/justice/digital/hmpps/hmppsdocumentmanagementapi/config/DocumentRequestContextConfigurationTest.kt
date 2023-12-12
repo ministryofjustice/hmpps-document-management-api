@@ -13,6 +13,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.JwtAuthHelper
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.ACTIVE_CASE_LOAD_ID
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.SERVICE_NAME
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.USERNAME
 
@@ -29,6 +30,7 @@ class DocumentRequestContextConfigurationTest {
   private val res = MockHttpServletResponse()
 
   private val serviceName = "Test Service Name"
+  private val activeCaseLoadId = "MDI"
   private val username = "TEST_USER"
 
   @Test
@@ -59,6 +61,7 @@ class DocumentRequestContextConfigurationTest {
   @Test
   fun `populate document request context`() {
     req.addHeader(SERVICE_NAME, serviceName)
+    req.addHeader(ACTIVE_CASE_LOAD_ID, activeCaseLoadId)
     req.addHeader(USERNAME, username)
 
     interceptor.preHandle(req, res, "null")
@@ -66,6 +69,7 @@ class DocumentRequestContextConfigurationTest {
     val documentRequestContext = req.getAttribute(DocumentRequestContext::class.simpleName!!) as DocumentRequestContext
 
     assertThat(documentRequestContext.serviceName).isEqualTo(serviceName)
+    assertThat(documentRequestContext.activeCaseLoadId).isEqualTo(activeCaseLoadId)
     assertThat(documentRequestContext.username).isEqualTo(username)
   }
 
@@ -125,5 +129,52 @@ class DocumentRequestContextConfigurationTest {
     val documentRequestContext = req.getAttribute(DocumentRequestContext::class.simpleName!!) as DocumentRequestContext
 
     assertThat(documentRequestContext.username).isEqualTo(username)
+  }
+
+  @Test
+  fun `active case load id is optional`() {
+    req.addHeader(SERVICE_NAME, serviceName)
+
+    interceptor.preHandle(req, res, "null")
+
+    val documentRequestContext = req.getAttribute(DocumentRequestContext::class.simpleName!!) as DocumentRequestContext
+
+    assertThat(documentRequestContext.activeCaseLoadId).isNull()
+  }
+
+  @Test
+  fun `empty active case load id converted to null`() {
+    req.addHeader(SERVICE_NAME, serviceName)
+    req.addHeader(ACTIVE_CASE_LOAD_ID, "")
+
+    interceptor.preHandle(req, res, "null")
+
+    val documentRequestContext = req.getAttribute(DocumentRequestContext::class.simpleName!!) as DocumentRequestContext
+
+    assertThat(documentRequestContext.activeCaseLoadId).isNull()
+  }
+
+  @Test
+  fun `whitespace active case load id converted to null`() {
+    req.addHeader(SERVICE_NAME, serviceName)
+    req.addHeader(ACTIVE_CASE_LOAD_ID, "    ")
+
+    interceptor.preHandle(req, res, "null")
+
+    val documentRequestContext = req.getAttribute(DocumentRequestContext::class.simpleName!!) as DocumentRequestContext
+
+    assertThat(documentRequestContext.activeCaseLoadId).isNull()
+  }
+
+  @Test
+  fun `active case load id is trimmed`() {
+    req.addHeader(SERVICE_NAME, serviceName)
+    req.addHeader(ACTIVE_CASE_LOAD_ID, " $activeCaseLoadId  ")
+
+    interceptor.preHandle(req, res, "null")
+
+    val documentRequestContext = req.getAttribute(DocumentRequestContext::class.simpleName!!) as DocumentRequestContext
+
+    assertThat(documentRequestContext.activeCaseLoadId).isEqualTo(activeCaseLoadId)
   }
 }

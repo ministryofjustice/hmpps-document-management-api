@@ -31,6 +31,7 @@ class AuditServiceTest {
 
   private val documentRequestContext = DocumentRequestContext(
     "Service name",
+    "KMI",
     "USERNAME",
   )
 
@@ -56,6 +57,7 @@ class AuditServiceTest {
       document,
       DocumentRequestContext(
         documentRequestContext.serviceName,
+        null,
         null,
       ),
       eventTime,

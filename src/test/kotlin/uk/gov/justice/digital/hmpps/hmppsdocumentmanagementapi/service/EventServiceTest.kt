@@ -42,6 +42,7 @@ class EventServiceTest {
 
   private val documentRequestContext = DocumentRequestContext(
     "Service name",
+    "RSI",
     "USERNAME",
   )
 

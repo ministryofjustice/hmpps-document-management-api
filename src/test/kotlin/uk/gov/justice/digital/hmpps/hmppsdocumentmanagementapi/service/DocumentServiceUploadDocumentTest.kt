@@ -37,6 +37,7 @@ class DocumentServiceUploadDocumentTest {
   private val contentType = "application/pdf"
   private val documentRequestContext = DocumentRequestContext(
     "Uploaded using service name",
+    "PVI",
     "UPLOADED_BY_USERNAME",
   )
   private val documentCaptor = argumentCaptor<Document>()

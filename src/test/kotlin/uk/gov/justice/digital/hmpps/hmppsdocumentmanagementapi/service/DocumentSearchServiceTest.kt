@@ -54,6 +54,7 @@ class DocumentSearchServiceTest {
 
   private val documentRequestContext = DocumentRequestContext(
     "Searched using service name",
+    "PVI",
     "SEARCHED_BY_USERNAME",
   )
 

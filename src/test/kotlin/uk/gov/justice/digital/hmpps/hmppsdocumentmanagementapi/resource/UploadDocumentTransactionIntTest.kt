@@ -43,7 +43,7 @@ class UploadDocumentTransactionIntTest : IntegrationTestBase() {
       .uri("/documents/${DocumentType.HMCTS_WARRANT}/$documentUuid")
       .bodyValue(documentMetadataMultipartBody())
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
-      .headers(setDocumentContext("Uploaded via service name", "UPLOADED_BY_USERNAME"))
+      .headers(setDocumentContext("Uploaded via service name", "MDI", "UPLOADED_BY_USERNAME"))
       .exchange()
       .expectStatus().is5xxServerError
       .expectHeader().contentType(MediaType.APPLICATION_JSON)

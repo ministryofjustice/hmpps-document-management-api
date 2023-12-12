@@ -40,6 +40,7 @@ import java.util.UUID
 
 @RestController
 @ServiceNameHeader
+@ActiveCaseLoadIdHeader
 @UsernameHeader
 @RequestMapping("/documents", produces = [MediaType.APPLICATION_JSON_VALUE])
 class DocumentController(

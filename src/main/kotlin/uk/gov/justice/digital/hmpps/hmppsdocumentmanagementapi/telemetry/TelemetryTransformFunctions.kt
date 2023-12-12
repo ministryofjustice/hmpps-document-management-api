@@ -8,6 +8,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as
 fun DocumentModel.toCustomEventProperties(documentRequestContext: DocumentRequestContext) =
   mapOf(
     SERVICE_NAME_PROPERTY_KEY to documentRequestContext.serviceName,
+    ACTIVE_CASE_LOAD_ID_PROPERTY_KEY to (documentRequestContext.activeCaseLoadId ?: ""),
     USERNAME_PROPERTY_KEY to (documentRequestContext.username ?: ""),
     DOCUMENT_UUID_PROPERTY_KEY to documentUuid.toString(),
     DOCUMENT_TYPE_PROPERTY_KEY to documentType.name,
@@ -19,6 +20,7 @@ fun DocumentModel.toCustomEventProperties(documentRequestContext: DocumentReques
 fun DocumentsSearchedEvent.toCustomEventProperties(documentRequestContext: DocumentRequestContext) =
   mapOf(
     SERVICE_NAME_PROPERTY_KEY to documentRequestContext.serviceName,
+    ACTIVE_CASE_LOAD_ID_PROPERTY_KEY to (documentRequestContext.activeCaseLoadId ?: ""),
     USERNAME_PROPERTY_KEY to (documentRequestContext.username ?: ""),
     DOCUMENT_TYPE_PROPERTY_KEY to (request.documentType?.name ?: ""),
     DOCUMENT_TYPE_DESCRIPTION_PROPERTY_KEY to (request.documentType?.description ?: ""),

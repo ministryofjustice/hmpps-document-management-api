@@ -26,6 +26,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.Docum
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.AuditService
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.whenLocalDateTime
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.ACTIVE_CASE_LOAD_ID_PROPERTY_KEY
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.DOCUMENT_TYPE_DESCRIPTION_PROPERTY_KEY
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.DOCUMENT_TYPE_PROPERTY_KEY
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.DOCUMENT_UUID_PROPERTY_KEY
@@ -50,6 +51,7 @@ class ReplaceDocumentMetadataIntTest : IntegrationTestBase() {
   private val documentUuid = UUID.fromString("f73a0f91-2957-4224-b477-714370c04d37")
   private val metadata = JacksonUtil.toJsonNode("{ \"prisonNumber\": \"B2345CD\" }")
   private val serviceName = "Replaced metadata using service name"
+  private val activeCaseLoadId = "MDI"
   private val username = "REPLACED_BY_USERNAME"
 
   @Test
@@ -109,7 +111,7 @@ class ReplaceDocumentMetadataIntTest : IntegrationTestBase() {
       .uri("/documents/INVALID/metadata")
       .bodyValue(metadata)
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isBadRequest
       .expectBody(ErrorResponse::class.java)
@@ -129,7 +131,7 @@ class ReplaceDocumentMetadataIntTest : IntegrationTestBase() {
     val response = webTestClient.put()
       .uri("/documents/$documentUuid/metadata")
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isBadRequest
       .expectBody(ErrorResponse::class.java)
@@ -150,7 +152,7 @@ class ReplaceDocumentMetadataIntTest : IntegrationTestBase() {
       .uri("/documents/$documentUuid/metadata")
       .bodyValue(metadata)
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isNotFound
       .expectBody(ErrorResponse::class.java)
@@ -240,6 +242,7 @@ class ReplaceDocumentMetadataIntTest : IntegrationTestBase() {
 
     with(customEventProperties.firstValue) {
       assertThat(this[SERVICE_NAME_PROPERTY_KEY]).isEqualTo(serviceName)
+      assertThat(this[ACTIVE_CASE_LOAD_ID_PROPERTY_KEY]).isEqualTo(activeCaseLoadId)
       assertThat(this[USERNAME_PROPERTY_KEY]).isEqualTo(username)
       assertThat(this[DOCUMENT_UUID_PROPERTY_KEY]).isEqualTo("f73a0f91-2957-4224-b477-714370c04d37")
       assertThat(this[DOCUMENT_TYPE_PROPERTY_KEY]).isEqualTo(DocumentType.HMCTS_WARRANT.name)
@@ -264,7 +267,7 @@ class ReplaceDocumentMetadataIntTest : IntegrationTestBase() {
       .uri("/documents/$documentUuid/metadata")
       .bodyValue(metadata)
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
-      .headers(setDocumentContext(serviceName, username))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
       .expectStatus().isOk
       .expectHeader().contentType(MediaType.APPLICATION_JSON)

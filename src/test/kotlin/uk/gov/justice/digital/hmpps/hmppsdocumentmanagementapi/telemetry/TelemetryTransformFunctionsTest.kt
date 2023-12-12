@@ -30,6 +30,7 @@ class TelemetryTransformFunctionsTest {
 
   private val documentRequestContext = DocumentRequestContext(
     "Service name",
+    "LPI",
     "USERNAME",
   )
 
@@ -39,6 +40,7 @@ class TelemetryTransformFunctionsTest {
   fun `document model to custom event properties`() {
     with(document.toCustomEventProperties(documentRequestContext)) {
       assertThat(this[SERVICE_NAME_PROPERTY_KEY]).isEqualTo(documentRequestContext.serviceName)
+      assertThat(this[ACTIVE_CASE_LOAD_ID_PROPERTY_KEY]).isEqualTo(documentRequestContext.activeCaseLoadId)
       assertThat(this[USERNAME_PROPERTY_KEY]).isEqualTo(documentRequestContext.username)
       assertThat(this[DOCUMENT_UUID_PROPERTY_KEY]).isEqualTo(document.documentUuid.toString())
       assertThat(this[DOCUMENT_TYPE_PROPERTY_KEY]).isEqualTo(document.documentType.name)
@@ -49,8 +51,14 @@ class TelemetryTransformFunctionsTest {
   }
 
   @Test
+  fun `document model to custom event properties no active case load id`() {
+    val eventProperties = document.toCustomEventProperties(DocumentRequestContext("Service name", null, null))
+    assertThat(eventProperties[ACTIVE_CASE_LOAD_ID_PROPERTY_KEY]).isEqualTo("")
+  }
+
+  @Test
   fun `document model to custom event properties no username`() {
-    val eventProperties = document.toCustomEventProperties(DocumentRequestContext("Service name", null))
+    val eventProperties = document.toCustomEventProperties(DocumentRequestContext("Service name", null, null))
     assertThat(eventProperties[USERNAME_PROPERTY_KEY]).isEqualTo("")
   }
 
@@ -60,6 +68,7 @@ class TelemetryTransformFunctionsTest {
     val event = DocumentsSearchedEvent(documentSearchRequest, 3)
     with(event.toCustomEventProperties(documentRequestContext)) {
       assertThat(this[SERVICE_NAME_PROPERTY_KEY]).isEqualTo(documentRequestContext.serviceName)
+      assertThat(this[ACTIVE_CASE_LOAD_ID_PROPERTY_KEY]).isEqualTo(documentRequestContext.activeCaseLoadId)
       assertThat(this[USERNAME_PROPERTY_KEY]).isEqualTo(documentRequestContext.username)
       assertThat(this[DOCUMENT_TYPE_PROPERTY_KEY]).isEqualTo(documentSearchRequest.documentType!!.name)
       assertThat(this[DOCUMENT_TYPE_DESCRIPTION_PROPERTY_KEY]).isEqualTo(documentSearchRequest.documentType!!.description)
@@ -67,10 +76,18 @@ class TelemetryTransformFunctionsTest {
   }
 
   @Test
+  fun `documents search event to custom event properties no active case load id`() {
+    val documentSearchRequest = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }"))
+    val event = DocumentsSearchedEvent(documentSearchRequest, 3)
+    val eventProperties = event.toCustomEventProperties(DocumentRequestContext("Service name", null, null))
+    assertThat(eventProperties[ACTIVE_CASE_LOAD_ID_PROPERTY_KEY]).isEqualTo("")
+  }
+
+  @Test
   fun `documents search event to custom event properties no username`() {
     val documentSearchRequest = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }"))
     val event = DocumentsSearchedEvent(documentSearchRequest, 3)
-    val eventProperties = event.toCustomEventProperties(DocumentRequestContext("Service name", null))
+    val eventProperties = event.toCustomEventProperties(DocumentRequestContext("Service name", null, null))
     assertThat(eventProperties[USERNAME_PROPERTY_KEY]).isEqualTo("")
   }
 
