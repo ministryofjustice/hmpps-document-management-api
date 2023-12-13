@@ -145,14 +145,12 @@ class DocumentSearchServiceTest {
   }
 
   @Test
-  fun `search uses page and order by`() {
+  fun `search uses page and page size`() {
     val request = DocumentSearchRequest(
       DocumentType.HMCTS_WARRANT,
       null,
       2,
       25,
-      DocumentSearchOrderBy.FILESIZE,
-      Direction.ASC,
     )
 
     whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>())).thenReturn(Page.empty())
@@ -164,6 +162,47 @@ class DocumentSearchServiceTest {
       eq(
         PageRequest.of(request.page, request.pageSize)
           .withSort(request.orderByDirection, request.orderBy.property),
+      ),
+    )
+    verifyNoMoreInteractions(documentRepository)
+  }
+
+  @Test
+  fun `default search is ordered by created time descending`() {
+    val request = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, null)
+
+    whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>())).thenReturn(Page.empty())
+
+    service.searchDocuments(request, DocumentType.entries, documentRequestContext)
+
+    verify(documentRepository).findAll(
+      any<Specification<Document>>(),
+      eq(
+        PageRequest.of(request.page, request.pageSize)
+          .withSort(Direction.DESC, "createdTime"),
+      ),
+    )
+    verifyNoMoreInteractions(documentRepository)
+  }
+
+  @Test
+  fun `non default search ordering includes created time to resolve equal values`() {
+    val request = DocumentSearchRequest(
+      DocumentType.HMCTS_WARRANT,
+      null,
+      orderBy = DocumentSearchOrderBy.FILESIZE,
+      orderByDirection = Direction.ASC,
+    )
+
+    whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>())).thenReturn(Page.empty())
+
+    service.searchDocuments(request, DocumentType.entries, documentRequestContext)
+
+    verify(documentRepository).findAll(
+      any<Specification<Document>>(),
+      eq(
+        PageRequest.of(request.page, request.pageSize)
+          .withSort(request.orderByDirection, request.orderBy.property, "createdTime"),
       ),
     )
     verifyNoMoreInteractions(documentRepository)

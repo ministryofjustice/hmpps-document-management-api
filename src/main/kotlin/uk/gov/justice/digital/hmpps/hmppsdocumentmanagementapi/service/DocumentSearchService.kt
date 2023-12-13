@@ -42,7 +42,7 @@ class DocumentSearchService(
     }
 
     val pageRequest = PageRequest.of(request.page, request.pageSize)
-      .withSort(request.orderByDirection, request.orderBy.property)
+      .withSort(request.orderByDirection, *setOf(request.orderBy.property, "createdTime").toTypedArray())
     val page = documentRepository.findAll(spec, pageRequest)
 
     return DocumentSearchResult(
