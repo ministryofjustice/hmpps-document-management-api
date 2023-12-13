@@ -65,20 +65,22 @@ class TelemetryTransformFunctionsTest {
   @Test
   fun `documents search event to custom event properties`() {
     val documentSearchRequest = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }"))
-    val event = DocumentsSearchedEvent(documentSearchRequest, 3)
+    val event = DocumentsSearchedEvent(documentSearchRequest, 10, 13)
     with(event.toCustomEventProperties(documentRequestContext)) {
       assertThat(this[SERVICE_NAME_PROPERTY_KEY]).isEqualTo(documentRequestContext.serviceName)
       assertThat(this[ACTIVE_CASE_LOAD_ID_PROPERTY_KEY]).isEqualTo(documentRequestContext.activeCaseLoadId)
       assertThat(this[USERNAME_PROPERTY_KEY]).isEqualTo(documentRequestContext.username)
       assertThat(this[DOCUMENT_TYPE_PROPERTY_KEY]).isEqualTo(documentSearchRequest.documentType!!.name)
       assertThat(this[DOCUMENT_TYPE_DESCRIPTION_PROPERTY_KEY]).isEqualTo(documentSearchRequest.documentType!!.description)
+      assertThat(this[ORDER_BY_PROPERTY_KEY]).isEqualTo(documentSearchRequest.orderBy.name)
+      assertThat(this[ORDER_BY_DIRECTION_PROPERTY_KEY]).isEqualTo(documentSearchRequest.orderByDirection.name)
     }
   }
 
   @Test
   fun `documents search event to custom event properties no active case load id`() {
     val documentSearchRequest = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }"))
-    val event = DocumentsSearchedEvent(documentSearchRequest, 3)
+    val event = DocumentsSearchedEvent(documentSearchRequest, 10, 13)
     val eventProperties = event.toCustomEventProperties(DocumentRequestContext("Service name", null, null))
     assertThat(eventProperties[ACTIVE_CASE_LOAD_ID_PROPERTY_KEY]).isEqualTo("")
   }
@@ -86,7 +88,7 @@ class TelemetryTransformFunctionsTest {
   @Test
   fun `documents search event to custom event properties no username`() {
     val documentSearchRequest = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }"))
-    val event = DocumentsSearchedEvent(documentSearchRequest, 3)
+    val event = DocumentsSearchedEvent(documentSearchRequest, 10, 13)
     val eventProperties = event.toCustomEventProperties(DocumentRequestContext("Service name", null, null))
     assertThat(eventProperties[USERNAME_PROPERTY_KEY]).isEqualTo("")
   }
@@ -94,7 +96,7 @@ class TelemetryTransformFunctionsTest {
   @Test
   fun `documents search event to custom event properties no document type`() {
     val documentSearchRequest = DocumentSearchRequest(null, JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }"))
-    val event = DocumentsSearchedEvent(documentSearchRequest, 3)
+    val event = DocumentsSearchedEvent(documentSearchRequest, 10, 13)
     with(event.toCustomEventProperties(documentRequestContext)) {
       assertThat(this[DOCUMENT_TYPE_PROPERTY_KEY]).isEqualTo("")
       assertThat(this[DOCUMENT_TYPE_DESCRIPTION_PROPERTY_KEY]).isEqualTo("")
@@ -127,18 +129,21 @@ class TelemetryTransformFunctionsTest {
   @Test
   fun `documents searched event to custom event metrics`() {
     val documentSearchRequest = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }"))
-    val event = DocumentsSearchedEvent(documentSearchRequest, 3)
+    val event = DocumentsSearchedEvent(documentSearchRequest, 10, 13)
     with(event.toCustomEventMetrics(eventTimeMs)) {
       assertThat(this[EVENT_TIME_MS_METRIC_KEY]).isEqualTo(eventTimeMs.toDouble())
       assertThat(this[METADATA_FIELD_COUNT_METRIC_KEY]).isEqualTo(1.0)
+      assertThat(this[PAGE_PROPERTY_KEY]).isEqualTo(documentSearchRequest.page.toDouble())
+      assertThat(this[PAGE_SIZE_PROPERTY_KEY]).isEqualTo(documentSearchRequest.pageSize.toDouble())
       assertThat(this[RESULTS_COUNT_METRIC_KEY]).isEqualTo(event.resultsCount.toDouble())
+      assertThat(this[TOTAL_RESULTS_COUNT_METRIC_KEY]).isEqualTo(event.totalResultsCount.toDouble())
     }
   }
 
   @Test
   fun `documents searched event to custom event metrics no metadata`() {
     val documentSearchRequest = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, null)
-    val event = DocumentsSearchedEvent(documentSearchRequest, 3)
+    val event = DocumentsSearchedEvent(documentSearchRequest, 10, 13)
     val eventProperties = event.toCustomEventMetrics(eventTimeMs)
     assertThat(eventProperties[METADATA_FIELD_COUNT_METRIC_KEY]).isEqualTo(0.0)
   }

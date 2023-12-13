@@ -24,6 +24,8 @@ fun DocumentsSearchedEvent.toCustomEventProperties(documentRequestContext: Docum
     USERNAME_PROPERTY_KEY to (documentRequestContext.username ?: ""),
     DOCUMENT_TYPE_PROPERTY_KEY to (request.documentType?.name ?: ""),
     DOCUMENT_TYPE_DESCRIPTION_PROPERTY_KEY to (request.documentType?.description ?: ""),
+    ORDER_BY_PROPERTY_KEY to request.orderBy.name,
+    ORDER_BY_DIRECTION_PROPERTY_KEY to request.orderByDirection.name,
   )
 
 fun DocumentModel.toCustomEventMetrics(eventTimeMs: Long) =
@@ -45,5 +47,8 @@ fun DocumentsSearchedEvent.toCustomEventMetrics(eventTimeMs: Long) =
   mapOf(
     EVENT_TIME_MS_METRIC_KEY to eventTimeMs.toDouble(),
     METADATA_FIELD_COUNT_METRIC_KEY to (request.metadata?.size()?.toDouble() ?: 0.0),
+    PAGE_PROPERTY_KEY to request.page.toDouble(),
+    PAGE_SIZE_PROPERTY_KEY to request.pageSize.toDouble(),
     RESULTS_COUNT_METRIC_KEY to resultsCount.toDouble(),
+    TOTAL_RESULTS_COUNT_METRIC_KEY to totalResultsCount.toDouble(),
   )

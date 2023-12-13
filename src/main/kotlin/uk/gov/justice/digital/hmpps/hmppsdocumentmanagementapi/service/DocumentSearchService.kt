@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service
 
+import org.springframework.data.domain.PageRequest
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -32,21 +33,25 @@ class DocumentSearchService(
       }
     }
 
-    var spec = documentSearchSpecification.documentTypeEquals(request.documentType)
+    var spec = documentSearchSpecification.documentTypeIn(
+      if (request.documentType != null) setOf(request.documentType) else authorisedDocumentTypes,
+    )
 
     request.metadata?.fields()?.forEach {
       spec = spec.and(documentSearchSpecification.metadataContains(it.key, it.value.asText()))
     }
 
-    val results = documentRepository.findAll(spec)
-      .filter { authorisedDocumentTypes.contains(it.documentType) }
+    val pageRequest = PageRequest.of(request.page, request.pageSize)
+      .withSort(request.orderByDirection, *setOf(request.orderBy.property, "createdTime").toTypedArray())
+    val page = documentRepository.findAll(spec, pageRequest)
 
     return DocumentSearchResult(
       request,
-      results.toModels(),
+      page.content.toModels(),
+      page.totalElements,
     ).also {
       eventService.recordDocumentsSearchedEvent(
-        DocumentsSearchedEvent(it.request, it.results.size),
+        DocumentsSearchedEvent(it.request, it.results.size, it.totalResultsCount),
         documentRequestContext,
         System.currentTimeMillis() - startTimeInMs,
       )

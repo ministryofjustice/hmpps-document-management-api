@@ -16,4 +16,10 @@ data class DocumentSearchResult(
       "additional roles will have been filtered out of these results if the client does not have the required roles.",
   )
   val results: Collection<Document>,
+
+  @Schema(
+    description = "The total number of available results not limited by page size",
+    example = "56",
+  )
+  val totalResultsCount: Long,
 )

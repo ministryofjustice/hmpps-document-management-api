@@ -77,9 +77,45 @@ class DocumentSearchRequestTest {
     validator.validate(request).assertSingleValidationError("metadata", "Metadata property values must be non null or empty strings.")
   }
 
+  @Test
+  fun `page must be 0 or greater - valid`() {
+    val request = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, null, page = 0)
+    assertThat(validator.validate(request)).isEmpty()
+  }
+
+  @Test
+  fun `page must be 0 or greater - invalid`() {
+    val request = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, null, page = -1)
+    validator.validate(request).assertSingleValidationError("page", "Page must be 0 or greater.")
+  }
+
+  @Test
+  fun `page size must be 1 or greater - valid`() {
+    val request = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, null, pageSize = 1)
+    assertThat(validator.validate(request)).isEmpty()
+  }
+
+  @Test
+  fun `page size must be 1 or greater - invalid`() {
+    val request = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, null, pageSize = 0)
+    validator.validate(request).assertSingleValidationError("pageSize", "Page size must be between 1 and 100.")
+  }
+
+  @Test
+  fun `page size must be 100 or less - valid`() {
+    val request = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, null, pageSize = 100)
+    assertThat(validator.validate(request)).isEmpty()
+  }
+
+  @Test
+  fun `page size must be 100 or less - invalid`() {
+    val request = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, null, pageSize = 101)
+    validator.validate(request).assertSingleValidationError("pageSize", "Page size must be between 1 and 100.")
+  }
+
   private fun MutableSet<ConstraintViolation<DocumentSearchRequest>>.assertSingleValidationError(propertyName: String, message: String) =
     with(single()) {
       assertThat(propertyPath.toString()).isEqualTo(propertyName)
-      assertThat(message).isEqualTo(message)
+      assertThat(this.message).isEqualTo(message)
     }
 }

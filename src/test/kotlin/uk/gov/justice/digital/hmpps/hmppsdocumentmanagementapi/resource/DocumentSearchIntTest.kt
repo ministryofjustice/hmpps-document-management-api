@@ -12,11 +12,13 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
+import org.springframework.data.domain.Sort.Direction
 import org.springframework.http.MediaType
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.reactive.server.WebTestClient
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentSearchOrderBy
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.EventType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.IntegrationTestBase
@@ -30,13 +32,19 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.DOCUMEN
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.DOCUMENT_TYPE_PROPERTY_KEY
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.EVENT_TIME_MS_METRIC_KEY
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.METADATA_FIELD_COUNT_METRIC_KEY
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.ORDER_BY_DIRECTION_PROPERTY_KEY
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.ORDER_BY_PROPERTY_KEY
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.PAGE_PROPERTY_KEY
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.PAGE_SIZE_PROPERTY_KEY
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.RESULTS_COUNT_METRIC_KEY
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.SERVICE_NAME_PROPERTY_KEY
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.TOTAL_RESULTS_COUNT_METRIC_KEY
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.USERNAME_PROPERTY_KEY
 import uk.gov.justice.hmpps.sqs.countMessagesOnQueue
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as DocumentModel
 
 class DocumentSearchIntTest : IntegrationTestBase() {
   private val deletedDocumentUuid = UUID.fromString("f73a0f91-2957-4224-b477-714370c04d37")
@@ -159,14 +167,93 @@ class DocumentSearchIntTest : IntegrationTestBase() {
     }
   }
 
+  @Test
+  fun `400 bad request - page must be 0 or greater`() {
+    val response = webTestClient.post()
+      .uri("/documents/search")
+      .bodyValue(DocumentSearchRequest(documentType, null, page = -1))
+      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
+      .headers(setDocumentContext())
+      .exchange()
+      .expectStatus().isBadRequest
+      .expectBody(ErrorResponse::class.java)
+      .returnResult().responseBody
+
+    with(response!!) {
+      assertThat(status).isEqualTo(400)
+      assertThat(errorCode).isNull()
+      assertThat(userMessage).isEqualTo("Validation failure: Page must be 0 or greater.")
+      assertThat(developerMessage).isEqualTo("Page must be 0 or greater.")
+      assertThat(moreInfo).isNull()
+    }
+  }
+
+  @Test
+  fun `400 bad request - page size must be between 1 and 100`() {
+    val response = webTestClient.post()
+      .uri("/documents/search")
+      .bodyValue(DocumentSearchRequest(documentType, null, pageSize = 0))
+      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
+      .headers(setDocumentContext())
+      .exchange()
+      .expectStatus().isBadRequest
+      .expectBody(ErrorResponse::class.java)
+      .returnResult().responseBody
+
+    with(response!!) {
+      assertThat(status).isEqualTo(400)
+      assertThat(errorCode).isNull()
+      assertThat(userMessage).isEqualTo("Validation failure: Page size must be between 1 and 100.")
+      assertThat(developerMessage).isEqualTo("Page size must be between 1 and 100.")
+      assertThat(moreInfo).isNull()
+    }
+  }
+
+  @Test
+  fun `400 bad request - invalid order by`() {
+    webTestClient.post()
+      .uri("/documents/search")
+      .bodyValue(JacksonUtil.toJsonNode("{ \"documentType\": \"${documentType.name}\", \"orderBy\": \"INVALID\" }"))
+      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
+      .headers(setDocumentContext())
+      .exchange()
+      .expectStatus().isBadRequest
+      .expectBody(ErrorResponse::class.java)
+      .returnResult().responseBody
+  }
+
+  @Test
+  fun `400 bad request - invalid order by direction`() {
+    webTestClient.post()
+      .uri("/documents/search")
+      .bodyValue(JacksonUtil.toJsonNode("{ \"documentType\": \"${documentType.name}\", \"orderByDirection\": \"INVALID\" }"))
+      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
+      .headers(setDocumentContext())
+      .exchange()
+      .expectStatus().isBadRequest
+      .expectBody(ErrorResponse::class.java)
+      .returnResult().responseBody
+  }
+
   @Sql("classpath:test_data/document-search.sql")
   @Test
   fun `response contains search request`() {
-    val response = webTestClient.searchDocuments(documentType, metadata)
+    val response = webTestClient.searchDocuments(
+      documentType,
+      metadata,
+      1,
+      2,
+      DocumentSearchOrderBy.FILESIZE,
+      Direction.ASC,
+    )
 
     with(response.request) {
       assertThat(documentType).isEqualTo(this@DocumentSearchIntTest.documentType)
       assertThat(metadata).isEqualTo(this@DocumentSearchIntTest.metadata)
+      assertThat(page).isEqualTo(1)
+      assertThat(pageSize).isEqualTo(2)
+      assertThat(orderBy).isEqualTo(DocumentSearchOrderBy.FILESIZE)
+      assertThat(orderByDirection).isEqualTo(Direction.ASC)
     }
   }
 
@@ -197,7 +284,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
     val response = webTestClient.searchDocuments(
       null,
       metadata,
-      listOf(ROLE_DOCUMENT_READER, ROLE_DOCUMENT_TYPE_SAR),
+      roles = listOf(ROLE_DOCUMENT_READER, ROLE_DOCUMENT_TYPE_SAR),
     )
 
     with(response.results) {
@@ -214,7 +301,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
     val response = webTestClient.searchDocuments(
       null,
       metadata,
-      listOf(ROLE_DOCUMENT_READER),
+      roles = listOf(ROLE_DOCUMENT_READER),
     )
 
     with(response.results) {
@@ -284,6 +371,69 @@ class DocumentSearchIntTest : IntegrationTestBase() {
     }
   }
 
+  @Sql("classpath:test_data/document-search-pagination-and-ordering.sql")
+  @Test
+  fun `search limits results to page size and returns total results count`() {
+    val response = webTestClient.searchDocuments(documentType, metadata, pageSize = 3)
+
+    with(response) {
+      assertThat(results).hasSize(3)
+      assertThat(totalResultsCount).isEqualTo(5)
+    }
+  }
+
+  @Sql("classpath:test_data/document-search-pagination-and-ordering.sql")
+  @Test
+  fun `search skips to second page and returns total results count`() {
+    val response = webTestClient.searchDocuments(documentType, metadata, page = 1, pageSize = 3)
+
+    with(response) {
+      assertThat(results).hasSize(2)
+      assertThat(totalResultsCount).isEqualTo(5)
+    }
+  }
+
+  @Sql("classpath:test_data/document-search-pagination-and-ordering.sql")
+  @Test
+  fun `search returns no results for page out of range`() {
+    val response = webTestClient.searchDocuments(documentType, metadata, page = 2, pageSize = 3)
+
+    with(response) {
+      assertThat(results).isEmpty()
+      assertThat(totalResultsCount).isEqualTo(5)
+    }
+  }
+
+  @Sql("classpath:test_data/document-search-pagination-and-ordering.sql")
+  @Test
+  fun `default ordering is by created time descending`() {
+    val response = webTestClient.searchDocuments(documentType, metadata)
+
+    assertThat(response.results).containsExactlyElementsOf(
+      response.results.sortedByDescending { it.createdTime },
+    )
+  }
+
+  @Sql("classpath:test_data/document-search-pagination-and-ordering.sql")
+  @Test
+  fun `order by file size ascending`() {
+    val response = webTestClient.searchDocuments(documentType, metadata, orderBy = DocumentSearchOrderBy.FILESIZE, orderByDirection = Direction.ASC)
+
+    assertThat(response.results).containsExactlyElementsOf(
+      response.results.sortedBy { it.fileSize },
+    )
+  }
+
+  @Sql("classpath:test_data/document-search-pagination-and-ordering.sql")
+  @Test
+  fun `order by uses created time to resolve equal values`() {
+    val response = webTestClient.searchDocuments(documentType, metadata, orderBy = DocumentSearchOrderBy.FILE_EXTENSION, orderByDirection = Direction.ASC)
+
+    assertThat(response.results).containsExactlyElementsOf(
+      response.results.sortedWith(compareBy<DocumentModel> { it.fileExtension }.thenBy { it.createdTime }),
+    )
+  }
+
   @Sql("classpath:test_data/document-search.sql")
   @Test
   fun `audits event`() {
@@ -319,23 +469,32 @@ class DocumentSearchIntTest : IntegrationTestBase() {
       assertThat(this[USERNAME_PROPERTY_KEY]).isEqualTo(username)
       assertThat(this[DOCUMENT_TYPE_PROPERTY_KEY]).isEqualTo(documentType.name)
       assertThat(this[DOCUMENT_TYPE_DESCRIPTION_PROPERTY_KEY]).isEqualTo(documentType.description)
+      assertThat(this[ORDER_BY_PROPERTY_KEY]).isEqualTo(DocumentSearchOrderBy.CREATED_TIME.name)
+      assertThat(this[ORDER_BY_DIRECTION_PROPERTY_KEY]).isEqualTo(Direction.DESC.name)
     }
 
     with(customEventMetrics.firstValue) {
       assertThat(this[EVENT_TIME_MS_METRIC_KEY]).isGreaterThan(0.0)
       assertThat(this[METADATA_FIELD_COUNT_METRIC_KEY]).isEqualTo(1.0)
+      assertThat(this[PAGE_PROPERTY_KEY]).isEqualTo(0.0)
+      assertThat(this[PAGE_SIZE_PROPERTY_KEY]).isEqualTo(10.0)
       assertThat(this[RESULTS_COUNT_METRIC_KEY]).isEqualTo(1.0)
+      assertThat(this[TOTAL_RESULTS_COUNT_METRIC_KEY]).isEqualTo(1.0)
     }
   }
 
   private fun WebTestClient.searchDocuments(
     documentType: DocumentType?,
     metadata: JsonNode?,
+    page: Int = 0,
+    pageSize: Int = 10,
+    orderBy: DocumentSearchOrderBy = DocumentSearchOrderBy.CREATED_TIME,
+    orderByDirection: Direction = Direction.DESC,
     roles: List<String> = listOf(ROLE_DOCUMENT_READER),
   ) =
     post()
       .uri("/documents/search")
-      .bodyValue(DocumentSearchRequest(documentType, metadata))
+      .bodyValue(DocumentSearchRequest(documentType, metadata, page, pageSize, orderBy, orderByDirection))
       .headers(setAuthorisation(roles = roles))
       .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
