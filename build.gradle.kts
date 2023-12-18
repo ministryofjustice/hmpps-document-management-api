@@ -20,7 +20,7 @@ dependencies {
   // Database dependencies
   runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("org.postgresql:postgresql")
-  implementation("io.hypersistence:hypersistence-utils-hibernate-62:3.6.1")
+  implementation("io.hypersistence:hypersistence-utils-hibernate-62:3.7.0")
 
   // AWS
   implementation("io.awspring.cloud:spring-cloud-aws-starter-s3")
