@@ -14,6 +14,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
+import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.reactive.server.WebTestClient
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
@@ -44,6 +45,11 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as DocumentModel
 
+@TestPropertySource(
+  properties = [
+    "feature.hmpps.audit.enabled=true",
+  ],
+)
 class ReplaceDocumentMetadataIntTest : IntegrationTestBase() {
   @Autowired
   lateinit var repository: DocumentRepository

@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.Feature
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.FeatureSwitches
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.EventType
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
@@ -18,6 +20,7 @@ import java.time.format.DateTimeFormatter
 class AuditService(
   private val hmppsQueueService: HmppsQueueService,
   private val objectMapper: ObjectMapper,
+  private val featureSwitches: FeatureSwitches,
 ) {
   private val auditQueue by lazy { hmppsQueueService.findByQueueId("audit") as HmppsQueue }
   private val auditSqsClient by lazy { auditQueue.sqsClient }
@@ -33,6 +36,19 @@ class AuditService(
     documentRequestContext: DocumentRequestContext,
     `when`: LocalDateTime = LocalDateTime.now(),
   ) {
+    if (featureSwitches.isEnabled(Feature.HMPPS_AUDIT)) {
+      sendToHmppsAudit(eventType, details, documentRequestContext, `when`)
+    } else {
+      log.debug("Not sending event type {} to HMPPS Audit as feature is disabled", eventType.name)
+    }
+  }
+
+  private fun sendToHmppsAudit(
+    eventType: EventType,
+    details: Any,
+    documentRequestContext: DocumentRequestContext,
+    `when`: LocalDateTime,
+  ) {
     val auditEvent = AuditEvent(
       what = eventType.name,
       who = documentRequestContext.username ?: documentRequestContext.serviceName,
@@ -40,7 +56,8 @@ class AuditService(
       details = details.toJson(),
       `when` = DateTimeFormatter.ISO_INSTANT.format(`when`.toInstant(ZoneOffset.UTC)),
     )
-    log.debug("Audit {}", auditEvent)
+
+    log.debug("Sending event type {} to HMPPS Audit", eventType.name)
 
     auditSqsClient.sendMessage(
       SendMessageRequest.builder()
@@ -61,4 +78,4 @@ class AuditService(
   )
 }
 
-fun AuditService.AuditEvent.whenLocalDateTime() = LocalDateTime.ofInstant(Instant.parse(`when`), ZoneOffset.UTC)
+fun AuditService.AuditEvent.whenLocalDateTime(): LocalDateTime = LocalDateTime.ofInstant(Instant.parse(`when`), ZoneOffset.UTC)

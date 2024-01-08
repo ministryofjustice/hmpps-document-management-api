@@ -11,6 +11,7 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.reactive.server.WebTestClient
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
@@ -39,6 +40,11 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
+@TestPropertySource(
+  properties = [
+    "feature.hmpps.audit.enabled=true",
+  ],
+)
 class DeleteDocumentIntTest : IntegrationTestBase() {
   @Autowired
   lateinit var repository: DocumentRepository
