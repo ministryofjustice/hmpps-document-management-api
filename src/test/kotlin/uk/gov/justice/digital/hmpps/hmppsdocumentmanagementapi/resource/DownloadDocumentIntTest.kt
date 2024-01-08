@@ -12,6 +12,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.springframework.http.ContentDisposition
 import org.springframework.http.MediaType
+import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.reactive.server.WebTestClient
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
@@ -39,6 +40,11 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
+@TestPropertySource(
+  properties = [
+    "feature.hmpps.audit.enabled=true",
+  ],
+)
 class DownloadDocumentIntTest : IntegrationTestBase() {
   private val documentUuid = UUID.fromString("f73a0f91-2957-4224-b477-714370c04d37")
   private val serviceName = "Uploaded via service name"
