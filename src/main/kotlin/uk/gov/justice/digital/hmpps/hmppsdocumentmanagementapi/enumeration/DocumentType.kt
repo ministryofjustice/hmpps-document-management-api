@@ -13,13 +13,7 @@ enum class DocumentType(
     description = "Subject Access Request Report",
     additionalRoles = setOf(ROLE_DOCUMENT_TYPE_SAR),
   ),
-  HMPPS_LICENCE_EXCLUSION_ZONE_MAP(
-    description = "Map image for the exclusion zone condition added to the licence",
-  ),
-  HMPPS_LICENCE_EXCLUSION_ZONE_MAP_ORIG_DATA(
-    description = "Original data for the exclusion zone condition added to the licence",
-  ),
-  HMPPS_LICENCE_EXCLUSION_ZONE_MAP_THUMBNAIL(
-    description = "Original data for the exclusion zone condition added to the licence",
+  HHMPPS_CVL_DOCS(
+    description = "Offender Licence documents created and managed by CVL (create and vary a licence create-and-vary-a-licence-api)",
   ),
 }
