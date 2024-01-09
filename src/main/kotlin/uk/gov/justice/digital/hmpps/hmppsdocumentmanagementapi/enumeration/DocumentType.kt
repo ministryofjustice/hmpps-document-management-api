@@ -13,7 +13,7 @@ enum class DocumentType(
     description = "Subject Access Request Report",
     additionalRoles = setOf(ROLE_DOCUMENT_TYPE_SAR),
   ),
-  CVL_DOCS(
-    description = "Offender Licence documents created and managed by CVL (create and vary a licence create-and-vary-a-licence-api)",
+  EXCLUSION_ZONE_MAP(
+    description = "Exclusion zone maps used for exclusion zone condition on offender licence",
   ),
 }
