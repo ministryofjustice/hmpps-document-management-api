@@ -13,4 +13,7 @@ enum class DocumentType(
     description = "Subject Access Request Report",
     additionalRoles = setOf(ROLE_DOCUMENT_TYPE_SAR),
   ),
+  EXCLUSION_ZONE_MAP(
+    description = "Exclusion zone maps used for exclusion zone condition on offender licence",
+  ),
 }
