@@ -70,3 +70,6 @@ sonar-project.properties
 
 #Helm
 **/Chart.lock
+
+#JMeter
+load-test-values.csv
