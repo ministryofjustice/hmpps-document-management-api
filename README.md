@@ -17,3 +17,14 @@ Run the following commands from the root directory of the project:
 2. docker compose -f docker-compose-local.yml up --no-start
 3. docker compose -f docker-compose-local.yml start db localstack
 4. ./run-local.sh
+
+# Load testing
+
+1. Install JMeter using brew: `brew install jmeter`
+2. Open the JMeter GUI: `jmeter`
+3. Use the plugin manager (Options -> Plugins Manager or the icon on the top right) to install the [Custom JMeter Functions](https://jmeter-plugins.org/wiki/Functions/) plugin
+4. Close JMeter and run the following command to open the test plan and specify required properties:
+
+```
+jmeter -t load-test.jmx -Jprotocol='http' -Jbase_server_name='localhost' -Jbase_port='8080' -Jauth_server_name='<auth_server_name>' -Jclient_id='<client_id>' -Jclient_secret='<client_secret>'
+```
