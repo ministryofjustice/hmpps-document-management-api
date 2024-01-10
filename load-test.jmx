@@ -18,7 +18,7 @@
         </elementProp>
       </SetupThreadGroup>
       <hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Get Access Token" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Get Access Token">
           <stringProp name="HTTPSampler.domain">${__P(auth_server_name)}</stringProp>
           <stringProp name="HTTPSampler.protocol">https</stringProp>
           <stringProp name="HTTPSampler.path">/auth/oauth/token?grant_type=client_credentials</stringProp>
@@ -55,6 +55,33 @@
           </BeanShellPostProcessor>
           <hashTree/>
         </hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate test values">
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="script">import org.apache.commons.lang3.RandomStringUtils
+
+def generator = { String alphabet, int n -&gt;
+  new Random().with {
+    (1..n).collect { alphabet[ nextInt( alphabet.length() ) ] }.join()
+  }
+}
+
+// Number of UUIDs to generate
+int uuidCount = 100
+
+// CSV file path
+String csvFilePath = &quot;load-test-values.csv&quot;;
+
+// Generate and save UUIDs to CSV
+def values = (1..uuidCount).collect { value -&gt; [ uuid: UUID.randomUUID().toString(), prisonNumber: generator((&apos;A&apos;..&apos;Z&apos;).join(), 1) + generator((&apos;0&apos;..&apos;9&apos;).join(), 4) + generator((&apos;A&apos;..&apos;Z&apos;).join(), 2) ] }
+new File(csvFilePath).withWriter { out -&gt;
+    values.each { value -&gt; out.println(value.uuid + &apos;,&apos; + value.prisonNumber) }
+}
+</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
       </hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group">
         <intProp name="ThreadGroup.num_threads">1</intProp>
@@ -67,7 +94,19 @@
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config">
+          <stringProp name="delimiter">,</stringProp>
+          <stringProp name="fileEncoding"></stringProp>
+          <stringProp name="filename">/Users/david.winchurch/Code/hmpps-document-management-api/load-test-values.csv</stringProp>
+          <boolProp name="ignoreFirstLine">false</boolProp>
+          <boolProp name="quotedData">false</boolProp>
+          <boolProp name="recycle">true</boolProp>
+          <stringProp name="shareMode">shareMode.all</stringProp>
+          <boolProp name="stopThread">false</boolProp>
+          <stringProp name="variableNames">uuid,prison_number</stringProp>
+        </CSVDataSet>
+        <hashTree/>
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults">
           <stringProp name="HTTPSampler.domain">${__P(base_server_name)}</stringProp>
           <stringProp name="HTTPSampler.port">${__P(base_port)}</stringProp>
           <stringProp name="HTTPSampler.protocol">${__P(base_protocol)}</stringProp>
@@ -77,7 +116,7 @@
           <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
         </ConfigTestElement>
         <hashTree/>
-        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
           <collectionProp name="HeaderManager.headers">
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Authorization</stringProp>
@@ -90,7 +129,37 @@
           </collectionProp>
         </HeaderManager>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Get a document by its unique identifier" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Upload a document file and associated metadata and store against a unique identifier">
+          <stringProp name="HTTPSampler.path">/documents/HMCTS_WARRANT/4527adad-c144-4a0f-9a82-231cca823285</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">true</boolProp>
+          <elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs">
+            <collectionProp name="HTTPFileArgs.files">
+              <elementProp name="src/test/resources/test_data/warrant-for-remand.pdf" elementType="HTTPFileArg">
+                <stringProp name="File.mimetype">application/pdf</stringProp>
+                <stringProp name="File.path">src/test/resources/test_data/warrant-for-remand.pdf</stringProp>
+                <stringProp name="File.paramname">file</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="metadata" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{&quot;prisonNumber&quot;: &quot;A1234BC&quot;}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">metadata</stringProp>
+                <stringProp name="HTTPArgument.content_type">application/json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Get a document by its unique identifier">
           <stringProp name="HTTPSampler.path">/documents/fec9cbba-09b0-41d4-87e5-e96962c7a2c5</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
@@ -101,7 +170,7 @@
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Download a document file by its unique identifier" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Download a document file by its unique identifier">
           <stringProp name="HTTPSampler.path">/documents/fec9cbba-09b0-41d4-87e5-e96962c7a2c5/file</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
