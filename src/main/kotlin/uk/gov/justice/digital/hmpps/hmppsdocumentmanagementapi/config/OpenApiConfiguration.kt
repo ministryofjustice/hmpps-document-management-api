@@ -67,7 +67,11 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
           },
         )
 
-        val roles = try { (preAuthExp.getValue(evalContext) as List<*>).filterIsInstance<String>() } catch (e: SpelEvaluationException) { emptyList() }
+        val roles = try {
+          (preAuthExp.getValue(evalContext) as List<*>).filterIsInstance<String>()
+        } catch (e: SpelEvaluationException) {
+          emptyList()
+        }
         if (roles.isNotEmpty()) {
           operation.description = "${operation.description ?: ""}\n\n" +
             "Requires one of the following roles:\n" +

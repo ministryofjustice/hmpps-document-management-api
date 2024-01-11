@@ -114,8 +114,8 @@ class HmppsDocumentManagementApiExceptionHandler {
 
   @ExceptionHandler(MethodArgumentNotValidException::class)
   fun handleMethodArgumentNotValidException(e: MethodArgumentNotValidException): ResponseEntity<ErrorResponse>? {
-    log.debug("Method argument not valid exception: {}", e.message)
-    val errors = e.bindingResult.allErrors.map { it.defaultMessage }.joinToString(", ")
+    log.info("Method argument not valid exception: {}", e.message)
+    val errors = e.bindingResult.allErrors.joinToString(", ") { it.defaultMessage }
     return ResponseEntity
       .status(BAD_REQUEST)
       .body(

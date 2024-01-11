@@ -1,8 +1,9 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service
 
 import com.fasterxml.jackson.databind.JsonNode
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentAlreadyUploadedException
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
@@ -24,6 +25,10 @@ class DocumentService(
   private val documentFileService: DocumentFileService,
   private val eventService: EventService,
 ) {
+  companion object {
+    val log: Logger = LoggerFactory.getLogger(this::class.java)
+  }
+
   fun getDocument(documentUuid: UUID, documentRequestContext: DocumentRequestContext): DocumentModel {
     val startTimeInMs = System.currentTimeMillis()
     val document = documentRepository.findByDocumentUuidOrThrowNotFound(documentUuid)
@@ -76,7 +81,13 @@ class DocumentService(
     )
 
     // Any thrown exception will cause the database transaction to roll back allowing the request to be retried
-    documentFileService.saveDocumentFile(documentUuid, file)
+    try {
+      documentFileService.saveDocumentFile(documentUuid, file)
+    } catch (e: Exception) {
+      documentRepository.delete(document)
+      log.warn("Failed to save document file for document UUID $documentUuid. Deleted document to allow retry", e)
+      throw e
+    }
 
     return document.toModel().also {
       eventService.recordDocumentUploadedEvent(it, documentRequestContext, System.currentTimeMillis() - startTimeInMs)
