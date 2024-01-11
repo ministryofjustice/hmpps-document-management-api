@@ -14,7 +14,6 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.Docume
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentSearchSpecification
 
 @Service
-@Transactional(readOnly = true)
 class DocumentSearchService(
   private val documentRepository: DocumentRepository,
   private val documentSearchSpecification: DocumentSearchSpecification,

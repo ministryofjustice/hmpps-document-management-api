@@ -19,7 +19,6 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentFile as DocumentFileModel
 
 @Service
-@Transactional
 class DocumentService(
   private val documentRepository: DocumentRepository,
   private val documentFileService: DocumentFileService,
