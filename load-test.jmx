@@ -18,10 +18,10 @@
         <boolProp name="recycle">true</boolProp>
         <stringProp name="shareMode">shareMode.group</stringProp>
         <boolProp name="stopThread">false</boolProp>
-        <stringProp name="variableNames">uuid,prison_number</stringProp>
+        <stringProp name="variableNames">uuid,prison_number,file</stringProp>
       </CSVDataSet>
       <hashTree/>
-      <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="setUp Thread Group" enabled="true">
+      <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="setUp Thread Group">
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">1</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -32,7 +32,7 @@
         </elementProp>
       </SetupThreadGroup>
       <hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Get Access Token" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Get Access Token">
           <stringProp name="HTTPSampler.domain">${__P(auth_server_name)}</stringProp>
           <stringProp name="HTTPSampler.protocol">https</stringProp>
           <stringProp name="HTTPSampler.path">/auth/oauth/token?grant_type=client_credentials</stringProp>
@@ -69,7 +69,7 @@
           </BeanShellPostProcessor>
           <hashTree/>
         </hashTree>
-        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate test values" enabled="true">
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate test values">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -84,31 +84,74 @@ def generator = { String alphabet, int n -&gt;
 // Number of UUIDs to generate
 int uuidCount = 100
 
-// CSV file path
-String csvFilePath = &quot;load-test-values.csv&quot;;
+// Representative distribution of file sizes
+def files = [
+	&quot;21kb.pdf&quot;,
+	&quot;21kb.pdf&quot;,
+	&quot;256kb.pdf&quot;,
+	&quot;21kb.pdf&quot;,
+	&quot;1mb.pdf&quot;,
+	&quot;21kb.pdf&quot;,
+	&quot;256kb.pdf&quot;,
+	&quot;21kb.pdf&quot;,
+	&quot;21kb.pdf&quot;,
+	&quot;256kb.pdf&quot;,
+	&quot;21kb.pdf&quot;,
+	&quot;512kb.pdf&quot;,
+	&quot;21kb.pdf&quot;,
+	&quot;256kb.pdf&quot;,
+	&quot;21kb.pdf&quot;,
+	&quot;2mb.pdf&quot;,
+	&quot;21kb.pdf&quot;,
+	&quot;256kb.pdf&quot;,
+	&quot;21kb.pdf&quot;,
+	&quot;10mb.pdf&quot;,
+	&quot;21kb.pdf&quot;,
+	&quot;256kb.pdf&quot;,
+	&quot;21kb.pdf&quot;,
+	&quot;5mb.pdf&quot;,
+	&quot;21kb.pdf&quot;,
+	&quot;256kb.pdf&quot;,
+	&quot;21kb.pdf&quot;,
+	&quot;512kb.pdf&quot;,
+	&quot;21kb.pdf&quot;,
+	&quot;256kb.pdf&quot;,
+	&quot;21kb.pdf&quot;,
+	&quot;21kb.pdf&quot;,
+	&quot;256kb.pdf&quot;,
+	&quot;21kb.pdf&quot;,
+	&quot;21kb.pdf&quot;,
+	&quot;256kb.pdf&quot;
+] as String[]
 
 // Generate and save UUIDs to CSV
-def values = (1..uuidCount).collect { value -&gt; [ uuid: UUID.randomUUID().toString(), prisonNumber: generator((&apos;A&apos;..&apos;Z&apos;).join(), 1) + generator((&apos;0&apos;..&apos;9&apos;).join(), 4) + generator((&apos;A&apos;..&apos;Z&apos;).join(), 2) ] }
-new File(csvFilePath).withWriter { out -&gt;
-    values.each { value -&gt; out.println(value.uuid + &apos;,&apos; + value.prisonNumber) }
+def values = (1..uuidCount).withIndex().collect { 
+	value, index -&gt; [
+		uuid: UUID.randomUUID().toString(),
+		prisonNumber: generator((&apos;A&apos;..&apos;Z&apos;).join(), 1) + generator((&apos;0&apos;..&apos;9&apos;).join(), 4) + generator((&apos;A&apos;..&apos;Z&apos;).join(), 2),
+		file: files[(index % files.length)]
+	]
+}
+new File(&quot;load-test-values.csv&quot;).withWriter { out -&gt;
+    values.each { value -&gt; out.println(value.uuid + &apos;,&apos; + value.prisonNumber + &apos;,&apos; + value.file) }
 }
 </stringProp>
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223Sampler>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Upload documents Thread Group" enabled="true">
-        <intProp name="ThreadGroup.num_threads">20</intProp>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Upload documents Thread Group">
+        <intProp name="ThreadGroup.num_threads">25</intProp>
         <intProp name="ThreadGroup.ramp_time">1</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
-          <stringProp name="LoopController.loops">5</stringProp>
+          <stringProp name="LoopController.loops">4</stringProp>
           <boolProp name="LoopController.continue_forever">false</boolProp>
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults">
           <stringProp name="HTTPSampler.domain">${__P(base_server_name)}</stringProp>
           <stringProp name="HTTPSampler.port">${__P(base_port)}</stringProp>
           <stringProp name="HTTPSampler.protocol">${__P(base_protocol)}</stringProp>
@@ -131,7 +174,7 @@ new File(csvFilePath).withWriter { out -&gt;
           </collectionProp>
         </HeaderManager>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Upload a document file and associated metadata and store against a unique identifier" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Upload a document file and associated metadata and store against a unique identifier">
           <stringProp name="HTTPSampler.path">/documents/HMCTS_WARRANT/${uuid}</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
@@ -139,9 +182,9 @@ new File(csvFilePath).withWriter { out -&gt;
           <boolProp name="HTTPSampler.DO_MULTIPART_POST">true</boolProp>
           <elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs">
             <collectionProp name="HTTPFileArgs.files">
-              <elementProp name="src/test/resources/test_data/warrant-for-remand.pdf" elementType="HTTPFileArg">
+              <elementProp name="src/test/resources/test_data/${file}" elementType="HTTPFileArg">
                 <stringProp name="File.mimetype">application/pdf</stringProp>
-                <stringProp name="File.path">src/test/resources/test_data/warrant-for-remand.pdf</stringProp>
+                <stringProp name="File.path">src/test/resources/test_data/${file}</stringProp>
                 <stringProp name="File.paramname">file</stringProp>
               </elementProp>
             </collectionProp>
@@ -162,13 +205,13 @@ new File(csvFilePath).withWriter { out -&gt;
         </HTTPSamplerProxy>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group" enabled="true">
-        <intProp name="ThreadGroup.num_threads">100</intProp>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group">
+        <intProp name="ThreadGroup.num_threads">50</intProp>
         <intProp name="ThreadGroup.ramp_time">1</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
-          <stringProp name="LoopController.loops">5</stringProp>
+          <stringProp name="LoopController.loops">8</stringProp>
           <boolProp name="LoopController.continue_forever">false</boolProp>
         </elementProp>
       </ThreadGroup>
@@ -366,7 +409,7 @@ new File(csvFilePath).withWriter { out -&gt;
         <stringProp name="filename"></stringProp>
       </ResultCollector>
       <hashTree/>
-      <ResultCollector guiclass="StatGraphVisualizer" testclass="ResultCollector" testname="Aggregate Graph" enabled="true">
+      <ResultCollector guiclass="StatGraphVisualizer" testclass="ResultCollector" testname="Aggregate Graph">
         <boolProp name="ResultCollector.error_logging">false</boolProp>
         <objProp>
           <name>saveConfig</name>
