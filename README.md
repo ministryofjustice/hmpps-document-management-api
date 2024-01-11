@@ -20,6 +20,8 @@ Run the following commands from the root directory of the project:
 
 # Load testing
 
+**IMPORTANT:** Inform the cloud platform team before running load tests against any environment. 
+
 1. Install JMeter using brew: `brew install jmeter`
 2. Open the JMeter GUI: `jmeter`
 3. Use the plugin manager (Options -> Plugins Manager or the icon on the top right) to install the [Custom JMeter Functions](https://jmeter-plugins.org/wiki/Functions/) plugin
