@@ -28,5 +28,13 @@ Run the following commands from the root directory of the project:
 4. Close JMeter and run the following command to open the test plan and specify required properties:
 
 ```
-jmeter -t load-test.jmx -Jprotocol='http' -Jbase_server_name='localhost' -Jbase_port='8080' -Jauth_server_name='<auth_server_name>' -Jclient_id='<client_id>' -Jclient_secret='<client_secret>'
+JVM_ARGS="-Xms1024m -Xmx1024m" jmeter -t load-test.jmx -Jprotocol='http' -Jbase_server_name='localhost' -Jbase_port='8080' -Jauth_server_name='<auth_server_name>' -Jclient_id='<client_id>' -Jclient_secret='<client_secret>'
+```
+
+## Running the load tests from the command line
+
+```
+rm -rf load-test-* \
+&& JVM_ARGS="-Xms1024m -Xmx1024m" hmpps-document-management-api % jmeter -n -t load-test.jmx -l load-test-results.jtl -e -o load-test-results -Jprotocol='http' -Jbase_server_name='localhost' -Jbase_port='8080' -Jauth_server_name='<auth_server_name>' -Jclient_id='<client_id>' -Jclient_secret='<client_secret>' \
+&& open load-test-results/index.html
 ```

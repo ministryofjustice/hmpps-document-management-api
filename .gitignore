@@ -72,4 +72,4 @@ sonar-project.properties
 **/Chart.lock
 
 #JMeter
-load-test-values.csv
+load-test-*
