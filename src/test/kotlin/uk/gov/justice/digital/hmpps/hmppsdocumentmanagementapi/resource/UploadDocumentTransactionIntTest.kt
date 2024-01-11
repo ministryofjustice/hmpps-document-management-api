@@ -18,6 +18,7 @@ import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.web.multipart.MultipartFile
 import software.amazon.awssdk.awscore.exception.AwsServiceException
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
@@ -33,7 +34,7 @@ class UploadDocumentTransactionIntTest : IntegrationTestBase() {
   lateinit var fileService: DocumentFileService
 
   @Test
-  fun `exception when storing document file rolls back transaction allowing retry`() {
+  fun `exception when storing document file deletes document allowing retry`() {
     val documentUuid = UUID.randomUUID()
 
     whenever(fileService.saveDocumentFile(eq(documentUuid), any<MultipartFile>()))
@@ -61,7 +62,10 @@ class UploadDocumentTransactionIntTest : IntegrationTestBase() {
     // Confirm that the document was saved to the database
     verify(repository).saveAndFlush(argThat { this.documentUuid == documentUuid })
 
-    // Confirm that the exception thrown when saving the document file caused the enclosing transaction to roll back
+    // Confirm that the document was then deleted
+    verify(repository).delete(argThat<Document> { this.documentUuid == documentUuid })
+
+    // Confirm that the exception thrown when saving the document file deleted the document
     // leaving no document with the supplied unique identifier in the database
     assertThat(repository.findByDocumentUuid(documentUuid)).isNull()
   }
