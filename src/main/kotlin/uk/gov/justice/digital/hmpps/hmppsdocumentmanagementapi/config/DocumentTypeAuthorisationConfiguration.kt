@@ -54,11 +54,23 @@ class DocumentTypeAuthorisationInterceptor(
 
   private fun HttpServletRequest.documentUuidFromPathVariable() =
     pathVariables()["documentUuid"]
-      ?.let { try { UUID.fromString(it.toString()) } catch (e: IllegalArgumentException) { null } }
+      ?.let {
+        try {
+          UUID.fromString(it.toString())
+        } catch (e: IllegalArgumentException) {
+          null
+        }
+      }
 
   private fun HttpServletRequest.documentTypeFromPathVariable() =
     pathVariables()["documentType"]
-      ?.let { try { DocumentType.valueOf(it.toString()) } catch (e: IllegalArgumentException) { null } }
+      ?.let {
+        try {
+          DocumentType.valueOf(it.toString())
+        } catch (e: IllegalArgumentException) {
+          null
+        }
+      }
 
   private fun HttpServletRequest.documentTypeFromUuidOrTypePathVariable() =
     documentUuidFromPathVariable()
