@@ -6,6 +6,7 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.output.Slf4jLogConsumer
 import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.utility.DockerImageName
+import java.net.BindException
 import java.net.ServerSocket
 
 object ClamAVContainer {
@@ -31,6 +32,8 @@ object ClamAVContainer {
     val serverSocket = ServerSocket(3310)
     serverSocket.localPort == 0
   } catch (e: IOException) {
+    true
+  } catch (e: BindException) {
     true
   }
 }
