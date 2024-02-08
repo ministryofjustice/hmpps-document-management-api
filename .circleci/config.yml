@@ -47,6 +47,11 @@ jobs:
           keys:
             - gradle-{{ checksum "build.gradle.kts" }}
             - gradle-
+      - hmpps/wait_till_ready_postgres
+      - hmpps/wait_till_ready:
+          port: 4566
+      - hmpps/wait_till_ready:
+          port: 3310
       - run:
           command: ./gradlew check
       - codecov/upload:
