@@ -51,6 +51,7 @@ class VirusScanService(private val hmppsClamAVProperties: HmppsClamAVProperties)
           response = String(buffer, 0, read, StandardCharsets.UTF_8)
         }
       }
+      socket.close()
     }
     return response
   }
@@ -86,6 +87,7 @@ class VirusScanService(private val hmppsClamAVProperties: HmppsClamAVProperties)
           }
           socketOutputStream.write(byteArrayOf(0, 0, 0, 0))
           socketOutputStream.flush()
+          socket.close()
           return populateVirusScanResult(String(IOUtils.toByteArray(socketInputStream), StandardCharsets.UTF_8).trim { it <= ' ' })
         }
       }
