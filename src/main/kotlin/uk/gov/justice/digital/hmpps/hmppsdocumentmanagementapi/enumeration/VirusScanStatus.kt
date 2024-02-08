@@ -4,5 +4,4 @@ enum class VirusScanStatus {
   PASSED,
   FAILED,
   ERROR,
-  CONNECTION_FAILED,
 }
