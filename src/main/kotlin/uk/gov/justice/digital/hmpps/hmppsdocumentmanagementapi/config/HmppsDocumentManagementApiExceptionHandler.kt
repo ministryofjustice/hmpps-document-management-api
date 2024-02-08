@@ -17,6 +17,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.multipart.MultipartException
 import org.springframework.web.multipart.support.MissingServletRequestPartException
 import org.springframework.web.servlet.resource.NoResourceFoundException
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.VirusScanResult
 import java.util.UUID
 
 @RestControllerAdvice
@@ -98,7 +99,7 @@ class HmppsDocumentManagementApiExceptionHandler {
 
   @ExceptionHandler(MethodArgumentNotValidException::class)
   fun handleMethodArgumentNotValidException(e: MethodArgumentNotValidException): ResponseEntity<ErrorResponse>? {
-    val errors = e.bindingResult.allErrors.joinToString(", ") { it.defaultMessage }
+    val errors = e.bindingResult.allErrors.joinToString(", ") { it.defaultMessage?.toString() ?: "" }
     return ResponseEntity
       .status(BAD_REQUEST)
       .body(
@@ -201,3 +202,5 @@ data class ErrorResponse(
 class DocumentAlreadyUploadedException(documentUuid: UUID) : Exception("Document with UUID '$documentUuid' already uploaded.")
 
 class DocumentFileNotFoundException(documentUuid: UUID) : Exception("Document file with UUID '$documentUuid' not found.")
+
+class DocumentFileVirusScanException(virusScanResult: VirusScanResult) : Exception("Document file virus scan ${virusScanResult.status} with result ${virusScanResult.result}${virusScanResult.signature?.let { " and signature $it" } ?: ""}")

@@ -27,8 +27,9 @@ class DocumentServiceUploadDocumentTest {
   private val documentRepository: DocumentRepository = mock()
   private val documentFileService: DocumentFileService = mock()
   private val eventService: EventService = mock()
+  private val virusScanService: VirusScanService = mock()
 
-  private val service = DocumentService(documentRepository, documentFileService, eventService)
+  private val service = DocumentService(documentRepository, documentFileService, eventService, virusScanService)
 
   private val documentType = DocumentType.HMCTS_WARRANT
   private val documentUuid = UUID.randomUUID()
@@ -49,6 +50,7 @@ class DocumentServiceUploadDocumentTest {
     whenever(file.originalFilename).thenReturn("test.pdf")
     whenever(file.size).thenReturn(size)
     whenever(file.contentType).thenReturn(contentType)
+    whenever(file.inputStream).thenReturn("A".byteInputStream())
     whenever(documentRepository.saveAndFlush(documentCaptor.capture())).thenReturn(document)
     whenever(document.toModel()).thenReturn(documentModel)
   }
