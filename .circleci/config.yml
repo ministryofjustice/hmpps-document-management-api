@@ -51,9 +51,6 @@ jobs:
       - hmpps/wait_till_ready:
           port: 4566
       - run:
-          name: Wait for clamAV to be ready
-          command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 ws://localhost:3310
-      - run:
           command: ./gradlew check
       - codecov/upload:
           file: build/reports/jacoco/test/jacocoTestReport.xml
