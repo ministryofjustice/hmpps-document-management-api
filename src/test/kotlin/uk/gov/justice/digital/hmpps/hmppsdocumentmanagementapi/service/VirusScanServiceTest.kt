@@ -1,9 +1,11 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service
 
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentFileVirusScanException
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.HmppsClamAVProperties
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.VirusScanStatus
 import java.io.ByteArrayInputStream
@@ -75,6 +77,13 @@ class VirusScanServiceTest {
     val virusScanService = setupVirusScanService("stream: virus1234 FOUND")
     val result = virusScanService.scan(ByteArrayInputStream(byteArrayOf()))
     assertThat(result.signature).isEqualTo("virus1234")
+  }
+
+  @Test
+  fun `scan and throw with any status other than passed throws error`() {
+    val virusScanService = setupVirusScanService("stream: virus1234 FOUND")
+    assertThatThrownBy { virusScanService.scanAndThrow(ByteArrayInputStream(byteArrayOf())) }
+      .isInstanceOf(DocumentFileVirusScanException::class.java)
   }
 
   private fun setupVirusScanService(returnedOutputStreamValue: String): VirusScanService {
