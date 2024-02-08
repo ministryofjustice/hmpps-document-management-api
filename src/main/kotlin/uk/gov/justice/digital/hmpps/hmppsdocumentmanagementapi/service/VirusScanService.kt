@@ -99,8 +99,8 @@ class VirusScanService(private val hmppsClamAVProperties: HmppsClamAVProperties)
     return socket
   }
 
-  private fun populateVirusScanResult(result: String?): VirusScanResult {
-    val status: VirusScanStatus = if (result.isNullOrEmpty()) {
+  private fun populateVirusScanResult(result: String): VirusScanResult {
+    val status: VirusScanStatus = if (result.isEmpty()) {
       VirusScanStatus.ERROR
     } else if (RESPONSE_OK == result) {
       VirusScanStatus.PASSED
@@ -110,7 +110,7 @@ class VirusScanService(private val hmppsClamAVProperties: HmppsClamAVProperties)
       VirusScanStatus.FAILED
     }
     val signature: String? = (
-      if (result?.endsWith(FOUND_SUFFIX) == true) {
+      if (result.endsWith(FOUND_SUFFIX)) {
         result.substring(STREAM_PREFIX.length, result.lastIndexOf(FOUND_SUFFIX) - 1).trim { it <= ' ' }
       } else {
         null
