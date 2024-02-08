@@ -50,8 +50,9 @@ jobs:
       - hmpps/wait_till_ready_postgres
       - hmpps/wait_till_ready:
           port: 4566
-      - hmpps/wait_till_ready:
-          port: 3310
+      - run:
+          name: Wait for clamAV to be ready
+          command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 localhost:3310
       - run:
           command: ./gradlew check
       - codecov/upload:
