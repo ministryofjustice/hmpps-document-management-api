@@ -18,6 +18,23 @@ Run the following commands from the root directory of the project:
 3. docker compose -f docker-compose-local.yml start db localstack
 4. ./run-local.sh
 
+# Running tests locally
+The tests use test containers to spin up dependent services (clamAV, postgres, localstack) so make sure Docker is running.
+There is also an integration test for uploading a "file infected with a virus" The file can be found src/test/resources/test_data/eicar.txt. 
+Windows defender will delete this file so it must be excluded from the scan. Open Windows defender and add the following exclusions:
+
+1. file: src/test/resources/test_data/eicar.txt
+2. file: build/resources/test_data/eicar.txt
+3. folder: build/tmp
+
+This will ensure the file is not deleted on the file system and during the test too.
+
+To run the test execute the following command:
+
+```shell
+./gradlew check
+```
+
 # Load testing
 
 **IMPORTANT:** Inform the cloud platform team before running load tests against any environment. 
