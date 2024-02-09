@@ -166,6 +166,17 @@ class HmppsDocumentManagementApiExceptionHandler {
       ),
     ).also { log.info("Document already uploaded exception: {}", e.message) }
 
+  @ExceptionHandler(DocumentFileVirusScanException::class)
+  fun handleDocumentFileVirusScanException(e: DocumentFileVirusScanException): ResponseEntity<ErrorResponse> = ResponseEntity
+    .status(BAD_REQUEST)
+    .body(
+      ErrorResponse(
+        status = BAD_REQUEST.value(),
+        userMessage = e.message,
+        developerMessage = e.message,
+      ),
+    ).also { log.info("Document virus scan exception: {}", e.message) }
+
   @ExceptionHandler(java.lang.Exception::class)
   fun handleException(e: Exception): ResponseEntity<ErrorResponse> = ResponseEntity
     .status(INTERNAL_SERVER_ERROR)

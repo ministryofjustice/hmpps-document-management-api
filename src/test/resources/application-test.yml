@@ -3,7 +3,9 @@ spring:
     url: 'jdbc:postgresql://localhost:5432/document-management'
     username: document-management
     password: document-management
-
+  servlet:
+    multipart:
+      location: ${user.dir}/build/tmp
 server:
   shutdown: immediate
 
