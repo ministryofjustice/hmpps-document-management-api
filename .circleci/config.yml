@@ -27,7 +27,7 @@ executors:
           - AWS_EXECUTION_ENV=True
           - DEFAULT_REGION=eu-west-2
           - TMPDIR=/private
-      - image: postgres:15
+      - image: postgres:16
         environment:
           - POSTGRES_PASSWORD=document-management
           - POSTGRES_USER=document-management
