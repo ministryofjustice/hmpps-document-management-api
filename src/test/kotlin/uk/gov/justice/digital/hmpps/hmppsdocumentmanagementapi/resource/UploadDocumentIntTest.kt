@@ -220,6 +220,28 @@ class UploadDocumentIntTest : IntegrationTestBase() {
     }
   }
 
+  @Test
+  fun `400 bad request - uploading file with virus`() {
+    val response = webTestClient.post()
+      .uri("/documents/${DocumentType.HMCTS_WARRANT}/${UUID.randomUUID()}")
+      .bodyValue(documentMetadataMultipartBody("eicar.txt"))
+      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
+      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
+      .exchange()
+      .expectStatus().isBadRequest
+      .expectHeader().contentType(MediaType.APPLICATION_JSON)
+      .expectBody(ErrorResponse::class.java)
+      .returnResult().responseBody!!
+
+    with(response) {
+      assertThat(status).isEqualTo(400)
+      assertThat(errorCode).isNull()
+      assertThat(userMessage).isEqualTo("Document file virus scan FAILED with result stream: Win.Test.EICAR_HDB-1 FOUND and signature Win.Test.EICAR_HDB-1")
+      assertThat(developerMessage).isEqualTo("Document file virus scan FAILED with result stream: Win.Test.EICAR_HDB-1 FOUND and signature Win.Test.EICAR_HDB-1")
+      assertThat(moreInfo).isNull()
+    }
+  }
+
   @Sql("classpath:test_data/document-with-no-metadata-history-id-1.sql")
   @Test
   fun `409 conflict - document unique identifier already used`() {
@@ -431,9 +453,9 @@ class UploadDocumentIntTest : IntegrationTestBase() {
     }
   }
 
-  private fun documentMetadataMultipartBody() =
+  private fun documentMetadataMultipartBody(file: String = "warrant-for-remand.pdf") =
     MultipartBodyBuilder().apply {
-      part("file", ClassPathResource("test_data/warrant-for-remand.pdf"))
+      part("file", ClassPathResource("test_data/$file"))
       part("metadata", metadata)
     }.build()
 

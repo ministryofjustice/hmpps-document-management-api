@@ -28,6 +28,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.HmppsS3Properties
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.container.ClamAVContainer
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.container.LocalStackContainer
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.container.LocalStackContainer.setLocalStackProperties
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.container.PostgresContainer
@@ -124,6 +125,7 @@ abstract class IntegrationTestBase {
   companion object {
     private val pgContainer = PostgresContainer.instance
     private val localStackContainer = LocalStackContainer.instance
+    private val clamAVContainer = ClamAVContainer.instance
 
     @JvmStatic
     @DynamicPropertySource
@@ -137,6 +139,9 @@ abstract class IntegrationTestBase {
       System.setProperty("aws.region", "eu-west-2")
 
       localStackContainer?.also { setLocalStackProperties(it, registry) }
+      clamAVContainer?.run {
+        registry.add("hmpps.clamav.port") { clamAVContainer.firstMappedPort }
+      }
     }
   }
 }

@@ -29,6 +29,8 @@ dependencies {
   // OpenAPI
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
 
+  implementation("commons-io:commons-io:2.15.1")
+
   // Test dependencies
   testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")

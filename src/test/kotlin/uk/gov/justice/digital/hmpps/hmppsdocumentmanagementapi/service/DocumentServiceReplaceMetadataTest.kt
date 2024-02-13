@@ -25,8 +25,9 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as
 class DocumentServiceReplaceMetadataTest {
   private val documentRepository: DocumentRepository = mock()
   private val eventService: EventService = mock()
+  private val virusScanService: VirusScanService = mock()
 
-  private val service = DocumentService(documentRepository, mock(), eventService)
+  private val service = DocumentService(documentRepository, mock(), eventService, virusScanService)
 
   private val documentUuid = UUID.randomUUID()
   private val document = spy(

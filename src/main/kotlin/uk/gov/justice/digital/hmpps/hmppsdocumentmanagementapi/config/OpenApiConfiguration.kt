@@ -33,7 +33,10 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
       Info()
         .title("Document Management API")
         .version(version)
-        .description("API for managing electronic documents")
+        .description(
+          "API for managing electronic documents. This service uses ClamAV to run a virus scan for any documents uploaded. ClamAV is updated twice daily at 6am and 6pm to" +
+            " refresh the virus database. This means close to those time there may be downtime, it is recommended to put in retries to cater for this.",
+        )
         .contact(
           Contact()
             .name("HMPPS Digital Studio")

@@ -21,8 +21,9 @@ class DocumentServiceGetDocumentFileTest {
   private val documentRepository: DocumentRepository = mock()
   private val documentFileService: DocumentFileService = mock()
   private val eventService: EventService = mock()
+  private val virusScanService: VirusScanService = mock()
 
-  private val service = DocumentService(documentRepository, documentFileService, eventService)
+  private val service = DocumentService(documentRepository, documentFileService, eventService, virusScanService)
 
   private val documentUuid = UUID.randomUUID()
   private val documentFilename = "test.pdf"

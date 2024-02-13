@@ -15,8 +15,30 @@ Run the following commands from the root directory of the project:
 
 1. docker compose -f docker-compose-local.yml pull
 2. docker compose -f docker-compose-local.yml up --no-start
-3. docker compose -f docker-compose-local.yml start db localstack
+3. docker compose -f docker-compose-local.yml start db localstack clamav
 4. ./run-local.sh
+
+# Running tests locally
+The tests use test containers to spin up dependent services (clamAV, postgres, localstack) so make sure Docker is running.
+There is also an integration test for uploading a "file infected with a virus" The file can be found src/test/resources/test_data/eicar.txt. 
+Windows defender will delete this file so it must be excluded from the scan. Open Windows defender and add the following exclusions:
+
+1. folder: src/test/resources/test_data (after this you may need to recover the eicar.txt within that folder)
+2. file: src/test/resources/test_data/eicar.txt (can delete the folder exclusion above now)
+
+After these two are done run a gradle task which will build the project (`./gradlew check`), this will likely popup another windows defender issue. Then exclude the following:
+1. folder: build/tmp
+2. folder: build/resources/test/test_data (may need to run a build task after this)
+3. file: build/resources/test/test_data/eicar.txt (can delete the folder exclusion above now)
+
+
+This will ensure the file is not deleted on the file system and during the test too.
+
+To run the test execute the following command:
+
+```shell
+./gradlew check
+```
 
 # Load testing
 
@@ -28,13 +50,13 @@ Run the following commands from the root directory of the project:
 4. Close JMeter and run the following command to open the test plan and specify required properties:
 
 ```
-JVM_ARGS="-Xms1024m -Xmx1024m" jmeter -t load-test.jmx -Jprotocol='http' -Jbase_server_name='localhost' -Jbase_port='8080' -Jauth_server_name='<auth_server_name>' -Jclient_id='<client_id>' -Jclient_secret='<client_secret>'
+JVM_ARGS="-Xms1024m -Xmx1024m" jmeter -t load-test.jmx -Jbase_protocol='http' -Jbase_server_name='localhost' -Jbase_port='8080' -Jauth_server_name='<auth_server_name>' -Jclient_id='<client_id>' -Jclient_secret='<client_secret>'
 ```
 
 ## Running the load tests from the command line
 
 ```
 rm -rf load-test-* \
-&& JVM_ARGS="-Xms1024m -Xmx1024m" hmpps-document-management-api % jmeter -n -t load-test.jmx -l load-test-results.jtl -e -o load-test-results -Jprotocol='http' -Jbase_server_name='localhost' -Jbase_port='8080' -Jauth_server_name='<auth_server_name>' -Jclient_id='<client_id>' -Jclient_secret='<client_secret>' \
+&& JVM_ARGS="-Xms1024m -Xmx1024m" jmeter -n -t load-test.jmx -l load-test-results.jtl -e -o load-test-results -Jbase_protocol='http' -Jbase_server_name='localhost' -Jbase_port='8080' -Jauth_server_name='<auth_server_name>' -Jclient_id='<client_id>' -Jclient_secret='<client_secret>' \
 && open load-test-results/index.html
 ```

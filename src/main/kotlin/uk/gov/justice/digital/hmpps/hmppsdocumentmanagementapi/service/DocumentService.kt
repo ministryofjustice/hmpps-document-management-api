@@ -24,6 +24,7 @@ class DocumentService(
   private val documentRepository: DocumentRepository,
   private val documentFileService: DocumentFileService,
   private val eventService: EventService,
+  private val virusScanService: VirusScanService,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -82,6 +83,7 @@ class DocumentService(
 
     // Any thrown exception will cause the database transaction to roll back allowing the request to be retried
     try {
+      virusScanService.scanAndThrow(file.inputStream)
       documentFileService.saveDocumentFile(documentUuid, file)
     } catch (e: Exception) {
       documentRepository.delete(document)
