@@ -23,9 +23,14 @@ The tests use test containers to spin up dependent services (clamAV, postgres, l
 There is also an integration test for uploading a "file infected with a virus" The file can be found src/test/resources/test_data/eicar.txt. 
 Windows defender will delete this file so it must be excluded from the scan. Open Windows defender and add the following exclusions:
 
-1. file: src/test/resources/test_data/eicar.txt
-2. file: build/resources/test_data/eicar.txt
-3. folder: build/tmp
+1. folder: src/test/resources/test_data (after this you may need to recover the eicar.txt within that folder)
+2. file: src/test/resources/test_data/eicar.txt (can delete the folder exclusion above now)
+
+After these two are done run a gradle task which will build the project (`./gradlew check`), this will likely popup another windows defender issue. Then exclude the following:
+1. folder: build/tmp
+2. folder: build/resources/test/test_data (may need to run a build task after this)
+3. file: build/resources/test/test_data/eicar.txt (can delete the folder exclusion above now)
+
 
 This will ensure the file is not deleted on the file system and during the test too.
 
