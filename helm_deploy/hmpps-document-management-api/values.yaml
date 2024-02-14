@@ -54,3 +54,7 @@ generic-service:
 
 generic-prometheus-alerts:
   targetApplication: hmpps-document-management-api
+
+clamav:
+  resources:
+    memory: 2Gi
