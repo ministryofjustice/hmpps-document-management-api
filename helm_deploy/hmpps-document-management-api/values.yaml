@@ -27,7 +27,7 @@ generic-service:
     DB_SSL_MODE: "verify-full"
     AWS_REGION: "eu-west-2"
     HMPPS_SQS_USE_WEB_TOKEN: "true"
-    HMPPS_CLAMAV_HOST: "clamav"
+    HMPPS_CLAMAV_HOST: "hmpps-document-management-api-clamav"
 
   # Pre-existing kubernetes secrets to load as environment variables in the deployment.
   # namespace_secrets:
@@ -57,4 +57,7 @@ generic-prometheus-alerts:
 
 clamav:
   resources:
-    memory: 2Gi
+    requests:
+      memory: 2Gi
+    limits:
+      memory: 2.5Gi
