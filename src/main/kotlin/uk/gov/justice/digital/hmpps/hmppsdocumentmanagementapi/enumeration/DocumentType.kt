@@ -16,4 +16,7 @@ enum class DocumentType(
   EXCLUSION_ZONE_MAP(
     description = "Exclusion zone maps used for exclusion zone condition on offender licence",
   ),
+  PIC_CASE_DOCUMENTS(
+    description = "Documents uploaded by prepare-a-case application users.",
+  ),
 }
