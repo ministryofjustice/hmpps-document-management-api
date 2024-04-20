@@ -19,4 +19,7 @@ enum class DocumentType(
   PIC_CASE_DOCUMENTS(
     description = "Documents uploaded by prepare-a-case application users.",
   ),
+  PPUD_RECALL(
+    description = "Supporting documents for PPUD",
+  ),
 }
