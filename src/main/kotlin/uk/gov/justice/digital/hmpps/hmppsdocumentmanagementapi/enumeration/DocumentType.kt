@@ -22,4 +22,7 @@ enum class DocumentType(
   PPUD_RECALL(
     description = "Supporting documents for PPUD",
   ),
+  PRISONER_PROFILE_PICTURE(
+    description = "Photograph of prisoner used for profile",
+  ),
 }
