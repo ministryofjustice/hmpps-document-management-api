@@ -387,7 +387,7 @@ class UploadDocumentIntTest : IntegrationTestBase() {
   fun `document file stored in S3`() {
     val response = webTestClient.uploadDocument()
 
-    val documentFile = fileService.getDocumentFile(response.documentUuid).readAllBytes()
+    val documentFile = fileService.getDocumentFile(response.documentUuid, DocumentType.PIC_CASE_DOCUMENTS).readAllBytes()
 
     assertThat(documentFile).hasSize(20688)
   }

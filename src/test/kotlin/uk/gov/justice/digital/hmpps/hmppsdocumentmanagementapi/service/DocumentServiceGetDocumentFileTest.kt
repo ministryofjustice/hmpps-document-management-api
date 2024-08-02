@@ -12,6 +12,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
 import java.io.InputStream
 import java.util.UUID
@@ -46,7 +47,8 @@ class DocumentServiceGetDocumentFileTest {
     whenever(documentModel.documentFilename).thenReturn(documentFilename)
     whenever(documentModel.fileSize).thenReturn(fileSize)
     whenever(documentModel.mimeType).thenReturn(mimeType)
-    whenever(documentFileService.getDocumentFile(documentUuid)).thenReturn(documentFile)
+    whenever(documentModel.documentType).thenReturn(DocumentType.PIC_CASE_DOCUMENTS)
+    whenever(documentFileService.getDocumentFile(documentUuid, DocumentType.PIC_CASE_DOCUMENTS)).thenReturn(documentFile)
   }
 
   @Test
@@ -69,7 +71,7 @@ class DocumentServiceGetDocumentFileTest {
   fun `gets document file by unique identifier`() {
     service.getDocumentFile(documentUuid, documentRequestContext)
 
-    verify(documentFileService).getDocumentFile(documentUuid)
+    verify(documentFileService).getDocumentFile(documentUuid, DocumentType.PIC_CASE_DOCUMENTS)
   }
 
   @Test

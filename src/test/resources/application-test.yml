@@ -22,6 +22,8 @@ hmpps.s3:
   buckets:
     document-management:
       bucketName: ${random.uuid}
+    prisoner-images:
+      bucketName: ${random.uuid}
 
 hmpps.sqs:
   provider: localstack

@@ -41,7 +41,7 @@ class DocumentService(
   fun getDocumentFile(documentUuid: UUID, documentRequestContext: DocumentRequestContext): DocumentFileModel {
     val startTimeInMs = System.currentTimeMillis()
     val document = documentRepository.findByDocumentUuidOrThrowNotFound(documentUuid).toModel()
-    val inputStream = documentFileService.getDocumentFile(documentUuid)
+    val inputStream = documentFileService.getDocumentFile(documentUuid, document.documentType)
     eventService.recordDocumentFileDownloadedEvent(document, documentRequestContext, System.currentTimeMillis() - startTimeInMs)
     return DocumentFileModel(
       document.documentFilename,
@@ -84,7 +84,7 @@ class DocumentService(
     // Any thrown exception will cause the database transaction to roll back allowing the request to be retried
     try {
       virusScanService.scanAndThrow(file.inputStream)
-      documentFileService.saveDocumentFile(documentUuid, file)
+      documentFileService.saveDocumentFile(documentUuid, file, documentType)
     } catch (e: Exception) {
       documentRepository.delete(document)
       log.warn("Failed to save document file for document UUID $documentUuid. Deleted document to allow retry", e)

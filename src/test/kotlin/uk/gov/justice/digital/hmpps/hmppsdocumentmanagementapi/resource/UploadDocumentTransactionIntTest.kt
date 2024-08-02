@@ -37,7 +37,7 @@ class UploadDocumentTransactionIntTest : IntegrationTestBase() {
   fun `exception when storing document file deletes document allowing retry`() {
     val documentUuid = UUID.randomUUID()
 
-    whenever(fileService.saveDocumentFile(eq(documentUuid), any<MultipartFile>()))
+    whenever(fileService.saveDocumentFile(eq(documentUuid), any<MultipartFile>(), eq(DocumentType.HMCTS_WARRANT)))
       .thenThrow(AwsServiceException.builder().message("Test AWS Service Exception").build())
 
     val response = webTestClient.post()
