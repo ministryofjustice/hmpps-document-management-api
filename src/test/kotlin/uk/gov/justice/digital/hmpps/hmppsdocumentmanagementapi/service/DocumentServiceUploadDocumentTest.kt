@@ -116,7 +116,7 @@ class DocumentServiceUploadDocumentTest {
   fun `saves document file using unique identifier`() {
     service.uploadDocument(documentType, documentUuid, file, mock(), documentRequestContext)
 
-    verify(documentFileService).saveDocumentFile(documentUuid, file)
+    verify(documentFileService).saveDocumentFile(documentUuid, file, documentType)
   }
 
   @Test

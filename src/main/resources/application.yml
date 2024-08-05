@@ -89,6 +89,9 @@ hmpps.s3:
     document-management:
       bucketName: ${S3_DOCUMENT_BUCKET_NAME}
       bucketArn: ${S3_DOCUMENT_BUCKET_ARN}
+    prisoner-images:
+      bucketName: ${S3_PRISONER_IMAGES_BUCKET_NAME}
+      bucketArn: ${S3_PRISONER_IMAGES_BUCKET_ARN}
 
 hmpps.sqs:
   queueAdminRole: ROLE_DOCUMENT_ADMIN

@@ -4,6 +4,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.ROLE_DOC
 
 enum class DocumentType(
   val description: String,
+  val s3BucketName: S3BucketName = S3BucketName.DOCUMENT_MANAGEMENT,
   val additionalRoles: Collection<String> = emptySet(),
 ) {
   HMCTS_WARRANT(
@@ -24,5 +25,6 @@ enum class DocumentType(
   ),
   PRISONER_PROFILE_PICTURE(
     description = "Photograph of prisoner used for profile",
+    s3BucketName = S3BucketName.PRISONER_IMAGES,
   ),
 }
