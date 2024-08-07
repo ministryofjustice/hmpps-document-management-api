@@ -24,7 +24,7 @@ dependencies {
 
   // AWS
   implementation("io.awspring.cloud:spring-cloud-aws-starter-s3")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:3.1.3")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:4.2.0")
 
   // OpenAPI
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
