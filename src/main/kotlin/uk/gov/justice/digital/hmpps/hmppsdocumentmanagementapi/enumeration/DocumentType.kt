@@ -27,4 +27,8 @@ enum class DocumentType(
     description = "Photograph of prisoner used for profile",
     s3BucketName = S3BucketName.PRISONER_IMAGES,
   ),
+  PHYSICAL_IDENTIFIER_PICTURE(
+    description = "Photograph of physical identifier for prisoners",
+    s3BucketName = S3BucketName.PRISONER_IMAGES,
+  ),
 }
