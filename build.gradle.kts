@@ -19,6 +19,7 @@ dependencies {
 
   // Database dependencies
   runtimeOnly("org.flywaydb:flyway-core")
+  runtimeOnly("org.flywaydb:flyway-database-postgresql")
   runtimeOnly("org.postgresql:postgresql")
   implementation("io.hypersistence:hypersistence-utils-hibernate-62:3.7.4")
 
