@@ -151,6 +151,15 @@ workflows:
             branches:
               only:
                 - /DOC-71\/.*/
+      - hmpps/build_docker:
+          name: build_docker
+          git-lfs: true
+          publish: false
+          persist_container_image: true
+          filters:
+            branches:
+                only:
+                  - /DOC-71\/.*/
       - hmpps/trivy_pipeline_scan:
           name: vulnerability_scan
           requires: [ build_docker, build_docker_publish ]
