@@ -142,6 +142,15 @@ workflows:
           slack_channel: << pipeline.parameters.alerts-slack-channel >>
           context:
             - hmpps-common-vars
+      - hmpps/build_docker:
+          name: build_docker_publish
+          git-lfs: true
+          publish: true
+          persist_container_image: true
+          filters:
+            branches:
+              only:
+                - /DOC-71\/.*/
       - hmpps/trivy_pipeline_scan:
           name: vulnerability_scan
           requires: [ build_docker, build_docker_publish ]
