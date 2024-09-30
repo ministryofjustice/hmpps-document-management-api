@@ -33,5 +33,5 @@ enum class DocumentType(
   ),
   CEMO_ATTACHMENT(
     description = "Attachments used for create electronic monitoring order",
-  )
+  ),
 }
