@@ -31,4 +31,7 @@ enum class DocumentType(
     description = "Photograph of physical identifier for prisoners",
     s3BucketName = S3BucketName.PRISONER_IMAGES,
   ),
+  CEMO_ATTACHMENT(
+    description = "Attachments used for create electronic monitoring order",
+  )
 }
