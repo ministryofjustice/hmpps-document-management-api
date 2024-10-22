@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.6"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.7"
   kotlin("plugin.spring") version "2.0.21"
   kotlin("plugin.jpa") version "2.0.21"
   jacoco
@@ -33,7 +33,7 @@ dependencies {
   implementation("commons-io:commons-io:2.17.0")
 
   // Test dependencies
-  testImplementation("org.junit.jupiter:junit-jupiter:5.11.2")
+  testImplementation("org.junit.jupiter:junit-jupiter:5.11.3")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
   testImplementation("org.wiremock:wiremock-standalone:3.9.1")
   testImplementation("org.testcontainers:postgresql:1.20.2")
