@@ -29,6 +29,8 @@ hmpps.s3:
       bucketName: document-management
     prisoner-images:
       bucketName: prisoner-images
+    distinguishing-mark-images:
+      bucketName: prisoner-images
 
 hmpps.sqs:
   provider: localstack
