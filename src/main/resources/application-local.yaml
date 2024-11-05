@@ -30,7 +30,7 @@ hmpps.s3:
     prisoner-images:
       bucketName: prisoner-images
     distinguishing-mark-images:
-      bucketName: prisoner-images
+      bucketName: distinguishing-mark-images
 
 hmpps.sqs:
   provider: localstack
