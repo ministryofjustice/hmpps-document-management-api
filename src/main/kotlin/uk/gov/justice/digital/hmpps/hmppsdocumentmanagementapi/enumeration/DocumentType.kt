@@ -31,6 +31,10 @@ enum class DocumentType(
     description = "Photograph of physical identifier for prisoners",
     s3BucketName = S3BucketName.PRISONER_IMAGES,
   ),
+  DISTINGUISHING_MARK_PICTURE(
+    description = "Photograph of distinguishing mark for prisoners",
+    s3BucketName = S3BucketName.DISTINGUISHING_MARK_IMAGES,
+  ),
   CEMO_ATTACHMENT(
     description = "Attachments used for create electronic monitoring order",
   ),
