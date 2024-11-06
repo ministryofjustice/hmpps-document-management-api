@@ -27,12 +27,8 @@ enum class DocumentType(
     description = "Photograph of prisoner used for profile",
     s3BucketName = S3BucketName.PRISONER_IMAGES,
   ),
-  PHYSICAL_IDENTIFIER_PICTURE(
-    description = "Photograph of physical identifier for prisoners",
-    s3BucketName = S3BucketName.PRISONER_IMAGES,
-  ),
-  DISTINGUISHING_MARK_PICTURE(
-    description = "Photograph of distinguishing mark for prisoners",
+  DISTINGUISHING_MARK_IMAGE(
+    description = "Image of distinguishing mark for prisoners",
     s3BucketName = S3BucketName.DISTINGUISHING_MARK_IMAGES,
   ),
   CEMO_ATTACHMENT(

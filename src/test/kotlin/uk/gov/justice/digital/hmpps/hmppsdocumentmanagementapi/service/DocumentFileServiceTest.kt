@@ -60,7 +60,6 @@ class DocumentFileServiceTest {
     "PIC_CASE_DOCUMENTS,doc-management-bucket-name",
     "PPUD_RECALL,doc-management-bucket-name",
     "PRISONER_PROFILE_PICTURE,prisoner-images-bucket-name",
-    "PHYSICAL_IDENTIFIER_PICTURE,prisoner-images-bucket-name",
     "DISTINGUISHING_MARK_PICTURE,distinguishing-mark-images-bucket-name",
   )
   fun `save document file uses bucket name from document type`(documentType: DocumentType, expectedBucketName: String) {
@@ -111,7 +110,6 @@ class DocumentFileServiceTest {
     "PIC_CASE_DOCUMENTS,doc-management-bucket-name",
     "PPUD_RECALL,doc-management-bucket-name",
     "PRISONER_PROFILE_PICTURE,prisoner-images-bucket-name",
-    "PHYSICAL_IDENTIFIER_PICTURE,prisoner-images-bucket-name",
     "DISTINGUISHING_MARK_PICTURE,distinguishing-mark-images-bucket-name",
   )
   fun `get document file uses bucket name from document type`(documentType: DocumentType, expectedBucketName: String) {
