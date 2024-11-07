@@ -5,4 +5,5 @@ enum class S3BucketName(
 ) {
   DOCUMENT_MANAGEMENT("document-management"),
   PRISONER_IMAGES("prisoner-images"),
+  DISTINGUISHING_MARK_IMAGES("distinguishing-mark-images"),
 }
