@@ -192,7 +192,7 @@ abstract class AbstractDocumentTypeIntegrationTest : IntegrationTestBase() {
     bucketName,
   )
 
-  internal fun uploadDocument(
+  private fun uploadDocument(
     documentUuid: UUID,
     pathOfResourceToUpload: String,
     roles: List<String>,
@@ -203,7 +203,7 @@ abstract class AbstractDocumentTypeIntegrationTest : IntegrationTestBase() {
       .headers(setDocumentContext(serviceName, activeCaseLoadId, username)).exchange()
   }
 
-  internal fun getDocument(documentUuid: UUID, roles: List<String>): WebTestClient.ResponseSpec {
+  private fun getDocument(documentUuid: UUID, roles: List<String>): WebTestClient.ResponseSpec {
     return webTestClient.get().uri("/documents/$documentUuid")
       .headers(setAuthorisation(roles = roles))
       .headers(setDocumentContext(serviceName, activeCaseLoadId, username)).exchange()
@@ -218,7 +218,7 @@ abstract class AbstractDocumentTypeIntegrationTest : IntegrationTestBase() {
       .headers(setDocumentContext(serviceName, activeCaseLoadId, username)).exchange()
   }
 
-  internal fun searchDocuments(
+  private fun searchDocuments(
     searchRequest: DocumentSearchRequest,
     roles: List<String>,
   ): WebTestClient.ResponseSpec {
@@ -227,7 +227,7 @@ abstract class AbstractDocumentTypeIntegrationTest : IntegrationTestBase() {
       .headers(setDocumentContext(serviceName, activeCaseLoadId, username)).exchange()
   }
 
-  internal fun replaceMetadata(
+  private fun replaceMetadata(
     documentUuid: UUID,
     newMetadata: JsonNode,
     roles: List<String>,
@@ -237,7 +237,7 @@ abstract class AbstractDocumentTypeIntegrationTest : IntegrationTestBase() {
       .headers(setDocumentContext(serviceName, activeCaseLoadId, username)).exchange()
   }
 
-  internal fun deleteDocument(
+  private fun deleteDocument(
     documentUuid: UUID,
     roles: List<String>,
   ): WebTestClient.ResponseSpec {
@@ -246,13 +246,13 @@ abstract class AbstractDocumentTypeIntegrationTest : IntegrationTestBase() {
       .headers(setDocumentContext(serviceName, activeCaseLoadId, username)).exchange()
   }
 
-  internal fun documentMetadataMultipartBody(pathOfResourceToUpload: String) =
+  private fun documentMetadataMultipartBody(pathOfResourceToUpload: String) =
     MultipartBodyBuilder().apply {
       part("file", ClassPathResource(pathOfResourceToUpload))
       part("metadata", metadata)
     }.build()
 
-  internal fun assertDocumentDataIsCorrect(expectedUuid: UUID, response: Document) {
+  private fun assertDocumentDataIsCorrect(expectedUuid: UUID, response: Document) {
     with(response) {
       val filenameParts = this@AbstractDocumentTypeIntegrationTest.testFileName.split(".")
       assertThat(this.documentUuid).isEqualTo(expectedUuid)
