@@ -21,7 +21,7 @@ VALUES
     'distinguishing-mark-image',
     'png',
     10465,
-    'd58e3582afa99040e27b92b13c8f2280',
+    '',
     'image/png',
     JSON '{ "prisonNumber": "A1234BC" }',
     NOW(),
