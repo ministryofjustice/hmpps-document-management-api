@@ -58,7 +58,7 @@ class DocumentTypeAuthorisationConfigurationTest {
     whenever(documentRepository.getDocumentTypeByDocumentUuid(documentUuid)).thenReturn(documentType)
 
     assertThrows<AccessDeniedException>(
-      "Document type '${documentType}' requires additional role",
+      "Document type '$documentType' requires additional role",
     ) {
       interceptor.preHandle(req, res, "null")
     }
@@ -75,7 +75,7 @@ class DocumentTypeAuthorisationConfigurationTest {
     )
 
     assertThrows<AccessDeniedException>(
-      "Document type '${documentType}' requires additional role",
+      "Document type '$documentType' requires additional role",
     ) {
       interceptor.preHandle(req, res, "null")
     }
@@ -97,7 +97,7 @@ class DocumentTypeAuthorisationConfigurationTest {
     whenever(documentRepository.getDocumentTypeByDocumentUuid(documentUuid)).thenReturn(documentType)
 
     assertThrows<AccessDeniedException>(
-      "Document type '${documentType}' requires additional role",
+      "Document type '$documentType' requires additional role",
     ) {
       interceptor.preHandle(req, res, "null")
     }
@@ -119,7 +119,7 @@ class DocumentTypeAuthorisationConfigurationTest {
     whenever(documentRepository.getDocumentTypeByDocumentUuid(documentUuid)).thenReturn(null)
 
     assertThrows<AccessDeniedException>(
-      "Document type '${documentType}' requires additional role",
+      "Document type '$documentType' requires additional role",
     ) {
       interceptor.preHandle(req, res, "null")
     }
@@ -129,13 +129,13 @@ class DocumentTypeAuthorisationConfigurationTest {
     @JvmStatic
     fun documentTypesRequiringAdditionalRoles() = listOf(
       Arguments.of(DocumentType.SUBJECT_ACCESS_REQUEST_REPORT),
-      Arguments.of(DocumentType.DISTINGUISHING_MARK_IMAGE)
+      Arguments.of(DocumentType.DISTINGUISHING_MARK_IMAGE),
     )
 
     @JvmStatic
     fun documentTypesRequiringAdditionalRoleWithRoleMapping() = listOf(
       Arguments.of(DocumentType.SUBJECT_ACCESS_REQUEST_REPORT, ROLE_DOCUMENT_TYPE_SAR),
-      Arguments.of(DocumentType.DISTINGUISHING_MARK_IMAGE, ROLE_DOCUMENT_TYPE_DISTINGUISHING_MARK_IMAGE)
+      Arguments.of(DocumentType.DISTINGUISHING_MARK_IMAGE, ROLE_DOCUMENT_TYPE_DISTINGUISHING_MARK_IMAGE),
     )
   }
 
