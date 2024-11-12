@@ -25,6 +25,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorRespo
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.EventType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.TestConstants
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.AuditService
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.DocumentFileService
@@ -115,7 +116,7 @@ class UploadDocumentIntTest : IntegrationTestBase() {
   @Test
   fun `400 bad request - invalid document type`() {
     val response = webTestClient.post()
-      .uri("/documents/INVALID/${UUID.randomUUID()}")
+      .uri("/documents/${TestConstants.INVALID_DOCUMENT_TYPE}/${UUID.randomUUID()}")
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
       .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
@@ -127,7 +128,7 @@ class UploadDocumentIntTest : IntegrationTestBase() {
       assertThat(status).isEqualTo(400)
       assertThat(errorCode).isNull()
       assertThat(userMessage).isEqualTo("Validation failure: Parameter documentType must be one of the following ${StringUtils.join(DocumentType.entries.toTypedArray(), ", ")}")
-      assertThat(developerMessage).isEqualTo("Failed to convert value of type 'java.lang.String' to required type 'uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType'; Failed to convert from type [java.lang.String] to type [@org.springframework.web.bind.annotation.PathVariable @io.swagger.v3.oas.annotations.Parameter uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType] for value [INVALID]")
+      assertThat(developerMessage).isEqualTo(String.format(TestConstants.INVALID_DOC_TYPE_EXCEPTION_MESSAGE_TEMPLATE, TestConstants.INVALID_DOCUMENT_TYPE))
       assertThat(moreInfo).isNull()
     }
   }
@@ -135,7 +136,7 @@ class UploadDocumentIntTest : IntegrationTestBase() {
   @Test
   fun `400 bad request - invalid document uuid`() {
     val response = webTestClient.post()
-      .uri("/documents/${DocumentType.HMCTS_WARRANT}/INVALID")
+      .uri("/documents/${DocumentType.HMCTS_WARRANT}/${TestConstants.INVALID_UUID}")
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
       .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
       .exchange()
@@ -147,7 +148,7 @@ class UploadDocumentIntTest : IntegrationTestBase() {
       assertThat(status).isEqualTo(400)
       assertThat(errorCode).isNull()
       assertThat(userMessage).isEqualTo("Validation failure: Parameter documentUuid must be of type java.util.UUID")
-      assertThat(developerMessage).isEqualTo("Failed to convert value of type 'java.lang.String' to required type 'java.util.UUID'; Invalid UUID string: INVALID")
+      assertThat(developerMessage).isEqualTo(String.format(TestConstants.INVALID_UUID_EXCEPTION_MESSAGE_TEMPLATE, TestConstants.INVALID_UUID))
       assertThat(moreInfo).isNull()
     }
   }
