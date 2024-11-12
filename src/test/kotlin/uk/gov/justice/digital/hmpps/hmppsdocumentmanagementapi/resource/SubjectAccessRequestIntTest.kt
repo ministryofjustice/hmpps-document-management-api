@@ -10,6 +10,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.S3BucketName
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest
@@ -300,5 +301,5 @@ class SubjectAccessRequestIntTest : IntegrationTestBase() {
       part("metadata", metadata)
     }.build()
 
-  private fun putDocumentInS3() = putDocumentInS3(documentUuid, "test_data/subject-access-request-report.pdf")
+  private fun putDocumentInS3() = putDocumentInS3(documentUuid, "test_data/subject-access-request-report.pdf", S3BucketName.DOCUMENT_MANAGEMENT.value)
 }
