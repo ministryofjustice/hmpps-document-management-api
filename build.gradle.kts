@@ -21,11 +21,11 @@ dependencies {
   runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
   runtimeOnly("org.postgresql:postgresql")
-  implementation("io.hypersistence:hypersistence-utils-hibernate-62:3.8.3")
+  implementation("io.hypersistence:hypersistence-utils-hibernate-62:3.9.0")
 
   // AWS
   implementation("io.awspring.cloud:spring-cloud-aws-starter-s3")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.0.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.1.1")
 
   // OpenAPI
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
@@ -35,9 +35,9 @@ dependencies {
   // Test dependencies
   testImplementation("org.junit.jupiter:junit-jupiter:5.11.3")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-  testImplementation("org.wiremock:wiremock-standalone:3.9.1")
-  testImplementation("org.testcontainers:postgresql:1.20.2")
-  testImplementation("org.testcontainers:localstack:1.20.2")
+  testImplementation("org.wiremock:wiremock-standalone:3.9.2")
+  testImplementation("org.testcontainers:postgresql:1.20.3")
+  testImplementation("org.testcontainers:localstack:1.20.3")
   testImplementation("org.awaitility:awaitility-kotlin:4.2.2")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.6")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
