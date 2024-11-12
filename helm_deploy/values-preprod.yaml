@@ -11,6 +11,14 @@ generic-service:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
     HMPPS_AUTH_URL: https://sign-in-preprod.hmpps.service.justice.gov.uk/auth
 
+
+  allowlist:
+    penetration-test-ip-1: 54.37.241.156/30
+    penetration-test-ip-2: 167.71.136.237/32
+    groups:
+      - internal
+      - circleci
+
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 # See https://user-guide.cloud-platform.service.justice.gov.uk/documentation/monitoring-an-app/how-to-create-alarms.html#creating-your-own-custom-alerts
 generic-prometheus-alerts:
