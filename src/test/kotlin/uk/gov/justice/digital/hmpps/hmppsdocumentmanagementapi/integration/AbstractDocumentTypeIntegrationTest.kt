@@ -33,6 +33,7 @@ abstract class AbstractDocumentTypeIntegrationTest : IntegrationTestBase() {
   abstract val documentFileSize: Long
   abstract val contentType: String
   abstract val bucketName: String
+  abstract val testFileHash: String
 
   @Test
   fun `upload document - 403 forbidden - document writer only`() {
@@ -62,7 +63,7 @@ abstract class AbstractDocumentTypeIntegrationTest : IntegrationTestBase() {
     ).expectStatus().isCreated.expectHeader().contentType(MediaType.APPLICATION_JSON)
       .expectBody(Document::class.java).returnResult().responseBody!!
 
-    assertDocumentDataIsCorrect(newUuid, response)
+    assertDocumentDataIsCorrect(newUuid, "", response)
   }
 
   @Test
@@ -82,7 +83,7 @@ abstract class AbstractDocumentTypeIntegrationTest : IntegrationTestBase() {
       listOf(ROLE_DOCUMENT_READER, documentTypeRole),
     ).expectStatus().isOk.expectBody(Document::class.java).returnResult().responseBody!!
 
-    assertDocumentDataIsCorrect(documentUuid, response)
+    assertDocumentDataIsCorrect(documentUuid, testFileHash, response)
   }
 
   @Test
@@ -252,7 +253,7 @@ abstract class AbstractDocumentTypeIntegrationTest : IntegrationTestBase() {
       part("metadata", metadata)
     }.build()
 
-  private fun assertDocumentDataIsCorrect(expectedUuid: UUID, response: Document) {
+  private fun assertDocumentDataIsCorrect(expectedUuid: UUID, expectedFileHash: String, response: Document) {
     with(response) {
       val filenameParts = this@AbstractDocumentTypeIntegrationTest.testFileName.split(".")
       assertThat(this.documentUuid).isEqualTo(expectedUuid)
@@ -260,7 +261,7 @@ abstract class AbstractDocumentTypeIntegrationTest : IntegrationTestBase() {
       assertThat(this.filename).isEqualTo(filenameParts.first())
       assertThat(this.fileExtension).isEqualTo(filenameParts.last())
       assertThat(this.fileSize).isEqualTo(this@AbstractDocumentTypeIntegrationTest.documentFileSize)
-      assertThat(this.fileHash).isEmpty()
+      assertThat(this.fileHash).isEqualTo(expectedFileHash)
       assertThat(this.mimeType).isEqualTo(this@AbstractDocumentTypeIntegrationTest.contentType)
       assertThat(this.metadata).isEqualTo(this@AbstractDocumentTypeIntegrationTest.metadata)
       assertThat(this.createdTime).isCloseTo(

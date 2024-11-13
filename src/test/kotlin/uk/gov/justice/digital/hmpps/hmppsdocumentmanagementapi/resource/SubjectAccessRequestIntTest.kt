@@ -27,4 +27,5 @@ class SubjectAccessRequestIntTest : AbstractDocumentTypeIntegrationTest() {
   override val documentFileSize: Long = 21384L
   override val contentType = "application/pdf"
   override val bucketName = S3BucketName.DOCUMENT_MANAGEMENT.value
+  override val testFileHash = "d58e3582afa99040e27b92b13c8f2280"
 }

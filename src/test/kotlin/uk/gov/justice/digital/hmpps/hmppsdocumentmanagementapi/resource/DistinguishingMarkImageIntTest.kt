@@ -26,4 +26,5 @@ class DistinguishingMarkImageIntTest : AbstractDocumentTypeIntegrationTest() {
   override val documentFileSize: Long = 10465L
   override val contentType = "image/png"
   override val bucketName = S3BucketName.DISTINGUISHING_MARK_IMAGES.value
+  override val testFileHash = "25429b1d1ef462265048f59522d04f07a1f81ee07d0abc39424d337d2b24d988"
 }

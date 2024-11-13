@@ -21,7 +21,7 @@ VALUES
     'subject-access-request-report',
     'pdf',
     21384,
-    '',
+    'd58e3582afa99040e27b92b13c8f2280',
     'application/pdf',
     JSON '{ "sarCaseReference": "SAR-1234", "prisonNumber": "A1234BC" }',
     NOW(),
