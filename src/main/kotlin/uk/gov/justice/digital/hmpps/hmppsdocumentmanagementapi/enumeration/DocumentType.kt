@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration
 
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.ROLE_DOCUMENT_TYPE_DISTINGUISHING_MARK_IMAGE
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.ROLE_DOCUMENT_TYPE_SAR
 
 enum class DocumentType(
@@ -30,6 +31,7 @@ enum class DocumentType(
   DISTINGUISHING_MARK_IMAGE(
     description = "Image of distinguishing mark for prisoners",
     s3BucketName = S3BucketName.DISTINGUISHING_MARK_IMAGES,
+    additionalRoles = setOf(ROLE_DOCUMENT_TYPE_DISTINGUISHING_MARK_IMAGE),
   ),
   CEMO_ATTACHMENT(
     description = "Attachments used for create electronic monitoring order",

@@ -19,6 +19,7 @@ import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.EventType
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.S3BucketName
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.IntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.TestConstants
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.assertIsDocumentWithNoMetadataHistoryId1
@@ -163,7 +164,7 @@ class DownloadDocumentIntTest : IntegrationTestBase() {
   @Sql("classpath:test_data/document-with-no-metadata-history-id-1.sql")
   @Test
   fun `download document success`() {
-    val fileBytes = putDocumentInS3(documentUuid, "test_data/warrant-for-remand.pdf")
+    val fileBytes = putDocumentInS3(documentUuid, "test_data/warrant-for-remand.pdf", S3BucketName.DOCUMENT_MANAGEMENT.value)
 
     val response = webTestClient.downloadDocument(
       documentUuid,
@@ -178,7 +179,7 @@ class DownloadDocumentIntTest : IntegrationTestBase() {
   @Sql("classpath:test_data/document-with-no-metadata-history-id-1.sql")
   @Test
   fun `audits event`() {
-    putDocumentInS3(documentUuid, "test_data/warrant-for-remand.pdf")
+    putDocumentInS3(documentUuid, "test_data/warrant-for-remand.pdf", S3BucketName.DOCUMENT_MANAGEMENT.value)
 
     webTestClient.downloadDocument(
       documentUuid,
@@ -202,7 +203,7 @@ class DownloadDocumentIntTest : IntegrationTestBase() {
   @Sql("classpath:test_data/document-with-no-metadata-history-id-1.sql")
   @Test
   fun `tracks event`() {
-    putDocumentInS3(documentUuid, "test_data/warrant-for-remand.pdf")
+    putDocumentInS3(documentUuid, "test_data/warrant-for-remand.pdf", S3BucketName.DOCUMENT_MANAGEMENT.value)
 
     webTestClient.downloadDocument(
       documentUuid,

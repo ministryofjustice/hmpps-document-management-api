@@ -1,0 +1,30 @@
+INSERT INTO document
+(
+    document_id,
+    document_uuid,
+    document_type,
+    filename,
+    file_extension,
+    file_size,
+    file_hash,
+    mime_type,
+    metadata,
+    created_time,
+    created_by_service_name,
+    created_by_username
+)
+VALUES
+(
+    4,
+    'dcfa4919-4474-461d-a795-336fbd11438c',
+    'DISTINGUISHING_MARK_IMAGE',
+    'distinguishing-mark-image',
+    'png',
+    10465,
+    '25429b1d1ef462265048f59522d04f07a1f81ee07d0abc39424d337d2b24d988',
+    'image/png',
+    JSON '{ "prisonNumber": "A1234BC" }',
+    NOW(),
+    'distinguishing-marks-api',
+    'TEST_USER'
+);

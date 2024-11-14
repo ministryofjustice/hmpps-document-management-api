@@ -4,6 +4,9 @@ import jakarta.servlet.http.HttpServletRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import org.springframework.mock.web.MockHttpServletRequest
@@ -12,6 +15,7 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.servlet.HandlerMapping
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.ROLE_DOCUMENT_TYPE_DISTINGUISHING_MARK_IMAGE
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.ROLE_DOCUMENT_TYPE_SAR
 import java.util.UUID
 
@@ -29,17 +33,19 @@ class DocumentTypeAuthorisationConfigurationTest {
     assertThat(req.authorisedDocumentTypes()).isEqualTo(DocumentType.entries.filter { it.additionalRoles.isEmpty() })
   }
 
-  @Test
-  fun `authorised document types contains subject access request report when request has document type SAR role`() {
-    req.addUserRole(ROLE_DOCUMENT_TYPE_SAR)
+  @ParameterizedTest
+  @MethodSource("documentTypesRequiringAdditionalRoleWithRoleMapping")
+  fun `authorised document types correct when request has additional document type role`(documentType: DocumentType, role: String) {
+    req.addUserRole(role)
 
     interceptor.preHandle(req, res, "null")
 
-    assertThat(req.authorisedDocumentTypes()).contains(DocumentType.SUBJECT_ACCESS_REQUEST_REPORT)
+    assertThat(req.authorisedDocumentTypes()).contains(documentType)
   }
 
-  @Test
-  fun `document type subject access request report from document unique identifier throws exception when request does not have document type SAR role`() {
+  @ParameterizedTest
+  @MethodSource("documentTypesRequiringAdditionalRoles")
+  fun `document type requiring custom roles from document unique identifier throws exception when request does not have document type role`(documentType: DocumentType) {
     val documentUuid = UUID.randomUUID()
 
     req.setAttribute(
@@ -49,33 +55,35 @@ class DocumentTypeAuthorisationConfigurationTest {
       ),
     )
 
-    whenever(documentRepository.getDocumentTypeByDocumentUuid(documentUuid)).thenReturn(DocumentType.SUBJECT_ACCESS_REQUEST_REPORT)
+    whenever(documentRepository.getDocumentTypeByDocumentUuid(documentUuid)).thenReturn(documentType)
 
     assertThrows<AccessDeniedException>(
-      "Document type '${DocumentType.SUBJECT_ACCESS_REQUEST_REPORT}' requires additional role",
+      "Document type '$documentType' requires additional role",
     ) {
       interceptor.preHandle(req, res, "null")
     }
   }
 
-  @Test
-  fun `document type subject access request report from path variable throws exception when request does not have document type SAR role`() {
+  @ParameterizedTest
+  @MethodSource("documentTypesRequiringAdditionalRoles")
+  fun `document type requiring custom roles from path variable throws exception when request does not have the document type role`(documentType: DocumentType) {
     req.setAttribute(
       HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
       mapOf(
-        "documentType" to DocumentType.SUBJECT_ACCESS_REQUEST_REPORT,
+        "documentType" to documentType,
       ),
     )
 
     assertThrows<AccessDeniedException>(
-      "Document type '${DocumentType.SUBJECT_ACCESS_REQUEST_REPORT}' requires additional role",
+      "Document type '$documentType' requires additional role",
     ) {
       interceptor.preHandle(req, res, "null")
     }
   }
 
-  @Test
-  fun `authorisation check prioritises document type from unique identifier over from path variable`() {
+  @ParameterizedTest
+  @MethodSource("documentTypesRequiringAdditionalRoles")
+  fun `authorisation check prioritises document type from unique identifier over from path variable`(documentType: DocumentType) {
     val documentUuid = UUID.randomUUID()
 
     req.setAttribute(
@@ -86,34 +94,49 @@ class DocumentTypeAuthorisationConfigurationTest {
       ),
     )
 
-    whenever(documentRepository.getDocumentTypeByDocumentUuid(documentUuid)).thenReturn(DocumentType.SUBJECT_ACCESS_REQUEST_REPORT)
+    whenever(documentRepository.getDocumentTypeByDocumentUuid(documentUuid)).thenReturn(documentType)
 
     assertThrows<AccessDeniedException>(
-      "Document type '${DocumentType.SUBJECT_ACCESS_REQUEST_REPORT}' requires additional role",
+      "Document type '$documentType' requires additional role",
     ) {
       interceptor.preHandle(req, res, "null")
     }
   }
 
-  @Test
-  fun `authorisation check uses document type from path variable if document type from unique identifier is null`() {
+  @ParameterizedTest
+  @MethodSource("documentTypesRequiringAdditionalRoles")
+  fun `authorisation check uses document type from path variable if document type from unique identifier is null`(documentType: DocumentType) {
     val documentUuid = UUID.randomUUID()
 
     req.setAttribute(
       HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
       mapOf(
         "documentUuid" to documentUuid,
-        "documentType" to DocumentType.SUBJECT_ACCESS_REQUEST_REPORT,
+        "documentType" to documentType,
       ),
     )
 
     whenever(documentRepository.getDocumentTypeByDocumentUuid(documentUuid)).thenReturn(null)
 
     assertThrows<AccessDeniedException>(
-      "Document type '${DocumentType.SUBJECT_ACCESS_REQUEST_REPORT}' requires additional role",
+      "Document type '$documentType' requires additional role",
     ) {
       interceptor.preHandle(req, res, "null")
     }
+  }
+
+  companion object {
+    @JvmStatic
+    fun documentTypesRequiringAdditionalRoles() = listOf(
+      Arguments.of(DocumentType.SUBJECT_ACCESS_REQUEST_REPORT),
+      Arguments.of(DocumentType.DISTINGUISHING_MARK_IMAGE),
+    )
+
+    @JvmStatic
+    fun documentTypesRequiringAdditionalRoleWithRoleMapping() = listOf(
+      Arguments.of(DocumentType.SUBJECT_ACCESS_REQUEST_REPORT, ROLE_DOCUMENT_TYPE_SAR),
+      Arguments.of(DocumentType.DISTINGUISHING_MARK_IMAGE, ROLE_DOCUMENT_TYPE_DISTINGUISHING_MARK_IMAGE),
+    )
   }
 
   private fun HttpServletRequest.authorisedDocumentTypes() =

@@ -28,6 +28,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.HmppsS3Properties
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.S3BucketName
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.container.ClamAVContainer
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.container.LocalStackContainer
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.container.LocalStackContainer.setLocalStackProperties
@@ -78,7 +79,7 @@ abstract class IntegrationTestBase {
 
   @AfterEach
   fun afterEach() {
-    deleteAllDocumentsInS3()
+    deleteAllDocumentsInAllS3()
     auditSqsClient.purgeQueue(PurgeQueueRequest.builder().queueUrl(auditQueueUrl).build()).get()
   }
 
@@ -98,11 +99,11 @@ abstract class IntegrationTestBase {
     it.set(USERNAME, username)
   }
 
-  internal fun bucketName() = hmppsS3Properties.buckets["document-management"]!!.bucketName
+  internal fun bucketName(bucketIdentifier: String) = hmppsS3Properties.buckets[bucketIdentifier]!!.bucketName
 
-  internal fun putDocumentInS3(documentUuid: UUID, fileResourcePath: String): ByteArray {
+  internal fun putDocumentInS3(documentUuid: UUID, fileResourcePath: String, bucketIdentifier: String): ByteArray {
     val request = PutObjectRequest.builder()
-      .bucket(bucketName())
+      .bucket(bucketName(bucketIdentifier))
       .key(documentUuid.toString())
       .build()
     val fileBytes = ClassPathResource(fileResourcePath).contentAsByteArray
@@ -110,15 +111,22 @@ abstract class IntegrationTestBase {
     return fileBytes
   }
 
-  internal fun deleteAllDocumentsInS3() {
-    val listObjectsResponse = s3Client.listObjectsV2(ListObjectsV2Request.builder().bucket(bucketName()).build())
+  internal fun deleteAllDocumentsInS3Bucket(bucketIdentifier: String) {
+    val bucketName = bucketName(bucketIdentifier)
+    val listObjectsResponse = s3Client.listObjectsV2(ListObjectsV2Request.builder().bucket(bucketName).build())
 
     for (s3Object in listObjectsResponse.contents()) {
       val request = DeleteObjectRequest.builder()
-        .bucket(bucketName())
+        .bucket(bucketName)
         .key(s3Object.key())
         .build()
       s3Client.deleteObject(request)
+    }
+  }
+
+  internal fun deleteAllDocumentsInAllS3() {
+    S3BucketName.entries.stream().forEach { bucketEnum ->
+      deleteAllDocumentsInS3Bucket(bucketEnum.value)
     }
   }
 
