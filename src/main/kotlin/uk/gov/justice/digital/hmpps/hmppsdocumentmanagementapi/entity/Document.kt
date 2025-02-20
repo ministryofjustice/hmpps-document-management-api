@@ -101,21 +101,20 @@ data class Document(
     this.deletedByUsername = deletedByUsername
   }
 
-  fun toModel() =
-    DocumentModel(
-      documentUuid,
-      documentType,
-      documentFilename(),
-      filename,
-      fileExtension,
-      fileSize,
-      fileHash,
-      mimeType,
-      metadata,
-      createdTime,
-      createdByServiceName,
-      createdByUsername,
-    )
+  fun toModel() = DocumentModel(
+    documentUuid,
+    documentType,
+    documentFilename(),
+    filename,
+    fileExtension,
+    fileSize,
+    fileHash,
+    mimeType,
+    metadata,
+    createdTime,
+    createdByServiceName,
+    createdByUsername,
+  )
 }
 
 fun Collection<Document>.toModels() = map { it.toModel() }

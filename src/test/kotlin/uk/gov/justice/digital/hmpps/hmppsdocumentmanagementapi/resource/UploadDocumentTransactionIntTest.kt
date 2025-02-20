@@ -70,12 +70,11 @@ class UploadDocumentTransactionIntTest : IntegrationTestBase() {
     assertThat(repository.findByDocumentUuid(documentUuid)).isNull()
   }
 
-  private fun documentMetadataMultipartBody() =
-    MultipartBodyBuilder().apply {
-      part("file", ClassPathResource("test_data/warrant-for-remand.pdf"))
-      part(
-        "metadata",
-        JacksonUtil.toJsonNode("{ \"caseReferenceNumber\": \"T20231234\", \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\" }"),
-      )
-    }.build()
+  private fun documentMetadataMultipartBody() = MultipartBodyBuilder().apply {
+    part("file", ClassPathResource("test_data/warrant-for-remand.pdf"))
+    part(
+      "metadata",
+      JacksonUtil.toJsonNode("{ \"caseReferenceNumber\": \"T20231234\", \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\" }"),
+    )
+  }.build()
 }

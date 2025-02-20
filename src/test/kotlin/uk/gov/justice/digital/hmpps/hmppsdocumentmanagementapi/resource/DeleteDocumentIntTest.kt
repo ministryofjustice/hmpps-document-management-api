@@ -185,11 +185,10 @@ class DeleteDocumentIntTest : IntegrationTestBase() {
     }
   }
 
-  private fun WebTestClient.deleteDocument(documentUuid: UUID) =
-    delete()
-      .uri("/documents/$documentUuid")
-      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER, ROLE_DOCUMENT_TYPE_SAR)))
-      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
-      .exchange()
-      .expectStatus().isNoContent
+  private fun WebTestClient.deleteDocument(documentUuid: UUID) = delete()
+    .uri("/documents/$documentUuid")
+    .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER, ROLE_DOCUMENT_TYPE_SAR)))
+    .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
+    .exchange()
+    .expectStatus().isNoContent
 }

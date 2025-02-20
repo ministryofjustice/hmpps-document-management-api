@@ -28,5 +28,4 @@ interface DocumentRepository :
   fun getDocumentTypeByDocumentUuid(documentUuid: UUID): DocumentType?
 }
 
-fun DocumentRepository.findByDocumentUuidOrThrowNotFound(documentUuid: UUID) =
-  this.findByDocumentUuid(documentUuid) ?: throw EntityNotFoundException("Document with UUID '$documentUuid' not found.")
+fun DocumentRepository.findByDocumentUuidOrThrowNotFound(documentUuid: UUID) = this.findByDocumentUuid(documentUuid) ?: throw EntityNotFoundException("Document with UUID '$documentUuid' not found.")

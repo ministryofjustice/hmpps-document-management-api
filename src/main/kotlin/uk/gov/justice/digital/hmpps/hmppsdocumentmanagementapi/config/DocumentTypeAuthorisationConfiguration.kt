@@ -46,34 +46,29 @@ class DocumentTypeAuthorisationInterceptor(
     return true
   }
 
-  private fun HttpServletRequest.authorisedDocumentTypes() =
-    DocumentType.entries.filter { it.additionalRoles.isEmpty() || it.additionalRoles.any { role -> isUserInRole(role) } }
+  private fun HttpServletRequest.authorisedDocumentTypes() = DocumentType.entries.filter { it.additionalRoles.isEmpty() || it.additionalRoles.any { role -> isUserInRole(role) } }
 
-  private fun HttpServletRequest.pathVariables() =
-    getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE) as Map<*, *>? ?: emptyMap<String, String>()
+  private fun HttpServletRequest.pathVariables() = getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE) as Map<*, *>? ?: emptyMap<String, String>()
 
-  private fun HttpServletRequest.documentUuidFromPathVariable() =
-    pathVariables()["documentUuid"]
-      ?.let {
-        try {
-          UUID.fromString(it.toString())
-        } catch (e: IllegalArgumentException) {
-          null
-        }
+  private fun HttpServletRequest.documentUuidFromPathVariable() = pathVariables()["documentUuid"]
+    ?.let {
+      try {
+        UUID.fromString(it.toString())
+      } catch (e: IllegalArgumentException) {
+        null
       }
+    }
 
-  private fun HttpServletRequest.documentTypeFromPathVariable() =
-    pathVariables()["documentType"]
-      ?.let {
-        try {
-          DocumentType.valueOf(it.toString())
-        } catch (e: IllegalArgumentException) {
-          null
-        }
+  private fun HttpServletRequest.documentTypeFromPathVariable() = pathVariables()["documentType"]
+    ?.let {
+      try {
+        DocumentType.valueOf(it.toString())
+      } catch (e: IllegalArgumentException) {
+        null
       }
+    }
 
-  private fun HttpServletRequest.documentTypeFromUuidOrTypePathVariable() =
-    documentUuidFromPathVariable()
-      ?.let { documentRepository.getDocumentTypeByDocumentUuid(it) }
-      ?: documentTypeFromPathVariable()
+  private fun HttpServletRequest.documentTypeFromUuidOrTypePathVariable() = documentUuidFromPathVariable()
+    ?.let { documentRepository.getDocumentTypeByDocumentUuid(it) }
+    ?: documentTypeFromPathVariable()
 }

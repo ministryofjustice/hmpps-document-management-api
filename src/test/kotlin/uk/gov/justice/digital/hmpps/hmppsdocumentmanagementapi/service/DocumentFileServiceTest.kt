@@ -137,15 +137,13 @@ class DocumentFileServiceTest {
     }
   }
 
-  private fun mockFile() =
-    mock<MultipartFile>().apply {
-      whenever(inputStream).thenReturn(mock<InputStream>())
-      whenever(size).thenReturn(20688)
-    }
+  private fun mockFile() = mock<MultipartFile>().apply {
+    whenever(inputStream).thenReturn(mock<InputStream>())
+    whenever(size).thenReturn(20688)
+  }
 
-  private fun stubResponseBytes() =
-    ResponseInputStream(
-      GetObjectResponse.builder().build(),
-      AbortableInputStream.create(ByteArrayInputStream(ByteArray(10))),
-    )
+  private fun stubResponseBytes() = ResponseInputStream(
+    GetObjectResponse.builder().build(),
+    AbortableInputStream.create(ByteArrayInputStream(ByteArray(10))),
+  )
 }

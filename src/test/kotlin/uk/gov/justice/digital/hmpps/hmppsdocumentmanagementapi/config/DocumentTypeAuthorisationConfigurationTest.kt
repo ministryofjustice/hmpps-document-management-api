@@ -136,6 +136,5 @@ class DocumentTypeAuthorisationConfigurationTest {
     )
   }
 
-  private fun HttpServletRequest.authorisedDocumentTypes() =
-    (getAttribute(AUTHORISED_DOCUMENT_TYPES) as List<*>).filterIsInstance<DocumentType>()
+  private fun HttpServletRequest.authorisedDocumentTypes() = (getAttribute(AUTHORISED_DOCUMENT_TYPES) as List<*>).filterIsInstance<DocumentType>()
 }

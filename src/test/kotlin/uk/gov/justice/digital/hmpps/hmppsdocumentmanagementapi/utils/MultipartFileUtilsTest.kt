@@ -130,6 +130,5 @@ class MultipartFileUtilsTest {
     originalFilename: String? = "test.pdf",
     contentType: String? = "application/pdf",
     size: Int = 0,
-  ) =
-    MockMultipartFile("file", originalFilename, contentType, ByteArray(size))
+  ) = MockMultipartFile("file", originalFilename, contentType, ByteArray(size))
 }

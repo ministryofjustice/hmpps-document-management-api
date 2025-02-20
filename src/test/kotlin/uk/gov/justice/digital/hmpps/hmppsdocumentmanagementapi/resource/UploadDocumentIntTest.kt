@@ -454,24 +454,22 @@ class UploadDocumentIntTest : IntegrationTestBase() {
     }
   }
 
-  private fun documentMetadataMultipartBody(file: String = "warrant-for-remand.pdf") =
-    MultipartBodyBuilder().apply {
-      part("file", ClassPathResource("test_data/$file"))
-      part("metadata", metadata)
-    }.build()
+  private fun documentMetadataMultipartBody(file: String = "warrant-for-remand.pdf") = MultipartBodyBuilder().apply {
+    part("file", ClassPathResource("test_data/$file"))
+    part("metadata", metadata)
+  }.build()
 
   private fun WebTestClient.uploadDocument(
     documentType: DocumentType = DocumentType.HMCTS_WARRANT,
     documentUuid: UUID = UUID.randomUUID(),
-  ) =
-    post()
-      .uri("/documents/$documentType/$documentUuid")
-      .bodyValue(documentMetadataMultipartBody())
-      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
-      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
-      .exchange()
-      .expectStatus().isCreated
-      .expectHeader().contentType(MediaType.APPLICATION_JSON)
-      .expectBody(DocumentModel::class.java)
-      .returnResult().responseBody!!
+  ) = post()
+    .uri("/documents/$documentType/$documentUuid")
+    .bodyValue(documentMetadataMultipartBody())
+    .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
+    .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
+    .exchange()
+    .expectStatus().isCreated
+    .expectHeader().contentType(MediaType.APPLICATION_JSON)
+    .expectBody(DocumentModel::class.java)
+    .returnResult().responseBody!!
 }

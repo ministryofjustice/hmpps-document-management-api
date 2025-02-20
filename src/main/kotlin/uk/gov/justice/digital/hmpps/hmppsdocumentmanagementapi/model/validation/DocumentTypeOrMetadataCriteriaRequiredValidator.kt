@@ -21,8 +21,7 @@ class DocumentTypeOrMetadataCriteriaRequiredValidator : ConstraintValidator<Docu
     return false
   }
 
-  private fun JsonNode?.isNotNullWithAtLeastOneProperty() =
-    this != null && this.isObject && this.size() > 0
+  private fun JsonNode?.isNotNullWithAtLeastOneProperty() = this != null && this.isObject && this.size() > 0
 }
 
 @Target(AnnotationTarget.CLASS)

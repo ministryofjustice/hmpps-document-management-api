@@ -497,15 +497,14 @@ class DocumentSearchIntTest : IntegrationTestBase() {
     orderBy: DocumentSearchOrderBy = DocumentSearchOrderBy.CREATED_TIME,
     orderByDirection: Direction = Direction.DESC,
     roles: List<String> = listOf(ROLE_DOCUMENT_READER),
-  ) =
-    post()
-      .uri("/documents/search")
-      .bodyValue(DocumentSearchRequest(documentType, metadata, page, pageSize, orderBy, orderByDirection))
-      .headers(setAuthorisation(roles = roles))
-      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
-      .exchange()
-      .expectStatus().isOk
-      .expectHeader().contentType(MediaType.APPLICATION_JSON)
-      .expectBody(DocumentSearchResult::class.java)
-      .returnResult().responseBody!!
+  ) = post()
+    .uri("/documents/search")
+    .bodyValue(DocumentSearchRequest(documentType, metadata, page, pageSize, orderBy, orderByDirection))
+    .headers(setAuthorisation(roles = roles))
+    .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
+    .exchange()
+    .expectStatus().isOk
+    .expectHeader().contentType(MediaType.APPLICATION_JSON)
+    .expectBody(DocumentSearchResult::class.java)
+    .returnResult().responseBody!!
 }

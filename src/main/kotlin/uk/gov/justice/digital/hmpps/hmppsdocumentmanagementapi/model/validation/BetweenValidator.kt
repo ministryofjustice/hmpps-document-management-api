@@ -15,9 +15,7 @@ class BetweenValidator : ConstraintValidator<Between, Int> {
     max = constraintAnnotation.max
   }
 
-  override fun isValid(value: Int, context: ConstraintValidatorContext): Boolean {
-    return value in min..max
-  }
+  override fun isValid(value: Int, context: ConstraintValidatorContext): Boolean = value in min..max
 }
 
 @Target(AnnotationTarget.FIELD, AnnotationTarget.PROPERTY)

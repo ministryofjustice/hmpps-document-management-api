@@ -36,9 +36,7 @@ class VirusScanServiceTest {
     val socket: Socket = mock()
     whenever(socket.getOutputStream()).thenThrow(IOException("OutputStream exception"))
     val virusScanService = object : VirusScanService(HmppsClamAVProperties()) {
-      override fun createSocket(): Socket {
-        return socket
-      }
+      override fun createSocket(): Socket = socket
     }
     val result = virusScanService.ping()
     assertThat(result).isFalse()
@@ -93,9 +91,7 @@ class VirusScanServiceTest {
     whenever(socket.getOutputStream()).thenReturn(byteArrayOutputStream)
     whenever(socket.getInputStream()).thenReturn(inputStream)
     return object : VirusScanService(HmppsClamAVProperties()) {
-      override fun createSocket(): Socket {
-        return socket
-      }
+      override fun createSocket(): Socket = socket
     }
   }
 }
