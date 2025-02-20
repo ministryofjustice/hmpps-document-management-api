@@ -48,9 +48,6 @@ generic-service:
     s3-images-output:
       S3_PRISONER_IMAGES_BUCKET_NAME: images_bucket_name
       S3_PRISONER_IMAGES_BUCKET_ARN: images_bucket_arn
-    s3-distinguishing-mark-images-output-injected:
-      S3_DISTINGUISHING_MARK_IMAGES_BUCKET_NAME: images_bucket_name
-      S3_DISTINGUISHING_MARK_IMAGES_BUCKET_ARN: images_bucket_arn
     sqs-hmpps-audit-secret:
       HMPPS_SQS_QUEUES_AUDIT_QUEUE_NAME: "sqs_queue_name"
 

@@ -92,8 +92,5 @@ hmpps.s3:
     prisoner-images:
       bucketName: ${S3_PRISONER_IMAGES_BUCKET_NAME}
       bucketArn: ${S3_PRISONER_IMAGES_BUCKET_ARN}
-    distinguishing-mark-images:
-      bucketName: ${S3_DISTINGUISHING_MARK_IMAGES_BUCKET_NAME}
-      bucketArn: ${S3_DISTINGUISHING_MARK_IMAGES_BUCKET_ARN}
 hmpps.sqs:
   queueAdminRole: ROLE_DOCUMENT_ADMIN

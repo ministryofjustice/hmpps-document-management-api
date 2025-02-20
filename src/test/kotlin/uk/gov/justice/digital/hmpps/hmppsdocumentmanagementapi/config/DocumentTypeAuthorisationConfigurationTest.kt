@@ -15,7 +15,6 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.servlet.HandlerMapping
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.ROLE_DOCUMENT_TYPE_DISTINGUISHING_MARK_IMAGE
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.ROLE_DOCUMENT_TYPE_SAR
 import java.util.UUID
 
@@ -129,13 +128,11 @@ class DocumentTypeAuthorisationConfigurationTest {
     @JvmStatic
     fun documentTypesRequiringAdditionalRoles() = listOf(
       Arguments.of(DocumentType.SUBJECT_ACCESS_REQUEST_REPORT),
-      Arguments.of(DocumentType.DISTINGUISHING_MARK_IMAGE),
     )
 
     @JvmStatic
     fun documentTypesRequiringAdditionalRoleWithRoleMapping() = listOf(
       Arguments.of(DocumentType.SUBJECT_ACCESS_REQUEST_REPORT, ROLE_DOCUMENT_TYPE_SAR),
-      Arguments.of(DocumentType.DISTINGUISHING_MARK_IMAGE, ROLE_DOCUMENT_TYPE_DISTINGUISHING_MARK_IMAGE),
     )
   }
 

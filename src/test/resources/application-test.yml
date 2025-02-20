@@ -24,8 +24,6 @@ hmpps.s3:
       bucketName: ${random.uuid}
     prisoner-images:
       bucketName: ${random.uuid}
-    distinguishing-mark-images:
-      bucketName: ${random.uuid}
 
 hmpps.sqs:
   provider: localstack

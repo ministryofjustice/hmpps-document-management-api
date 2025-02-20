@@ -30,13 +30,11 @@ import java.util.UUID
 class DocumentFileServiceTest {
   private val documentManagementBucketName = "doc-management-bucket-name"
   private val prisonerImagesBucketName = "prisoner-images-bucket-name"
-  private val distinguishingMarkImagesBucketName = "distinguishing-mark-images-bucket-name"
 
   private val hmppsS3Properties = HmppsS3Properties(
     buckets = mapOf(
       "document-management" to HmppsS3Properties.BucketConfig(bucketName = documentManagementBucketName),
       "prisoner-images" to HmppsS3Properties.BucketConfig(bucketName = prisonerImagesBucketName),
-      "distinguishing-mark-images" to HmppsS3Properties.BucketConfig(bucketName = distinguishingMarkImagesBucketName),
     ),
   )
 
@@ -60,7 +58,6 @@ class DocumentFileServiceTest {
     "PIC_CASE_DOCUMENTS,doc-management-bucket-name",
     "PPUD_RECALL,doc-management-bucket-name",
     "PRISONER_PROFILE_PICTURE,prisoner-images-bucket-name",
-    "DISTINGUISHING_MARK_IMAGE,distinguishing-mark-images-bucket-name",
   )
   fun `save document file uses bucket name from document type`(documentType: DocumentType, expectedBucketName: String) {
     val requestCaptor = argumentCaptor<PutObjectRequest>()
@@ -110,7 +107,6 @@ class DocumentFileServiceTest {
     "PIC_CASE_DOCUMENTS,doc-management-bucket-name",
     "PPUD_RECALL,doc-management-bucket-name",
     "PRISONER_PROFILE_PICTURE,prisoner-images-bucket-name",
-    "DISTINGUISHING_MARK_IMAGE,distinguishing-mark-images-bucket-name",
   )
   fun `get document file uses bucket name from document type`(documentType: DocumentType, expectedBucketName: String) {
     val requestCaptor = argumentCaptor<GetObjectRequest>()
