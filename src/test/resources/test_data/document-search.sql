@@ -111,20 +111,6 @@ VALUES
     NOW(),
     'Remand and Sentencing',
     'CREATED_BY_USER'
-),
-(
-    8,
-    'dcfa4919-4474-461d-a795-336fbd11438c',
-    'DISTINGUISHING_MARK_IMAGE',
-    'distinguishing-mark-image',
-    'png',
-    47645,
-    'd58e3582afa99040e27b92b13c8f2280',
-    'image/png',
-    JSON '{ "prisonNumber": "A1234BC" }',
-    NOW(),
-    'Distinguishing Mark Image',
-    'CREATED_BY_USER'
 );
 
 -- Deleted HMCTS_WARRANT document
