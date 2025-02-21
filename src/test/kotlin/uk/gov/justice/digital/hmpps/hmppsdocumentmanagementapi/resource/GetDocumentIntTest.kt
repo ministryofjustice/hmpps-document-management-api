@@ -191,13 +191,12 @@ class GetDocumentIntTest : IntegrationTestBase() {
 
   private fun WebTestClient.getDocument(
     documentUuid: UUID,
-  ) =
-    get()
-      .uri("/documents/$documentUuid")
-      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
-      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
-      .exchange()
-      .expectStatus().isOk
-      .expectBody(DocumentModel::class.java)
-      .returnResult().responseBody!!
+  ) = get()
+    .uri("/documents/$documentUuid")
+    .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
+    .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
+    .exchange()
+    .expectStatus().isOk
+    .expectBody(DocumentModel::class.java)
+    .returnResult().responseBody!!
 }

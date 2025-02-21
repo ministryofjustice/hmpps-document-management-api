@@ -269,15 +269,14 @@ class ReplaceDocumentMetadataIntTest : IntegrationTestBase() {
   private fun WebTestClient.replaceDocumentMetadata(
     documentUuid: UUID,
     metadata: JsonNode,
-  ) =
-    put()
-      .uri("/documents/$documentUuid/metadata")
-      .bodyValue(metadata)
-      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
-      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
-      .exchange()
-      .expectStatus().isOk
-      .expectHeader().contentType(MediaType.APPLICATION_JSON)
-      .expectBody(DocumentModel::class.java)
-      .returnResult().responseBody!!
+  ) = put()
+    .uri("/documents/$documentUuid/metadata")
+    .bodyValue(metadata)
+    .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
+    .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
+    .exchange()
+    .expectStatus().isOk
+    .expectHeader().contentType(MediaType.APPLICATION_JSON)
+    .expectBody(DocumentModel::class.java)
+    .returnResult().responseBody!!
 }

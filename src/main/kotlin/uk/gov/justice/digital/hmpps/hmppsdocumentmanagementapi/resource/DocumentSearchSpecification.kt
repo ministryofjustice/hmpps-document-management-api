@@ -7,23 +7,21 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.Docum
 
 @Component
 class DocumentSearchSpecification {
-  fun documentTypeIn(documentTypes: Collection<DocumentType>) =
-    Specification<Document> { root, _, _ -> root.get<String>("documentType").`in`(documentTypes) }
+  fun documentTypeIn(documentTypes: Collection<DocumentType>) = Specification<Document> { root, _, _ -> root.get<String>("documentType").`in`(documentTypes) }
 
-  fun metadataContains(property: String, value: String) =
-    Specification<Document> { root, _, cb ->
-      cb.like(
+  fun metadataContains(property: String, value: String) = Specification<Document> { root, _, cb ->
+    cb.like(
+      cb.function(
+        "lower",
+        String::class.java,
         cb.function(
-          "lower",
+          "jsonb_extract_path_text",
           String::class.java,
-          cb.function(
-            "jsonb_extract_path_text",
-            String::class.java,
-            root.get<String>("metadata"),
-            cb.literal(property),
-          ),
+          root.get<String>("metadata"),
+          cb.literal(property),
         ),
-        "%${value.lowercase()}%",
-      )
-    }
+      ),
+      "%${value.lowercase()}%",
+    )
+  }
 }

@@ -197,61 +197,48 @@ abstract class AbstractDocumentTypeIntegrationTest : IntegrationTestBase() {
     documentUuid: UUID,
     pathOfResourceToUpload: String,
     roles: List<String>,
-  ): WebTestClient.ResponseSpec {
-    return webTestClient.post().uri("/documents/$documentType/$documentUuid")
-      .bodyValue(documentMetadataMultipartBody(pathOfResourceToUpload))
-      .headers(setAuthorisation(roles = roles))
-      .headers(setDocumentContext(serviceName, activeCaseLoadId, username)).exchange()
-  }
+  ): WebTestClient.ResponseSpec = webTestClient.post().uri("/documents/$documentType/$documentUuid")
+    .bodyValue(documentMetadataMultipartBody(pathOfResourceToUpload))
+    .headers(setAuthorisation(roles = roles))
+    .headers(setDocumentContext(serviceName, activeCaseLoadId, username)).exchange()
 
-  private fun getDocument(documentUuid: UUID, roles: List<String>): WebTestClient.ResponseSpec {
-    return webTestClient.get().uri("/documents/$documentUuid")
-      .headers(setAuthorisation(roles = roles))
-      .headers(setDocumentContext(serviceName, activeCaseLoadId, username)).exchange()
-  }
+  private fun getDocument(documentUuid: UUID, roles: List<String>): WebTestClient.ResponseSpec = webTestClient.get().uri("/documents/$documentUuid")
+    .headers(setAuthorisation(roles = roles))
+    .headers(setDocumentContext(serviceName, activeCaseLoadId, username)).exchange()
 
   internal fun getDocumentFile(
     documentUuid: UUID,
     roles: List<String>,
-  ): WebTestClient.ResponseSpec {
-    return webTestClient.get().uri("/documents/$documentUuid/file")
-      .headers(setAuthorisation(roles = roles))
-      .headers(setDocumentContext(serviceName, activeCaseLoadId, username)).exchange()
-  }
+  ): WebTestClient.ResponseSpec = webTestClient.get().uri("/documents/$documentUuid/file")
+    .headers(setAuthorisation(roles = roles))
+    .headers(setDocumentContext(serviceName, activeCaseLoadId, username)).exchange()
 
   private fun searchDocuments(
     searchRequest: DocumentSearchRequest,
     roles: List<String>,
-  ): WebTestClient.ResponseSpec {
-    return webTestClient.post().uri("/documents/search").bodyValue(searchRequest)
-      .headers(setAuthorisation(roles = roles))
-      .headers(setDocumentContext(serviceName, activeCaseLoadId, username)).exchange()
-  }
+  ): WebTestClient.ResponseSpec = webTestClient.post().uri("/documents/search").bodyValue(searchRequest)
+    .headers(setAuthorisation(roles = roles))
+    .headers(setDocumentContext(serviceName, activeCaseLoadId, username)).exchange()
 
   private fun replaceMetadata(
     documentUuid: UUID,
     newMetadata: JsonNode,
     roles: List<String>,
-  ): WebTestClient.ResponseSpec {
-    return webTestClient.put().uri("/documents/$documentUuid/metadata").bodyValue(newMetadata)
-      .headers(setAuthorisation(roles = roles))
-      .headers(setDocumentContext(serviceName, activeCaseLoadId, username)).exchange()
-  }
+  ): WebTestClient.ResponseSpec = webTestClient.put().uri("/documents/$documentUuid/metadata").bodyValue(newMetadata)
+    .headers(setAuthorisation(roles = roles))
+    .headers(setDocumentContext(serviceName, activeCaseLoadId, username)).exchange()
 
   private fun deleteDocument(
     documentUuid: UUID,
     roles: List<String>,
-  ): WebTestClient.ResponseSpec {
-    return webTestClient.delete().uri("/documents/$documentUuid")
-      .headers(setAuthorisation(roles = roles))
-      .headers(setDocumentContext(serviceName, activeCaseLoadId, username)).exchange()
-  }
+  ): WebTestClient.ResponseSpec = webTestClient.delete().uri("/documents/$documentUuid")
+    .headers(setAuthorisation(roles = roles))
+    .headers(setDocumentContext(serviceName, activeCaseLoadId, username)).exchange()
 
-  private fun documentMetadataMultipartBody(pathOfResourceToUpload: String) =
-    MultipartBodyBuilder().apply {
-      part("file", ClassPathResource(pathOfResourceToUpload))
-      part("metadata", metadata)
-    }.build()
+  private fun documentMetadataMultipartBody(pathOfResourceToUpload: String) = MultipartBodyBuilder().apply {
+    part("file", ClassPathResource(pathOfResourceToUpload))
+    part("metadata", metadata)
+  }.build()
 
   private fun assertDocumentDataIsCorrect(expectedUuid: UUID, expectedFileHash: String, response: Document) {
     with(response) {

@@ -239,16 +239,15 @@ class DownloadDocumentIntTest : IntegrationTestBase() {
     contentType: MediaType,
     contentLength: Long,
     filename: String,
-  ) =
-    get()
-      .uri("/documents/$documentUuid/file")
-      .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
-      .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
-      .exchange()
-      .expectStatus().isOk
-      .expectHeader().contentType(contentType)
-      .expectHeader().contentLength(contentLength)
-      .expectHeader().contentDisposition(ContentDisposition.parse("attachment; filename=\"$filename\""))
-      .expectBody(ByteArray::class.java)
-      .returnResult()
+  ) = get()
+    .uri("/documents/$documentUuid/file")
+    .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
+    .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
+    .exchange()
+    .expectStatus().isOk
+    .expectHeader().contentType(contentType)
+    .expectHeader().contentLength(contentLength)
+    .expectHeader().contentDisposition(ContentDisposition.parse("attachment; filename=\"$filename\""))
+    .expectBody(ByteArray::class.java)
+    .returnResult()
 }

@@ -113,9 +113,8 @@ class DocumentSearchRequestTest {
     validator.validate(request).assertSingleValidationError("pageSize", "Page size must be between 1 and 100.")
   }
 
-  private fun MutableSet<ConstraintViolation<DocumentSearchRequest>>.assertSingleValidationError(propertyName: String, message: String) =
-    with(single()) {
-      assertThat(propertyPath.toString()).isEqualTo(propertyName)
-      assertThat(this.message).isEqualTo(message)
-    }
+  private fun MutableSet<ConstraintViolation<DocumentSearchRequest>>.assertSingleValidationError(propertyName: String, message: String) = with(single()) {
+    assertThat(propertyPath.toString()).isEqualTo(propertyName)
+    assertThat(this.message).isEqualTo(message)
+  }
 }

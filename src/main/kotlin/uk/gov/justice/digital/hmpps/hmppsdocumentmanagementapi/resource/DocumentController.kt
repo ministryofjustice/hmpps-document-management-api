@@ -211,14 +211,13 @@ class DocumentController(
     )
     metadata: String,
     request: HttpServletRequest,
-  ) =
-    documentService.uploadDocument(
-      documentType,
-      documentUuid,
-      file,
-      JacksonUtil.toJsonNode(metadata),
-      request.documentRequestContext(),
-    )
+  ) = documentService.uploadDocument(
+    documentType,
+    documentUuid,
+    file,
+    JacksonUtil.toJsonNode(metadata),
+    request.documentRequestContext(),
+  )
 
   @ResponseStatus(HttpStatus.OK)
   @PutMapping("/{documentUuid}/metadata")
@@ -278,12 +277,11 @@ class DocumentController(
     )
     metadata: JsonNode,
     request: HttpServletRequest,
-  ) =
-    documentService.replaceDocumentMetadata(
-      documentUuid,
-      metadata,
-      request.documentRequestContext(),
-    )
+  ) = documentService.replaceDocumentMetadata(
+    documentUuid,
+    metadata,
+    request.documentRequestContext(),
+  )
 
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @DeleteMapping("/{documentUuid}")
@@ -322,11 +320,10 @@ class DocumentController(
     )
     documentUuid: UUID,
     request: HttpServletRequest,
-  ) =
-    documentService.deleteDocument(
-      documentUuid,
-      request.documentRequestContext(),
-    )
+  ) = documentService.deleteDocument(
+    documentUuid,
+    request.documentRequestContext(),
+  )
 
   @ResponseStatus(HttpStatus.OK)
   @PostMapping("/search")
@@ -379,9 +376,7 @@ class DocumentController(
     request.documentRequestContext(),
   )
 
-  private fun HttpServletRequest.authorisedDocumentTypes() =
-    (getAttribute(AUTHORISED_DOCUMENT_TYPES) as List<*>).filterIsInstance<DocumentType>()
+  private fun HttpServletRequest.authorisedDocumentTypes() = (getAttribute(AUTHORISED_DOCUMENT_TYPES) as List<*>).filterIsInstance<DocumentType>()
 
-  private fun HttpServletRequest.documentRequestContext() =
-    getAttribute(DocumentRequestContext::class.simpleName) as DocumentRequestContext
+  private fun HttpServletRequest.documentRequestContext() = getAttribute(DocumentRequestContext::class.simpleName) as DocumentRequestContext
 }
