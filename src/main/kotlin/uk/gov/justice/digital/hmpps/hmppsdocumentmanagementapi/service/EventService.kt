@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.EventType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentMetadataReplacedEvent
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsScannedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsSearchedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.toCustomEventMetrics
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.toCustomEventProperties
@@ -87,6 +88,18 @@ class EventService(
     telemetryClient.trackEvent(
       EventType.DOCUMENTS_SEARCHED.name,
       event.toCustomEventProperties(documentRequestContext),
+      event.toCustomEventMetrics(eventTimeMs),
+    )
+  }
+
+  fun recordDocumentScannedEvent(
+    event: DocumentsScannedEvent,
+    eventTimeMs: Long,
+  ) {
+    log.info("Document scanned")
+    telemetryClient.trackEvent(
+      EventType.DOCUMENT_SCANNED.name,
+      event.toCustomEventProperties(),
       event.toCustomEventMetrics(eventTimeMs),
     )
   }

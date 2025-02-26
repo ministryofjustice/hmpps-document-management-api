@@ -12,6 +12,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.Docum
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.EventType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentMetadataReplacedEvent
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsScannedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsSearchedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.toCustomEventMetrics
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.toCustomEventProperties
@@ -171,6 +172,19 @@ class EventServiceTest {
     verify(telemetryClient).trackEvent(
       EventType.DOCUMENTS_SEARCHED.name,
       event.toCustomEventProperties(documentRequestContext),
+      event.toCustomEventMetrics(eventTimeMs),
+    )
+  }
+
+  @Test
+  fun `record document scanned tracks event`() {
+    val event = DocumentsScannedEvent(documentRequestContext, 123L)
+
+    service.recordDocumentScannedEvent(event, eventTimeMs)
+
+    verify(telemetryClient).trackEvent(
+      EventType.DOCUMENT_SCANNED.name,
+      event.toCustomEventProperties(),
       event.toCustomEventMetrics(eventTimeMs),
     )
   }

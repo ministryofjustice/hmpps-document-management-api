@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry
 
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentMetadataReplacedEvent
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsScannedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsSearchedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as DocumentModel
 
@@ -26,6 +27,12 @@ fun DocumentsSearchedEvent.toCustomEventProperties(documentRequestContext: Docum
   ORDER_BY_DIRECTION_PROPERTY_KEY to request.orderByDirection.name,
 )
 
+fun DocumentsScannedEvent.toCustomEventProperties() = mapOf(
+  SERVICE_NAME_PROPERTY_KEY to documentRequestContext.serviceName,
+  ACTIVE_CASE_LOAD_ID_PROPERTY_KEY to (documentRequestContext.activeCaseLoadId ?: ""),
+  USERNAME_PROPERTY_KEY to (documentRequestContext.username ?: ""),
+)
+
 fun DocumentModel.toCustomEventMetrics(eventTimeMs: Long) = mapOf(
   EVENT_TIME_MS_METRIC_KEY to eventTimeMs.toDouble(),
   FILE_SIZE_METRIC_KEY to fileSize.toDouble(),
@@ -46,4 +53,9 @@ fun DocumentsSearchedEvent.toCustomEventMetrics(eventTimeMs: Long) = mapOf(
   PAGE_SIZE_PROPERTY_KEY to request.pageSize.toDouble(),
   RESULTS_COUNT_METRIC_KEY to resultsCount.toDouble(),
   TOTAL_RESULTS_COUNT_METRIC_KEY to totalResultsCount.toDouble(),
+)
+
+fun DocumentsScannedEvent.toCustomEventMetrics(eventTimeMs: Long) = mapOf(
+  EVENT_TIME_MS_METRIC_KEY to eventTimeMs.toDouble(),
+  FILE_SIZE_METRIC_KEY to fileSize.toDouble(),
 )
