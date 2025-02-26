@@ -109,7 +109,8 @@ class TelemetryTransformFunctionsTest {
     val documentRequestContext = DocumentRequestContext(
       "Service name",
       "LPI",
-      null)
+      null,
+    )
     val event = DocumentsScannedEvent(documentRequestContext, document.fileSize)
     with(event.toCustomEventProperties()) {
       assertThat(this[SERVICE_NAME_PROPERTY_KEY]).isEqualTo(documentRequestContext.serviceName)
@@ -123,7 +124,8 @@ class TelemetryTransformFunctionsTest {
     val documentRequestContext = DocumentRequestContext(
       "Service name",
       null,
-      "USERNAME")
+      "USERNAME",
+    )
     val event = DocumentsScannedEvent(documentRequestContext, document.fileSize)
     with(event.toCustomEventProperties()) {
       assertThat(this[SERVICE_NAME_PROPERTY_KEY]).isEqualTo(documentRequestContext.serviceName)
