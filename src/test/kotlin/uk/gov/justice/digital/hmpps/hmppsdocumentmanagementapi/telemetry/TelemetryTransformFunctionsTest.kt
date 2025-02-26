@@ -105,11 +105,29 @@ class TelemetryTransformFunctionsTest {
   }
 
   @Test
-  fun `document scanned event to custom event properties`() {
+  fun `document scanned event to custom event properties with no username`() {
+    val documentRequestContext = DocumentRequestContext(
+      "Service name",
+      "LPI",
+      null)
     val event = DocumentsScannedEvent(documentRequestContext, document.fileSize)
     with(event.toCustomEventProperties()) {
       assertThat(this[SERVICE_NAME_PROPERTY_KEY]).isEqualTo(documentRequestContext.serviceName)
       assertThat(this[ACTIVE_CASE_LOAD_ID_PROPERTY_KEY]).isEqualTo(documentRequestContext.activeCaseLoadId)
+      assertThat(this[USERNAME_PROPERTY_KEY]).isEqualTo("")
+    }
+  }
+
+  @Test
+  fun `document scanned event to custom event properties with no caseload`() {
+    val documentRequestContext = DocumentRequestContext(
+      "Service name",
+      null,
+      "USERNAME")
+    val event = DocumentsScannedEvent(documentRequestContext, document.fileSize)
+    with(event.toCustomEventProperties()) {
+      assertThat(this[SERVICE_NAME_PROPERTY_KEY]).isEqualTo(documentRequestContext.serviceName)
+      assertThat(this[ACTIVE_CASE_LOAD_ID_PROPERTY_KEY]).isEqualTo("")
       assertThat(this[USERNAME_PROPERTY_KEY]).isEqualTo(documentRequestContext.username)
     }
   }
