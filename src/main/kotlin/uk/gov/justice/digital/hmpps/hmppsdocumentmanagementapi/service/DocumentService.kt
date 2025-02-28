@@ -9,7 +9,9 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentAl
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.VirusScanResult
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentMetadataReplacedEvent
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsScannedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.findByDocumentUuidOrThrowNotFound
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.utils.fileExtension
@@ -139,6 +141,13 @@ class DocumentService(
       documentRepository.saveAndFlush(this).toModel().also {
         eventService.recordDocumentDeletedEvent(it, documentRequestContext, System.currentTimeMillis() - startTimeInMs)
       }
+    }
+  }
+
+  fun scanDocument(fileToScan: MultipartFile, documentRequestContext: DocumentRequestContext): VirusScanResult {
+    val startTimeInMs = System.currentTimeMillis()
+    return virusScanService.scan(fileToScan.inputStream).also {
+      eventService.recordDocumentScannedEvent(DocumentsScannedEvent(documentRequestContext, fileToScan.size), System.currentTimeMillis() - startTimeInMs)
     }
   }
 }

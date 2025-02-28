@@ -10,11 +10,11 @@ import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.MediaType
 import org.springframework.http.client.MultipartBodyBuilder
+import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.web.multipart.MultipartFile
 import software.amazon.awssdk.awscore.exception.AwsServiceException
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
@@ -27,10 +27,10 @@ import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
 class UploadDocumentTransactionIntTest : IntegrationTestBase() {
-  @SpyBean
+  @MockitoSpyBean
   lateinit var repository: DocumentRepository
 
-  @MockBean
+  @MockitoBean
   lateinit var fileService: DocumentFileService
 
   @Test

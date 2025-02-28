@@ -7,6 +7,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRe
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentMetadataReplacedEvent
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsScannedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsSearchedEvent
 import java.time.LocalDateTime
 import java.util.UUID
@@ -104,6 +105,36 @@ class TelemetryTransformFunctionsTest {
   }
 
   @Test
+  fun `document scanned event to custom event properties with no username`() {
+    val documentRequestContext = DocumentRequestContext(
+      "Service name",
+      "LPI",
+      null,
+    )
+    val event = DocumentsScannedEvent(documentRequestContext, document.fileSize)
+    with(event.toCustomEventProperties()) {
+      assertThat(this[SERVICE_NAME_PROPERTY_KEY]).isEqualTo(documentRequestContext.serviceName)
+      assertThat(this[ACTIVE_CASE_LOAD_ID_PROPERTY_KEY]).isEqualTo(documentRequestContext.activeCaseLoadId)
+      assertThat(this[USERNAME_PROPERTY_KEY]).isEqualTo("")
+    }
+  }
+
+  @Test
+  fun `document scanned event to custom event properties with no caseload`() {
+    val documentRequestContext = DocumentRequestContext(
+      "Service name",
+      null,
+      "USERNAME",
+    )
+    val event = DocumentsScannedEvent(documentRequestContext, document.fileSize)
+    with(event.toCustomEventProperties()) {
+      assertThat(this[SERVICE_NAME_PROPERTY_KEY]).isEqualTo(documentRequestContext.serviceName)
+      assertThat(this[ACTIVE_CASE_LOAD_ID_PROPERTY_KEY]).isEqualTo("")
+      assertThat(this[USERNAME_PROPERTY_KEY]).isEqualTo(documentRequestContext.username)
+    }
+  }
+
+  @Test
   fun `document model to custom event metrics`() {
     with(document.toCustomEventMetrics(eventTimeMs)) {
       assertThat(this[EVENT_TIME_MS_METRIC_KEY]).isEqualTo(eventTimeMs.toDouble())
@@ -146,5 +177,14 @@ class TelemetryTransformFunctionsTest {
     val event = DocumentsSearchedEvent(documentSearchRequest, 10, 13)
     val eventProperties = event.toCustomEventMetrics(eventTimeMs)
     assertThat(eventProperties[METADATA_FIELD_COUNT_METRIC_KEY]).isEqualTo(0.0)
+  }
+
+  @Test
+  fun `document scanned event to custom event metrics`() {
+    val event = DocumentsScannedEvent(documentRequestContext, document.fileSize)
+    with(event.toCustomEventMetrics(eventTimeMs)) {
+      assertThat(this[EVENT_TIME_MS_METRIC_KEY]).isEqualTo(eventTimeMs.toDouble())
+      assertThat(this[FILE_SIZE_METRIC_KEY]).isEqualTo(document.fileSize.toDouble())
+    }
   }
 }

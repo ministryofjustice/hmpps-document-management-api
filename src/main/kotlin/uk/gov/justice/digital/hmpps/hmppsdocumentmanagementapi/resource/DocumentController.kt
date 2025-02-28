@@ -34,6 +34,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.Docum
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResult
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.VirusScanResult
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.DocumentSearchService
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.DocumentService
 import java.util.UUID
@@ -375,6 +376,48 @@ class DocumentController(
     request.authorisedDocumentTypes(),
     request.documentRequestContext(),
   )
+
+  @ResponseStatus(HttpStatus.OK)
+  @PostMapping("/scan")
+  @Operation(
+    summary = "Performs a virus check on the uploaded file.",
+    description = "This endpoint performs a virus scan on the uploaded file and returns the scan results." +
+      " This can be run on any document type and the file will not be persisted.",
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Document scan successfully",
+        content = [Content(schema = Schema(implementation = VirusScanResult::class))],
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Bad request",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role.",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  @PreAuthorize("hasAnyRole('$ROLE_DOCUMENT_WRITER', '$ROLE_DOCUMENT_ADMIN')")
+  fun scanDocument(
+    @RequestPart
+    @Parameter(
+      description = "File part of the multipart request",
+      required = true,
+    )
+    file: MultipartFile,
+    request: HttpServletRequest,
+  ) = documentService.scanDocument(file, request.documentRequestContext())
 
   private fun HttpServletRequest.authorisedDocumentTypes() = (getAttribute(AUTHORISED_DOCUMENT_TYPES) as List<*>).filterIsInstance<DocumentType>()
 
