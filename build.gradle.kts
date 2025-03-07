@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "7.1.2"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "7.1.3"
   kotlin("plugin.spring") version "2.1.10"
   kotlin("plugin.jpa") version "2.1.10"
   jacoco
@@ -21,11 +21,11 @@ dependencies {
   runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
   runtimeOnly("org.postgresql:postgresql")
-  implementation("io.hypersistence:hypersistence-utils-hibernate-62:3.9.2")
+  implementation("io.hypersistence:hypersistence-utils-hibernate-62:3.9.3")
 
   // AWS
   implementation("io.awspring.cloud:spring-cloud-aws-starter-s3")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.3.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.3.2")
 
   // OpenAPI
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
@@ -33,12 +33,12 @@ dependencies {
   implementation("commons-io:commons-io:2.18.0")
 
   // Test dependencies
-  testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
+  testImplementation("org.junit.jupiter:junit-jupiter:5.12.0")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-  testImplementation("org.wiremock:wiremock-standalone:3.12.0")
-  testImplementation("org.testcontainers:postgresql:1.20.5")
-  testImplementation("org.testcontainers:localstack:1.20.5")
-  testImplementation("org.awaitility:awaitility-kotlin:4.2.2")
+  testImplementation("org.wiremock:wiremock-standalone:3.12.1")
+  testImplementation("org.testcontainers:postgresql:1.20.6")
+  testImplementation("org.testcontainers:localstack:1.20.6")
+  testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.6")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
 }
