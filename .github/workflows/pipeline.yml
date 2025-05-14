@@ -1,0 +1,14 @@
+name: Minimal Workflow
+
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+jobs:
+  say_hello:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log a message
+        run: echo "Hello from GitHub Actions! Workflow executed successfully."
