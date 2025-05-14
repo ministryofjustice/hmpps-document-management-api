@@ -51,6 +51,21 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Wait for LocalStack to be ready
+        run: |
+          echo "Waiting for LocalStack to be ready..."
+          for i in {1..30}; do
+            if curl -s http://localhost:4567/health | grep '"status": "running"'; then
+              echo "LocalStack is ready!"
+              break
+            fi
+            echo "Waiting for LocalStack... retry $i"
+            sleep 5
+          done
+          if [ $i -eq 30 ]; then
+            echo "LocalStack did not start in time."
+            exit 1
+          fi
       - name: refresh cache
         id: initial-cache
         uses: actions/cache@v4
