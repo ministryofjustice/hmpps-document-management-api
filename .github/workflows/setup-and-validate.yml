@@ -22,24 +22,29 @@ jobs:
 
     services:
       localstack:
-        image: localstack/localstack:latest
+        image: localstack/localstack:3
         env:
           SERVICES: s3, sqs, sns
-          DEFAULT_REGION: us-east-1
-          AWS_ACCESS_KEY_ID: test
-          AWS_SECRET_ACCESS_KEY: test
+          ES_PORT_EXTERNAL: 4571
+          DEBUG: ${DEBUG- }
+          DATA_DIR: /tmp/localstack/data
+          DOCKER_HOST: unix:///var/run/docker.sock
+          LAMBDA_EXECUTOR: ${LAMBDA_EXECUTOR- }
+          AWS_EXECUTION_ENV: True
+          DEFAULT_REGION: eu-west-2
+          TMPDIR: /private
         ports:
           - 4567:4566
       postgres:
         image: postgres:15.7
         env:
-          POSTGRES_USER: visit_allocation
-          POSTGRES_PASSWORD: visit_allocation
-          POSTGRES_DB: visit_allocation
+          POSTGRES_USER: document-management
+          POSTGRES_PASSWORD: document-management
+          POSTGRES_DB: document-management
         ports:
           - 5433:5432
         options: >-
-          --health-cmd="pg_isready -U postgres -d visit_allocation"
+          --health-cmd="pg_isready -U postgres -d document-management"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
