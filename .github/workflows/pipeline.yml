@@ -56,8 +56,7 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-  
     steps:
       - name: Print app version
-        run:
-          echo "App Version: ${{ needs.build.outputs.app_version }}"
+        run: |
+          echo "Debug: App version is '${{ needs.build.outputs.app_version }}'"
