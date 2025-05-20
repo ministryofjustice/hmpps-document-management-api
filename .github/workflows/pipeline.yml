@@ -54,6 +54,7 @@ jobs:
       push: ${{ inputs.push || true }}
       docker_multiplatform: false
   deploy_dev:
+    if: github.ref == 'refs/heads/main'
     name: Deploy to the development environment
     needs:
       - build
