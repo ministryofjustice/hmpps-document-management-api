@@ -13,13 +13,6 @@ generic-service:
     enabled: true
     host: app-hostname.local # override per environment
     tlsSecretName: hmpps-document-management-api-cert
-    annotations:
-      nginx.ingress.kubernetes.io/server-snippet: |
-        server_tokens off;
-        location /visits/allocation/job/start {
-          deny all;
-          return 401;
-        }
 
   # Used to access resources like S3 buckets, SQS queues and SNS topics
   serviceAccountName: hmpps-document-management-api
