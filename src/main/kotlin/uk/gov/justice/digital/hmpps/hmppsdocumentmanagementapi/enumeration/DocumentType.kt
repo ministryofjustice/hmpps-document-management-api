@@ -30,4 +30,13 @@ enum class DocumentType(
   CEMO_ATTACHMENT(
     description = "Attachments used for create electronic monitoring order",
   ),
+  TRIAL_RECORD_SHEET(
+    description = "Trial record sheet of a Sentence",
+  ),
+  INDICTMENT(
+    description = "Indictment document of a Sentence",
+  ),
+  PRISON_COURT_REGISTER(
+    description = "Prison court register",
+  ),
 }
