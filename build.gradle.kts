@@ -1,7 +1,7 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.2.0"
-  kotlin("plugin.spring") version "2.1.21"
-  kotlin("plugin.jpa") version "2.1.21"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.3.0"
+  kotlin("plugin.spring") version "2.2.0"
+  kotlin("plugin.jpa") version "2.2.0"
   jacoco
 }
 
@@ -25,7 +25,7 @@ dependencies {
 
   // AWS
   implementation("io.awspring.cloud:spring-cloud-aws-starter-s3")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.5")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.6")
 
   // OpenAPI
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
@@ -33,11 +33,11 @@ dependencies {
   implementation("commons-io:commons-io:2.19.0")
 
   // Test dependencies
-  testImplementation("org.junit.jupiter:junit-jupiter:5.13.1")
+  testImplementation("org.junit.jupiter:junit-jupiter:5.13.2")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
   testImplementation("org.wiremock:wiremock-standalone:3.13.1")
-  testImplementation("org.testcontainers:postgresql:1.21.1")
-  testImplementation("org.testcontainers:localstack:1.21.1")
+  testImplementation("org.testcontainers:postgresql:1.21.3")
+  testImplementation("org.testcontainers:localstack:1.21.3")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.6")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
