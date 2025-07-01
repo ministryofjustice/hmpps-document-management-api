@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.3.0"
   kotlin("plugin.spring") version "2.2.0"
@@ -44,14 +46,10 @@ dependencies {
 }
 
 kotlin {
-  jvmToolchain(21)
-}
+  jvmToolchain(21) // optional but recommended for aligning JDK version
 
-tasks {
-  withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-      jvmTarget = "21"
-    }
+  compilerOptions {
+    jvmTarget.set(JvmTarget.JVM_21)
   }
 }
 
