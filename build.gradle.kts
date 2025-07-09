@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.3.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.3.1"
   kotlin("plugin.spring") version "2.2.0"
   kotlin("plugin.jpa") version "2.2.0"
   jacoco
@@ -27,7 +27,7 @@ dependencies {
 
   // AWS
   implementation("io.awspring.cloud:spring-cloud-aws-starter-s3")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.6")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.7")
 
   // OpenAPI
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
@@ -35,7 +35,7 @@ dependencies {
   implementation("commons-io:commons-io:2.19.0")
 
   // Test dependencies
-  testImplementation("org.junit.jupiter:junit-jupiter:5.13.2")
+  testImplementation("org.junit.jupiter:junit-jupiter:5.13.3")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
   testImplementation("org.wiremock:wiremock-standalone:3.13.1")
   testImplementation("org.testcontainers:postgresql:1.21.3")
