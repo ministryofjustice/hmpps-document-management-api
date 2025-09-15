@@ -26,7 +26,7 @@ generic-prometheus-alerts:
 
 s3Sync:
   enabled: true
-  schedule: 0 2 * * *
+  schedule: 0 */4 * * *
   serviceAccountName: hmpps-document-management-preprod-cross-service
   sourceBucket: cloud-platform-f548ea4a5da62a1d1dff02ad6e1e2d42
   container:
