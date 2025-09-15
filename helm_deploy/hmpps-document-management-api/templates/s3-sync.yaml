@@ -37,4 +37,4 @@ spec:
                   value: "{{ .Values.generic-service.env.AWS_REGION }}"
                 - name: S3_DESTINATION_REGION
                   value: "{{ .Values.generic-service.env.AWS_REGION }}"
-  {{- end }}
+{{- end }}
