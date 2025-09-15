@@ -32,7 +32,7 @@ spec:
                   valueFrom:
                     secretKeyRef:
                       name: s3-output
-                      key: "{{ .Values.generic-service.namespace_secrets.s3-output.S3_DOCUMENT_BUCKET_NAME }}"
+                      key: "{{ index (index .Values.generic-service.namespace_secrets \"s3-output\") \"S3_DOCUMENT_BUCKET_NAME\" }}"
                 - name: S3_SOURCE_REGION
                   value: "{{ .Values.generic-service.env.AWS_REGION }}"
                 - name: S3_DESTINATION_REGION
