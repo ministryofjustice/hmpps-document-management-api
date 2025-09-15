@@ -1,11 +1,11 @@
-{{- if .Values.s3Sync.enabled -}}
+{{- if .Values.s3Sync.enabled }}
 ---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: hmpps-document-management-api-s3-sync-cronjob
 spec:
-  schedule: {{ .Values.s3Sync.schedule | quote }}
+  schedule: "{{ .Values.s3Sync.schedule }}"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 5
   failedJobsHistoryLimit: 5
@@ -13,11 +13,11 @@ spec:
     spec:
       template:
         spec:
-          serviceAccountName: {{ .Values.s3Sync.serviceAccountName }}
+          serviceAccountName: "{{ .Values.s3Sync.serviceAccountName }}"
           restartPolicy: OnFailure
           containers:
-            - name: {{ .Values.s3Sync.container.name }}
-              image: {{ .Values.s3Sync.container.image }}
+            - name: "{{ .Values.s3Sync.container.name }}"
+              image: "{{ .Values.s3Sync.container.image }}"
               args:
                 - >
                   aws s3 sync --delete
@@ -25,16 +25,16 @@ spec:
                   s3://$S3_DESTINATION_BUCKET
                   --source-region $S3_SOURCE_REGION
                   --region $S3_DESTINATION_REGION
-                env:
-                  - name: S3_SOURCE_BUCKET
-                    value: { { .Values.s3Sync.sourceBucket } }
-                  - name: S3_DESTINATION_BUCKET
-                    valueFrom:
-                      secretKeyRef:
-                        name: s3-output
-                        key: { { .Values.generic-service.namespace_secrets[ "s3-output" ].S3_DOCUMENT_BUCKET_NAME } }
-                  - name: S3_SOURCE_REGION
-                    value: { { .Values.generic-service.env.AWS_REGION } }
-                  - name: S3_DESTINATION_REGION
-                    value: { { .Values.generic-service.env.AWS_REGION } }
-{{- end }}
+              env:
+                - name: S3_SOURCE_BUCKET
+                  value: "{{ .Values.s3Sync.sourceBucket }}"
+                - name: S3_DESTINATION_BUCKET
+                  valueFrom:
+                    secretKeyRef:
+                      name: s3-output
+                      key: "{{ .Values.generic-service.namespace_secrets.s3-output.S3_DOCUMENT_BUCKET_NAME }}"
+                - name: S3_SOURCE_REGION
+                  value: "{{ .Values.generic-service.env.AWS_REGION }}"
+                - name: S3_DESTINATION_REGION
+                  value: "{{ .Values.generic-service.env.AWS_REGION }}"
+  {{- end }}
