@@ -25,4 +25,6 @@ generic-prometheus-alerts:
   alertSeverity: hmpps_document_management_api_non_prod
 
 s3Sync:
-  enabled: false
+  enabled: true
+  schedule: 0 2 * * *
+  serviceAccountName: hmpps-document-management-preprod-cross-service
