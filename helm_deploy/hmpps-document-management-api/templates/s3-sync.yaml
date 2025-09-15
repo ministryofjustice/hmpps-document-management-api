@@ -34,7 +34,7 @@ spec:
                       name: s3-output
                       key: "{{ index (index (index .Values "generic-service" ) "namespace_secrets") "s3-output" | index "S3_DOCUMENT_BUCKET_NAME" }}"
                 - name: S3_SOURCE_REGION
-                  value: "{{ .Values.generic-service.env.AWS_REGION }}"
+                  value: "{{ index (index (index .Values "generic-service") "env") "AWS_REGION" }}"
                 - name: S3_DESTINATION_REGION
-                  value: "{{ .Values.generic-service.env.AWS_REGION }}"
+                  value: "{{ index (index (index .Values "generic-service") "env") "AWS_REGION" }}"
 {{- end }}
