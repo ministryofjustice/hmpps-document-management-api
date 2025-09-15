@@ -3,9 +3,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ include "hmpps-document-management-api.fullname" . }}-s3-sync-cronjob
-  labels:
-    {{- include "hmpps-document-management-api.labels" . | nindent 4 }}
+  name: hmpps-document-management-api-s3-sync-cronjob
 spec:
   schedule: {{ .Values.s3Sync.schedule | quote }}
   concurrencyPolicy: Forbid
