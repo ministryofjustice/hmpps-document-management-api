@@ -23,3 +23,12 @@ generic-service:
 # See https://user-guide.cloud-platform.service.justice.gov.uk/documentation/monitoring-an-app/how-to-create-alarms.html#creating-your-own-custom-alerts
 generic-prometheus-alerts:
   alertSeverity: hmpps_document_management_api_non_prod
+
+s3Sync:
+  enabled: true
+  schedule: 0 */1 * * *
+  serviceAccountName: hmpps-document-management-dev-cross-service-dev-test
+  sourceBucket: cloud-platform-9f7916cd9d39324d81c052834a583ff8
+  container:
+    name: cross-service-s3-sync-dev-tst
+    image: github.com/ministryofjustice/cloud-platform-terraform-service-pod?ref=1.2.0
