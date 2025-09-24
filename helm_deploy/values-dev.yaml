@@ -27,7 +27,7 @@ generic-prometheus-alerts:
 s3Sync:
   enabled: true
   schedule: 0 */1 * * *
-  serviceAccountName: hmpps-document-management-dev-cross-service-dev-test
+  serviceAccountName: hmpps-document-management-dev-cross-srv-tst
   sourceBucket: cloud-platform-9f7916cd9d39324d81c052834a583ff8
   container:
     name: cross-service-s3-sync-dev-tst
