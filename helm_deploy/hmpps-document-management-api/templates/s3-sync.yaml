@@ -24,13 +24,10 @@ spec:
                  allowPrivilegeEscalation: false
                  runAsNonRoot: true
                  runAsUser: 1001
+              command: [ "/bin/sh", "-c" ]
               args:
                 - >
-                  aws s3 sync 
-                  s3://$S3_SOURCE_BUCKET
-                  s3://$S3_DESTINATION_BUCKET
-                  --source-region $S3_SOURCE_REGION
-                  --region $S3_DESTINATION_REGION
+                  aws s3 sync s3://$S3_SOURCE_BUCKET s3://$S3_DESTINATION_BUCKET --source-region $S3_SOURCE_REGION --region $S3_DESTINATION_REGION
               env:
                 - name: S3_SOURCE_BUCKET
                   value: "{{ .Values.s3Sync.sourceBucket }}"
