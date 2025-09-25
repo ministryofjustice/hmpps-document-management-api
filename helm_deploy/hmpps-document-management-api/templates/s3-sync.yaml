@@ -18,6 +18,12 @@ spec:
           containers:
             - name: "{{ .Values.s3Sync.container.name }}"
               image: "{{ .Values.s3Sync.container.image }}"
+              stdin: true
+              tty: true
+              securityContext:
+                 allowPrivilegeEscalation: false
+                 runAsNonRoot: true
+                 runAsUser: 1001
               args:
                 - >
                   aws s3 sync 
