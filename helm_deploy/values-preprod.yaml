@@ -31,4 +31,4 @@ s3Sync:
   sourceBucket: cloud-platform-f548ea4a5da62a1d1dff02ad6e1e2d42
   container:
       name: cross-service-s3-sync
-      image: 754256621582.dkr.ecr.eu-west-2.amazonaws.com/webops/cloud-platform-service-pod:f9619b99ffe9ae511dde5e7e6e5b67ea289bbab5
+      image: ghcr.io/ministryofjustice/hmpps-devops-tools:sha-994f439
