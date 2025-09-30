@@ -34,4 +34,10 @@ s3Sync:
       image: ghcr.io/ministryofjustice/hmpps-devops-tools:sha-994f439
 
 s3ImgSync:
-  enabled: false
+  enabled: true
+  schedule: 0 0 * * 1
+  serviceAccountName: hmpps-document-management-preprod-cross-service
+  sourceBucket: cloud-platform-86ce211134a73df3c03f1a87c1dbf0a7
+  container:
+    name: cross-service-s3-img-sync
+    image: ghcr.io/ministryofjustice/hmpps-devops-tools:sha-994f439
