@@ -34,3 +34,6 @@ generic-prometheus-alerts:
 
 s3Sync:
   enabled: false
+
+s3ImgSync:
+  enabled: false

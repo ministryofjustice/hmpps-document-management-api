@@ -32,3 +32,12 @@ s3Sync:
   container:
     name: cross-service-s3-sync-dev-tst
     image: ghcr.io/ministryofjustice/hmpps-devops-tools:sha-994f439
+
+s3ImgSync:
+  enabled: true
+  schedule: 0 1 * * 0
+  serviceAccountName: hmpps-document-management-dev-cross-srv-tst
+  sourceBucket: cloud-platform-9f7916cd9d39324d81c052834a583ff8
+  container:
+    name: cross-service-s3-img-sync-dev-tst
+    image: ghcr.io/ministryofjustice/hmpps-devops-tools:sha-994f439

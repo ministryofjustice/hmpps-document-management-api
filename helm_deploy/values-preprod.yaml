@@ -32,3 +32,6 @@ s3Sync:
   container:
       name: cross-service-s3-sync
       image: ghcr.io/ministryofjustice/hmpps-devops-tools:sha-994f439
+
+s3ImgSync:
+  enabled: false
