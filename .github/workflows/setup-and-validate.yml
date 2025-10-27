@@ -22,7 +22,7 @@ jobs:
 
     services:
       localstack:
-        image: localstack/localstack:3
+        image: localstack/localstack:4
         env:
           SERVICES: s3, sqs, sns
           ES_PORT_EXTERNAL: 4571
