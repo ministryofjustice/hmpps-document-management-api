@@ -1,9 +1,9 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.1.2"
-  kotlin("plugin.spring") version "2.2.20"
-  kotlin("plugin.jpa") version "2.2.20"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.2.0"
+  kotlin("plugin.spring") version "2.2.21"
+  kotlin("plugin.jpa") version "2.2.21"
   jacoco
 }
 
@@ -26,18 +26,18 @@ dependencies {
   implementation("io.hypersistence:hypersistence-utils-hibernate-62:3.9.4")
 
   // AWS
-  implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:3.4.0")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.11")
+  implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:3.4.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.6.2")
 
   // OpenAPI
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14")
 
-  implementation("commons-io:commons-io:2.20.0")
+  implementation("commons-io:commons-io:2.21.0")
 
   // Test dependencies
-  testImplementation("org.junit.jupiter:junit-jupiter:6.0.0")
+  testImplementation("org.junit.jupiter:junit-jupiter:6.0.1")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-  testImplementation("org.wiremock:wiremock-standalone:3.13.1")
+  testImplementation("org.wiremock:wiremock-standalone:3.13.2")
   testImplementation("org.testcontainers:postgresql:1.21.3")
   testImplementation("org.testcontainers:localstack:1.21.3")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
