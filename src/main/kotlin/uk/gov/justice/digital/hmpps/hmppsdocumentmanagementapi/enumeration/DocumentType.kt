@@ -39,4 +39,16 @@ enum class DocumentType(
   PRISON_COURT_REGISTER(
     description = "Prison court register",
   ),
+  BAIL_ORDER(
+    description = "Bail order",
+  ),
+  SUSPENDED_IMPRISONMENT_ORDER(
+    description = "Suspended imprisonment order",
+  ),
+  NOTICE_OF_DISCONTINUANCE(
+    description = "Notice of discontinuance",
+  ),
+  COMMUNITY_ORDER(
+    description = "Community order",
+  ),
 }
