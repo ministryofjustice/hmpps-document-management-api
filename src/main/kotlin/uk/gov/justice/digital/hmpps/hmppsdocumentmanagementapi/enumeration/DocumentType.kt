@@ -52,6 +52,6 @@ enum class DocumentType(
     description = "Community order",
   ),
   PRISONER_APPLICATION(
-    description = "Image of prisoner application forms"
+    description = "Image of prisoner application forms",
   ),
 }
