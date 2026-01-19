@@ -40,7 +40,7 @@ services:
       - SPRING_PROFILES_ACTIVE=dev
       - DELIUS_ENABLED=false
   clamav:
-    image: ghcr.io/ministryofjustice/hmpps-clamav-freshclammed:sha-be2a89d
+    image: ghcr.io/ministryofjustice/hmpps-clamav-freshclammed:sha-e2459aa
     networks:
       - hmpps
     container_name: clamav
