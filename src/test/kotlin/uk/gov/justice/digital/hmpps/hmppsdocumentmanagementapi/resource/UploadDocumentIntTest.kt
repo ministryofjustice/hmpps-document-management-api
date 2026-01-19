@@ -237,8 +237,8 @@ class UploadDocumentIntTest : IntegrationTestBase() {
     with(response) {
       assertThat(status).isEqualTo(400)
       assertThat(errorCode).isNull()
-      assertThat(userMessage).isEqualTo("Document file virus scan FAILED with result stream: Win.Test.EICAR_HDB-1 FOUND and signature Win.Test.EICAR_HDB-1")
-      assertThat(developerMessage).isEqualTo("Document file virus scan FAILED with result stream: Win.Test.EICAR_HDB-1 FOUND and signature Win.Test.EICAR_HDB-1")
+      assertThat(userMessage).isEqualTo("Document file virus scan FAILED with result stream: Eicar-Test-Signature FOUND and signature Eicar-Test-Signature")
+      assertThat(developerMessage).isEqualTo("Document file virus scan FAILED with result stream: Eicar-Test-Signature FOUND and signature Eicar-Test-Signature")
       assertThat(moreInfo).isNull()
     }
   }
