@@ -102,8 +102,8 @@ class ScanDocumentIntTest : IntegrationTestBase() {
 
     with(response) {
       assertThat(status).isEqualTo(VirusScanStatus.FAILED)
-      assertThat(result).isEqualTo("stream: Win.Test.EICAR_HDB-1 FOUND")
-      assertThat(signature).isEqualTo("Win.Test.EICAR_HDB-1")
+      assertThat(result).isEqualTo("stream: Eicar-Test-Signature FOUND")
+      assertThat(signature).isEqualTo("Eicar-Test-Signature")
     }
   }
 
