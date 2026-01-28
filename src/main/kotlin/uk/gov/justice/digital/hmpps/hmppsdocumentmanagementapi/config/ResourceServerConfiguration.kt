@@ -29,7 +29,7 @@ class ResourceServerConfiguration {
       authorizeHttpRequests {
         listOf(
           "/webjars/**",
-          "favicon.ico",
+          "/favicon.ico",
           "/health/**",
           "/info",
           "/swagger-resources/**",
@@ -48,8 +48,7 @@ class ResourceServerConfiguration {
   }
 
   @Bean
-  fun locallyCachedJwtDecoder(
-    @Value("\${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}") jwkSetUri: String,
-    cacheManager: CacheManager,
-  ): JwtDecoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri).cache(cacheManager.getCache("jwks")).build()
+  fun cacheManager(): CacheManager {
+    return org.springframework.cache.caffeine.CaffeineCacheManager()
+  }
 }

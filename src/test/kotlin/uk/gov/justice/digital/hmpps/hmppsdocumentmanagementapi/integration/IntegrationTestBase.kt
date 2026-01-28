@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
@@ -47,6 +48,7 @@ import java.util.UUID
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
 @Sql("classpath:test_data/reset-database.sql")
 @ExtendWith(OAuthExtension::class)
+@AutoConfigureWebTestClient
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
 abstract class IntegrationTestBase {

@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.3.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.0.2"
   kotlin("plugin.spring") version "2.3.0"
   kotlin("plugin.jpa") version "2.3.0"
   jacoco
@@ -18,16 +18,21 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+  implementation("org.springframework.boot:spring-boot-starter-actuator")
+  implementation("org.springframework:spring-context-support")
+
+  implementation("com.github.ben-manes.caffeine:caffeine")
 
   // Database dependencies
   runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
   runtimeOnly("org.postgresql:postgresql")
-  implementation("io.hypersistence:hypersistence-utils-hibernate-62:3.9.4")
+// Use the artifact built for Hibernate 7.x
+  implementation("io.hypersistence:hypersistence-utils-hibernate-71:3.14.1")
 
   // AWS
-  implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:3.4.1")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.6.3")
+  implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:4.0.0-M1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:6.0.0")
 
   // OpenAPI
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14")
@@ -43,7 +48,10 @@ dependencies {
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.13.0")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.13.0")
+  testImplementation("org.springframework.boot:spring-boot-starter-webflux-test")
 }
+
+extra["hibernate.version"] = "7.2.2.Final"
 
 kotlin {
   jvmToolchain(24) // optional but recommended for aligning JDK version
