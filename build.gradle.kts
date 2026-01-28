@@ -20,6 +20,8 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework:spring-context-support")
+  implementation("org.springframework.boot:spring-boot-starter-flyway")
+  implementation("org.springframework.boot:spring-boot-starter-webclient")
 
   implementation("com.github.ben-manes.caffeine:caffeine")
 
@@ -27,7 +29,6 @@ dependencies {
   runtimeOnly("org.flywaydb:flyway-core")
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
   runtimeOnly("org.postgresql:postgresql")
-// Use the artifact built for Hibernate 7.x
   implementation("io.hypersistence:hypersistence-utils-hibernate-71:3.14.1")
 
   // AWS
