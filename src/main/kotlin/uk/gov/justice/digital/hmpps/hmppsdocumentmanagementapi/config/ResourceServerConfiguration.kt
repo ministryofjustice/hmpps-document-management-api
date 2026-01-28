@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config
 
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
@@ -10,8 +9,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.invoke
 import org.springframework.security.config.http.SessionCreationPolicy
-import org.springframework.security.oauth2.jwt.JwtDecoder
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import org.springframework.security.web.SecurityFilterChain
 
 @Configuration
@@ -48,7 +45,5 @@ class ResourceServerConfiguration {
   }
 
   @Bean
-  fun cacheManager(): CacheManager {
-    return org.springframework.cache.caffeine.CaffeineCacheManager()
-  }
+  fun cacheManager(): CacheManager = org.springframework.cache.caffeine.CaffeineCacheManager()
 }
