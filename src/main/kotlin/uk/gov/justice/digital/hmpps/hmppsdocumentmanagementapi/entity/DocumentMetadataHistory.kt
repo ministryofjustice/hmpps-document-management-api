@@ -15,7 +15,7 @@ import org.hibernate.annotations.Type
 import java.time.LocalDateTime
 
 @Entity
-@Table
+@Table(name = "document_metadata_history")
 data class DocumentMetadataHistory(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -12,9 +12,9 @@ class FeatureSwitches(private val environment: Environment) {
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun isEnabled(feature: Feature, defaultValue: Boolean = false): Boolean = get(feature.label, Boolean::class.java, defaultValue)
+  fun isEnabled(feature: Feature, defaultValue: Boolean = false): Boolean = get(feature.label, Boolean::class.javaObjectType, defaultValue)
 
-  private inline fun <reified T> get(property: String, type: Class<T>, defaultValue: T) = environment.getProperty(property, type).let {
+  private fun <T : Any> get(property: String, type: Class<T>, defaultValue: T) = environment.getProperty(property, type).let {
     if (it == null) {
       log.info("property '$property' not configured, defaulting to $defaultValue")
       defaultValue

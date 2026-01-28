@@ -36,10 +36,10 @@ class HmppsDocumentManagementApiExceptionHandler {
   @ExceptionHandler(MethodArgumentTypeMismatchException::class)
   fun handleMethodArgumentTypeMismatchException(e: MethodArgumentTypeMismatchException): ResponseEntity<ErrorResponse> {
     val type = e.requiredType
-    val message = if (type.isEnum) {
+    val message = if (type?.isEnum == true) {
       "Parameter ${e.name} must be one of the following ${StringUtils.join(type.enumConstants, ", ")}"
     } else {
-      "Parameter ${e.name} must be of type ${type.typeName}"
+      "Parameter ${e.name} must be of type ${type?.typeName}"
     }
 
     return ResponseEntity

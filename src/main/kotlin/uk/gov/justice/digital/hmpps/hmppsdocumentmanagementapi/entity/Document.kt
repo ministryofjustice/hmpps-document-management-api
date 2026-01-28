@@ -22,7 +22,7 @@ import java.util.UUID
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as DocumentModel
 
 @Entity
-@Table
+@Table(name = "document")
 @SQLRestriction("deleted_time IS NULL")
 data class Document(
   @Id
