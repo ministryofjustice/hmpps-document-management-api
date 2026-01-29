@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.converter
 
 import jakarta.persistence.AttributeConverter
 import jakarta.persistence.Converter
-import tools.jackson.core.JacksonException // <--- NEW EXCEPTION CLASS
+import tools.jackson.core.JacksonException
 import tools.jackson.databind.JsonNode
 import tools.jackson.databind.ObjectMapper
 
@@ -18,7 +18,7 @@ class JsonNodeConverter : AttributeConverter<JsonNode, String> {
     }
     try {
       return jsonMapper.writeValueAsString(attribute)
-    } catch (e: JacksonException) { // <--- Catch JacksonException
+    } catch (e: JacksonException) {
       throw IllegalArgumentException("Error converting JsonNode to String", e)
     }
   }
@@ -29,7 +29,7 @@ class JsonNodeConverter : AttributeConverter<JsonNode, String> {
     }
     try {
       return jsonMapper.readTree(dbData)
-    } catch (e: JacksonException) { // <--- Catch JacksonException
+    } catch (e: JacksonException) {
       throw IllegalArgumentException("Error converting String to JsonNode", e)
     }
   }

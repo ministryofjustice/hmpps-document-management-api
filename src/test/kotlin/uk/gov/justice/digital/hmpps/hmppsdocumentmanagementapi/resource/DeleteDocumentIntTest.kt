@@ -39,7 +39,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.USERNAM
 import uk.gov.justice.hmpps.sqs.countMessagesOnQueue
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.util.*
+import java.util.UUID
 
 @TestPropertySource(
   properties = [

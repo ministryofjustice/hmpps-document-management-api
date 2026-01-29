@@ -154,7 +154,6 @@ abstract class AbstractDocumentTypeIntegrationTest : IntegrationTestBase() {
 
   @Test
   fun `replace document metadata success`() {
-    // FIX: Use the new ObjectMapper directly instead of JacksonUtil
     val newMetadata = ObjectMapper().readTree("{ \"sarCaseReference\": \"SAR-2345\", \"prisonNumber\": \"B2345CD\" }")
 
     val response = replaceMetadata(
