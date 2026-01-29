@@ -1,7 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource
 
-
-import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.awaitility.kotlin.await
@@ -149,8 +147,8 @@ class ReplaceDocumentMetadataIntTest : IntegrationTestBase() {
     with(response!!) {
       assertThat(status).isEqualTo(400)
       assertThat(errorCode).isNull()
-      assertThat(userMessage).isEqualTo("Validation failure: Couldn't read request body: Required request body is missing: public uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentController.replaceDocumentMetadata(java.util.UUID,com.fasterxml.jackson.databind.JsonNode,jakarta.servlet.http.HttpServletRequest)")
-      assertThat(developerMessage).isEqualTo("Required request body is missing: public uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentController.replaceDocumentMetadata(java.util.UUID,com.fasterxml.jackson.databind.JsonNode,jakarta.servlet.http.HttpServletRequest)")
+      assertThat(userMessage).isEqualTo("Validation failure: Couldn't read request body: Required request body is missing: public uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentController.replaceDocumentMetadata(java.util.UUID,tools.jackson.databind.JsonNode,jakarta.servlet.http.HttpServletRequest)")
+      assertThat(developerMessage).isEqualTo("Required request body is missing: public uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentController.replaceDocumentMetadata(java.util.UUID,tools.jackson.databind.JsonNode,jakarta.servlet.http.HttpServletRequest)")
       assertThat(moreInfo).isNull()
     }
   }

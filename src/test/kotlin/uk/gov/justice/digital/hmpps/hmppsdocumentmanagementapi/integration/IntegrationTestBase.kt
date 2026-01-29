@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration
 
 import com.microsoft.applicationinsights.TelemetryClient
-import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.AfterEach

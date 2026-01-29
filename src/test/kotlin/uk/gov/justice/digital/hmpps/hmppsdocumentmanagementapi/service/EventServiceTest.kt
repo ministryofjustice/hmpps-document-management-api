@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service
 
 import com.microsoft.applicationinsights.TelemetryClient
-import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
