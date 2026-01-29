@@ -1,7 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource
 
-import com.fasterxml.jackson.databind.JsonNode
-import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -27,6 +25,8 @@ import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ObjectMapper
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.AUTHORISED_DOCUMENT_TYPES
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
@@ -216,7 +216,7 @@ class DocumentController(
     documentType,
     documentUuid,
     file,
-    JacksonUtil.toJsonNode(metadata),
+    ObjectMapper().readTree(metadata),
     request.documentRequestContext(),
   )
 

@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.readValue
+
 import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
@@ -18,6 +17,9 @@ import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.reactive.server.WebTestClient
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.readValue
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.EventType
@@ -56,7 +58,7 @@ class ReplaceDocumentMetadataIntTest : IntegrationTestBase() {
   lateinit var repository: DocumentRepository
 
   private val documentUuid = UUID.fromString("f73a0f91-2957-4224-b477-714370c04d37")
-  private val metadata = JacksonUtil.toJsonNode("{ \"prisonNumber\": \"B2345CD\" }")
+  private val metadata = ObjectMapper().readTree("{ \"prisonNumber\": \"B2345CD\" }")
   private val serviceName = "Replaced metadata using service name"
   private val activeCaseLoadId = "MDI"
   private val username = "REPLACED_BY_USERNAME"
@@ -200,7 +202,7 @@ class ReplaceDocumentMetadataIntTest : IntegrationTestBase() {
     val entity = repository.findByDocumentUuid(documentUuid)!!
 
     assertThat(entity.documentMetadataHistory().single().metadata)
-      .isEqualTo(JacksonUtil.toJsonNode("{ \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\" }"))
+      .isEqualTo(ObjectMapper().readTree("{ \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\" }"))
   }
 
   @Sql("classpath:test_data/document-with-no-metadata-history-id-1.sql")
@@ -233,7 +235,7 @@ class ReplaceDocumentMetadataIntTest : IntegrationTestBase() {
       with(objectMapper.readValue<DocumentMetadataReplacedEvent>(details)) {
         document.assertIsDocumentWithNoMetadataHistoryId1(metadata)
         assertThat(originalMetadata)
-          .isEqualTo(JacksonUtil.toJsonNode("{ \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\" }"))
+          .isEqualTo(ObjectMapper().readTree("{ \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\" }"))
       }
     }
   }

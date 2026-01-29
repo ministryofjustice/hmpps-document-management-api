@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.hypersistence.utils.hibernate.type.json.JsonType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -12,6 +11,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import org.hibernate.annotations.Type
+import tools.jackson.databind.JsonNode
 import java.time.LocalDateTime
 
 @Entity

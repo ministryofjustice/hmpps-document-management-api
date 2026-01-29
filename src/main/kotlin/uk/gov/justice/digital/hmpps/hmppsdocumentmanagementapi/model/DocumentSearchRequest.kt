@@ -1,9 +1,9 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Min
 import org.springframework.data.domain.Sort.Direction
+import tools.jackson.databind.JsonNode
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentSearchOrderBy
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.validation.Between

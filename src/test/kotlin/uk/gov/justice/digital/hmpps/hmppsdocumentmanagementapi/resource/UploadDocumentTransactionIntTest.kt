@@ -17,6 +17,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.web.multipart.MultipartFile
 import software.amazon.awssdk.awscore.exception.AwsServiceException
+import tools.jackson.databind.ObjectMapper
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
@@ -74,7 +75,7 @@ class UploadDocumentTransactionIntTest : IntegrationTestBase() {
     part("file", ClassPathResource("test_data/warrant-for-remand.pdf"))
     part(
       "metadata",
-      JacksonUtil.toJsonNode("{ \"caseReferenceNumber\": \"T20231234\", \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\" }"),
+      ObjectMapper().readTree("{ \"caseReferenceNumber\": \"T20231234\", \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\" }"),
     )
   }.build()
 }

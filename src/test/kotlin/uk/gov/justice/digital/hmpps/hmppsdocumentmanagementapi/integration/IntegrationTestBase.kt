@@ -1,7 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.microsoft.applicationinsights.TelemetryClient
 import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
 import org.assertj.core.api.Assertions.assertThat
@@ -27,6 +25,8 @@ import software.amazon.awssdk.services.s3.model.DeleteObjectRequest
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ObjectMapper
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.HmppsS3Properties
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.S3BucketName
@@ -43,7 +43,7 @@ import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingQueueException
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.util.UUID
+import java.util.*
 
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
 @Sql("classpath:test_data/reset-database.sql")
@@ -157,7 +157,7 @@ abstract class IntegrationTestBase {
 }
 
 fun Document.assertIsDocumentWithNoMetadataHistoryId1(
-  metadata: JsonNode = JacksonUtil.toJsonNode("{\"prisonNumber\": \"A1234BC\", \"prisonCode\": \"KMI\"}"),
+  metadata: JsonNode = ObjectMapper().readTree("{\"prisonNumber\": \"A1234BC\", \"prisonCode\": \"KMI\"}"),
 ) {
   assertThat(documentUuid).isEqualTo(UUID.fromString("f73a0f91-2957-4224-b477-714370c04d37"))
   assertThat(documentType).isEqualTo(DocumentType.HMCTS_WARRANT)

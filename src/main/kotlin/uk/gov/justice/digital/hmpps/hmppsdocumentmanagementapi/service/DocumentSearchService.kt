@@ -35,7 +35,7 @@ class DocumentSearchService(
       if (request.documentType != null) setOf(request.documentType) else authorisedDocumentTypes,
     )
 
-    request.metadata?.fields()?.forEach {
+    request.metadata?.properties()?.forEach {
       spec = spec.and(documentSearchSpecification.metadataContains(it.key, it.value.asText()))
     }
 

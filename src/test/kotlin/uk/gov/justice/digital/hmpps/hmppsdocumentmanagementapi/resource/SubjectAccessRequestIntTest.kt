@@ -1,9 +1,10 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource
 
-import com.fasterxml.jackson.databind.JsonNode
-import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
+
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.context.jdbc.SqlGroup
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ObjectMapper
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.S3BucketName
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.AbstractDocumentTypeIntegrationTest
@@ -18,7 +19,7 @@ class SubjectAccessRequestIntTest : AbstractDocumentTypeIntegrationTest() {
   override val documentTypeRole = ROLE_DOCUMENT_TYPE_SAR
   override val documentUuid: UUID = UUID.fromString("1f4e2c96-de62-4585-a79a-9a37c5506b1c")
   override val metadata: JsonNode =
-    JacksonUtil.toJsonNode("{ \"sarCaseReference\": \"SAR-1234\", \"prisonNumber\": \"A1234BC\" }")
+    ObjectMapper().readTree("{ \"sarCaseReference\": \"SAR-1234\", \"prisonNumber\": \"A1234BC\" }")
   override val serviceName = "Manage Subject Access Requests"
   override val activeCaseLoadId = "STI"
   override val username = "SAR_USER"

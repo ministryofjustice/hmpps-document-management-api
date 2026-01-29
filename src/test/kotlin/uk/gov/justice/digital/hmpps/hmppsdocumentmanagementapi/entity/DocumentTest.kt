@@ -4,6 +4,7 @@ import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.ObjectMapper
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -19,12 +20,12 @@ class DocumentTest {
       fileSize = 3876,
       fileHash = "d58e3582afa99040e27b92b13c8f2280",
       mimeType = "application/pdf",
-      metadata = JacksonUtil.toJsonNode("{ \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\" }"),
+      metadata = ObjectMapper().readTree("{ \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\" }"),
       createdByServiceName = "Remand and sentencing",
       createdByUsername = "CREATED_BY_USERNAME",
     )
 
-  private val replacementMetadata = JacksonUtil.toJsonNode("{ \"prisonCode\": \"RSI\", \"prisonNumber\": \"B2345CD\" }")
+  private val replacementMetadata = ObjectMapper().readTree("{ \"prisonCode\": \"RSI\", \"prisonNumber\": \"B2345CD\" }")
 
   @Test
   fun `document filename uses filename and extension`() {

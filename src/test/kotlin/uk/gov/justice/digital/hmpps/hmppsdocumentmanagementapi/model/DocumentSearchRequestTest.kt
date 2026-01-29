@@ -6,6 +6,7 @@ import jakarta.validation.Validation
 import jakarta.validation.Validator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.ObjectMapper
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 
 class DocumentSearchRequestTest {
@@ -19,19 +20,19 @@ class DocumentSearchRequestTest {
 
   @Test
   fun `valid request - document type specified empty metadata`() {
-    val request = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, JacksonUtil.toJsonNode("{}"))
+    val request = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, ObjectMapper().readTree("{}"))
     assertThat(validator.validate(request)).isEmpty()
   }
 
   @Test
   fun `valid request - document type specified non object metadata`() {
-    val request = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, JacksonUtil.toJsonNode("[ \"test\" ]"))
+    val request = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, ObjectMapper().readTree("[ \"test\" ]"))
     assertThat(validator.validate(request)).isEmpty()
   }
 
   @Test
   fun `valid request - null document type valid metadata`() {
-    val request = DocumentSearchRequest(null, JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }"))
+    val request = DocumentSearchRequest(null, ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }"))
     assertThat(validator.validate(request)).isEmpty()
   }
 
@@ -43,37 +44,37 @@ class DocumentSearchRequestTest {
 
   @Test
   fun `document type or metadata criteria must be supplied - null document type and empty metadata`() {
-    val request = DocumentSearchRequest(null, JacksonUtil.toJsonNode("{}"))
+    val request = DocumentSearchRequest(null, ObjectMapper().readTree("{}"))
     validator.validate(request).assertSingleValidationError("", "Document type or metadata criteria must be supplied.")
   }
 
   @Test
   fun `document type or metadata criteria must be supplied - null document type and non object metadata`() {
-    val request = DocumentSearchRequest(null, JacksonUtil.toJsonNode("[ \"test\" ]"))
+    val request = DocumentSearchRequest(null, ObjectMapper().readTree("[ \"test\" ]"))
     validator.validate(request).assertSingleValidationError("", "Document type or metadata criteria must be supplied.")
   }
 
   @Test
   fun `metadata property values must be non null or empty strings - null value`() {
-    val request = DocumentSearchRequest(null, JacksonUtil.toJsonNode("{ \"prisonNumber\": null }"))
+    val request = DocumentSearchRequest(null, ObjectMapper().readTree("{ \"prisonNumber\": null }"))
     validator.validate(request).assertSingleValidationError("metadata", "Metadata property values must be non null or empty strings.")
   }
 
   @Test
   fun `metadata property values must be non null or empty strings - empty value`() {
-    val request = DocumentSearchRequest(null, JacksonUtil.toJsonNode("{ \"prisonNumber\": \"\" }"))
+    val request = DocumentSearchRequest(null, ObjectMapper().readTree("{ \"prisonNumber\": \"\" }"))
     validator.validate(request).assertSingleValidationError("metadata", "Metadata property values must be non null or empty strings.")
   }
 
   @Test
   fun `metadata property values must be non null or empty strings - numerical value`() {
-    val request = DocumentSearchRequest(null, JacksonUtil.toJsonNode("{ \"prisonNumber\": 1234 }"))
+    val request = DocumentSearchRequest(null, ObjectMapper().readTree("{ \"prisonNumber\": 1234 }"))
     validator.validate(request).assertSingleValidationError("metadata", "Metadata property values must be non null or empty strings.")
   }
 
   @Test
   fun `metadata property values must be non null or empty strings - decimal value`() {
-    val request = DocumentSearchRequest(null, JacksonUtil.toJsonNode("{ \"prisonNumber\": 12.34 }"))
+    val request = DocumentSearchRequest(null, ObjectMapper().readTree("{ \"prisonNumber\": 12.34 }"))
     validator.validate(request).assertSingleValidationError("metadata", "Metadata property values must be non null or empty strings.")
   }
 
