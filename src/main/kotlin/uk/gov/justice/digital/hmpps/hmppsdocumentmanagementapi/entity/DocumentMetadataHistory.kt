@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity
 
 import io.hypersistence.utils.hibernate.type.json.JsonType
 import jakarta.persistence.Column
+import jakarta.persistence.Convert
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
@@ -12,6 +13,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import org.hibernate.annotations.Type
 import tools.jackson.databind.JsonNode
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.converter.JsonNodeConverter
 import java.time.LocalDateTime
 
 @Entity
@@ -25,7 +27,7 @@ data class DocumentMetadataHistory(
   @JoinColumn(name = "document_id", nullable = false)
   val document: Document,
 
-  @Type(value = JsonType::class)
+  @Convert(converter = JsonNodeConverter::class)
   @Column(columnDefinition = "jsonb")
   val metadata: JsonNode,
 

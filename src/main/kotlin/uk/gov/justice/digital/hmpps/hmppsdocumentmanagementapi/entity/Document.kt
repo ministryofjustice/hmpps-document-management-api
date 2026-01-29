@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity
 import io.hypersistence.utils.hibernate.type.json.JsonType
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
+import jakarta.persistence.Convert
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
@@ -17,6 +18,7 @@ import org.hibernate.annotations.SQLRestriction
 import org.hibernate.annotations.Type
 import tools.jackson.databind.JsonNode
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.converter.JsonNodeConverter
 import java.time.LocalDateTime
 import java.util.UUID
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as DocumentModel
@@ -44,7 +46,7 @@ data class Document(
 
   val mimeType: String,
 
-  @Type(JsonType::class)
+  @Convert(converter = JsonNodeConverter::class)
   @Column(columnDefinition = "jsonb")
   var metadata: JsonNode,
 
