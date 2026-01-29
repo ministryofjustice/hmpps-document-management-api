@@ -160,7 +160,6 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   fun `400 bad request - metadata property values must not be empty`() {
     val response = webTestClient.post()
       .uri("/documents/search")
-
       .bodyValue(DocumentSearchRequest(null, jsonMapper.readTree("{ \"prisonNumber\": \"\" }")))
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
       .headers(setDocumentContext())
