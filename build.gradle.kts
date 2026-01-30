@@ -53,10 +53,10 @@ dependencies {
 extra["hibernate.version"] = "7.2.2.Final"
 
 kotlin {
-  jvmToolchain(24) // optional but recommended for aligning JDK version
+  jvmToolchain(25) // optional but recommended for aligning JDK version
 
   compilerOptions {
-    jvmTarget.set(JvmTarget.JVM_24)
+    jvmTarget.set(JvmTarget.JVM_25)
   }
 }
 
