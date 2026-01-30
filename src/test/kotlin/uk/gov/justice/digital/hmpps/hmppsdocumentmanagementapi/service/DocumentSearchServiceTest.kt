@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service
 
-import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -15,6 +14,7 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort.Direction
 import org.springframework.data.jpa.domain.Specification
+import tools.jackson.databind.ObjectMapper
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.toModels
@@ -40,7 +40,7 @@ class DocumentSearchServiceTest {
     fileSize = 48243,
     fileHash = "d58e3582afa99040e27b92b13c8f2280",
     mimeType = "application/pdf",
-    metadata = JacksonUtil.toJsonNode("{ \"prisonCode\": \"KPI\", \"prisonNumber\": \"A1234BC\" }"),
+    metadata = ObjectMapper().readTree("{ \"prisonCode\": \"KPI\", \"prisonNumber\": \"A1234BC\" }"),
     createdByServiceName = "Remand and Sentencing",
     createdByUsername = "CREATED_BY_USER",
   )
@@ -52,7 +52,7 @@ class DocumentSearchServiceTest {
     fileSize = 63621,
     fileHash = "0e0396b7a0e931762c167abb7da85398",
     mimeType = "application/pdf",
-    metadata = JacksonUtil.toJsonNode("{ \"sarCaseReference\": \"SAR-1234\", \"prisonCode\": \"KPI\", \"prisonNumber\": \"A1234BC\" }"),
+    metadata = ObjectMapper().readTree("{ \"sarCaseReference\": \"SAR-1234\", \"prisonCode\": \"KPI\", \"prisonNumber\": \"A1234BC\" }"),
     createdByServiceName = "Manage Subject Access Requests",
     createdByUsername = "SAR_USER",
   )
@@ -81,7 +81,7 @@ class DocumentSearchServiceTest {
   @Test
   fun `search by document type and metadata property`() {
     val documentType = DocumentType.HMCTS_WARRANT
-    val metadata = JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")
+    val metadata = ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }")
 
     whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>())).thenReturn(Page.empty())
 
@@ -97,7 +97,7 @@ class DocumentSearchServiceTest {
 
   @Test
   fun `search by metadata property only`() {
-    val metadata = JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")
+    val metadata = ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }")
 
     whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>())).thenReturn(Page.empty())
 
@@ -114,7 +114,7 @@ class DocumentSearchServiceTest {
   @Test
   fun `search by multiple metadata properties`() {
     val documentType = DocumentType.HMCTS_WARRANT
-    val metadata = JacksonUtil.toJsonNode("{ \"prisonCode\": \"KPI\", \"prisonNumber\": \"A1234BC\" }")
+    val metadata = ObjectMapper().readTree("{ \"prisonCode\": \"KPI\", \"prisonNumber\": \"A1234BC\" }")
 
     whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>())).thenReturn(Page.empty())
 
@@ -131,7 +131,7 @@ class DocumentSearchServiceTest {
 
   @Test
   fun `ignores non object metadata`() {
-    val metadata = JacksonUtil.toJsonNode("[ \"test\" ]")
+    val metadata = ObjectMapper().readTree("[ \"test\" ]")
 
     whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>())).thenReturn(Page.empty())
 
@@ -211,7 +211,7 @@ class DocumentSearchServiceTest {
   @Test
   fun `returns results`() {
     val documentType = DocumentType.HMCTS_WARRANT
-    val metadata = JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")
+    val metadata = ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }")
     val request = DocumentSearchRequest(documentType, metadata)
 
     whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>()))
@@ -225,7 +225,7 @@ class DocumentSearchServiceTest {
   @Test
   fun `records event`() {
     val documentType = DocumentType.HMCTS_WARRANT
-    val metadata = JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")
+    val metadata = ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }")
     val request = DocumentSearchRequest(documentType, metadata, 0, 2)
 
     whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>()))

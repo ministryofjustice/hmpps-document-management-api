@@ -30,7 +30,7 @@ class FeatureSwitchesTest {
     val configuredValue = true
     val defaultValue = false
 
-    whenever(environment.getProperty(Feature.HMPPS_AUDIT.label, Boolean::class.java)).thenReturn(configuredValue)
+    whenever(environment.getProperty(Feature.HMPPS_AUDIT.label, Boolean::class.javaObjectType)).thenReturn(configuredValue)
 
     val result = featureSwitches.isEnabled(Feature.HMPPS_AUDIT, defaultValue)
 

@@ -1,7 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource
 
-import com.fasterxml.jackson.module.kotlin.readValue
-import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
 import org.apache.commons.lang3.StringUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
@@ -21,6 +19,8 @@ import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.reactive.server.WebTestClient
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.readValue
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.EventType
@@ -59,7 +59,7 @@ class UploadDocumentIntTest : IntegrationTestBase() {
   @Autowired
   lateinit var fileService: DocumentFileService
 
-  private val metadata = JacksonUtil.toJsonNode("{ \"caseReferenceNumber\": \"T20231234\", \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\" }")
+  private val metadata = ObjectMapper().readTree("{ \"caseReferenceNumber\": \"T20231234\", \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\" }")
   private val serviceName = "Uploaded via service name"
   private val activeCaseLoadId = "RSI"
   private val username = "UPLOADED_BY_USERNAME"

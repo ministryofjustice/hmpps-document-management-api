@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service
 
-import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
 import jakarta.persistence.EntityNotFoundException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -13,6 +12,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import tools.jackson.databind.ObjectMapper
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
@@ -40,13 +40,13 @@ class DocumentServiceReplaceMetadataTest {
       fileSize = 3876,
       fileHash = "d58e3582afa99040e27b92b13c8f2280",
       mimeType = "application/pdf",
-      metadata = JacksonUtil.toJsonNode("{ \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\" }"),
+      metadata = ObjectMapper().readTree("{ \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\" }"),
       createdByServiceName = "Remand and sentencing",
       createdByUsername = "CREATED_BY_USERNAME",
     ),
   )
 
-  private val replacementMetadata = JacksonUtil.toJsonNode("{ \"prisonCode\": \"RSI\", \"prisonNumber\": \"B2345CD\" }")
+  private val replacementMetadata = ObjectMapper().readTree("{ \"prisonCode\": \"RSI\", \"prisonNumber\": \"B2345CD\" }")
 
   private val documentRequestContext = DocumentRequestContext(
     "Replaced metadata using service name",

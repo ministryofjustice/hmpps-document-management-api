@@ -1,7 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration
 
-import com.fasterxml.jackson.databind.JsonNode
-import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Test
@@ -10,6 +8,8 @@ import org.springframework.http.ContentDisposition
 import org.springframework.http.MediaType
 import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.test.web.reactive.server.WebTestClient
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ObjectMapper
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest
@@ -154,8 +154,7 @@ abstract class AbstractDocumentTypeIntegrationTest : IntegrationTestBase() {
 
   @Test
   fun `replace document metadata success`() {
-    val newMetadata =
-      JacksonUtil.toJsonNode("{ \"sarCaseReference\": \"SAR-2345\", \"prisonNumber\": \"B2345CD\" }")
+    val newMetadata = ObjectMapper().readTree("{ \"sarCaseReference\": \"SAR-2345\", \"prisonNumber\": \"B2345CD\" }")
 
     val response = replaceMetadata(
       documentUuid,

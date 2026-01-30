@@ -1,8 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import com.fasterxml.jackson.databind.JsonNode
 import io.swagger.v3.oas.annotations.media.Schema
+import tools.jackson.databind.JsonNode
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import java.time.LocalDateTime
 import java.util.UUID

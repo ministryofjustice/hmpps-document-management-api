@@ -1,12 +1,12 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service
 
 import com.microsoft.applicationinsights.TelemetryClient
-import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
+import tools.jackson.databind.ObjectMapper
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.EventType
@@ -35,7 +35,7 @@ class EventServiceTest {
     fileSize = 3876,
     fileHash = "d58e3582afa99040e27b92b13c8f2280",
     mimeType = "application/pdf",
-    metadata = JacksonUtil.toJsonNode("{ \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\", \"court\": \"Stafford Crown\", \"warrantDate\": \"2021-09-27\" }"),
+    metadata = ObjectMapper().readTree("{ \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\", \"court\": \"Stafford Crown\", \"warrantDate\": \"2021-09-27\" }"),
     createdTime = LocalDateTime.now(),
     createdByServiceName = "Remand and sentencing",
     createdByUsername = "CREATED_BY_USERNAME",
@@ -115,7 +115,7 @@ class EventServiceTest {
 
   @Test
   fun `record document metadata replaced tracks event`() {
-    val originalMetadata = JacksonUtil.toJsonNode("{ \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\" }")
+    val originalMetadata = ObjectMapper().readTree("{ \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\" }")
     val event = DocumentMetadataReplacedEvent(document, originalMetadata)
     val supersededTime = LocalDateTime.now()
 
@@ -149,7 +149,7 @@ class EventServiceTest {
   @Test
   fun `record documents searched audits event`() {
     val event = DocumentsSearchedEvent(
-      DocumentSearchRequest(DocumentType.HMCTS_WARRANT, JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")),
+      DocumentSearchRequest(DocumentType.HMCTS_WARRANT, ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }")),
       10,
       13,
     )
@@ -162,7 +162,7 @@ class EventServiceTest {
   @Test
   fun `record documents searched tracks event`() {
     val event = DocumentsSearchedEvent(
-      DocumentSearchRequest(DocumentType.HMCTS_WARRANT, JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")),
+      DocumentSearchRequest(DocumentType.HMCTS_WARRANT, ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }")),
       10,
       13,
     )

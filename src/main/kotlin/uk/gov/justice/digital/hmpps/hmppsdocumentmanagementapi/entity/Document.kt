@@ -1,9 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity
 
-import com.fasterxml.jackson.databind.JsonNode
-import io.hypersistence.utils.hibernate.type.json.JsonType
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
+import jakarta.persistence.Convert
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
@@ -14,15 +13,17 @@ import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OrderBy
 import jakarta.persistence.Table
+import org.hibernate.annotations.ColumnTransformer
 import org.hibernate.annotations.SQLRestriction
-import org.hibernate.annotations.Type
+import tools.jackson.databind.JsonNode
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.converter.JsonNodeConverter
 import java.time.LocalDateTime
 import java.util.UUID
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as DocumentModel
 
 @Entity
-@Table
+@Table(name = "document")
 @SQLRestriction("deleted_time IS NULL")
 data class Document(
   @Id
@@ -44,7 +45,8 @@ data class Document(
 
   val mimeType: String,
 
-  @Type(JsonType::class)
+  @Convert(converter = JsonNodeConverter::class)
+  @ColumnTransformer(write = "?::jsonb")
   @Column(columnDefinition = "jsonb")
   var metadata: JsonNode,
 

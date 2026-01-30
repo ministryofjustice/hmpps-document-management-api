@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -12,6 +11,7 @@ import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
+import tools.jackson.databind.ObjectMapper
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.Feature
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.FeatureSwitches

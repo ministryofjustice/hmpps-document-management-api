@@ -1,10 +1,10 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.validation
 
-import com.fasterxml.jackson.databind.JsonNode
 import jakarta.validation.Constraint
 import jakarta.validation.ConstraintValidator
 import jakarta.validation.ConstraintValidatorContext
 import jakarta.validation.Payload
+import tools.jackson.databind.JsonNode
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest
 import kotlin.reflect.KClass
 

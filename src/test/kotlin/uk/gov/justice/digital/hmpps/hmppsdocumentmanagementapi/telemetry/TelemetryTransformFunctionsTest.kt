@@ -1,8 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry
 
-import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.ObjectMapper
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest
@@ -23,7 +23,7 @@ class TelemetryTransformFunctionsTest {
     fileSize = 3876,
     fileHash = "d58e3582afa99040e27b92b13c8f2280",
     mimeType = "application/pdf",
-    metadata = JacksonUtil.toJsonNode("{ \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\", \"court\": \"Stafford Crown\", \"warrantDate\": \"2021-09-27\" }"),
+    metadata = ObjectMapper().readTree("{ \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\", \"court\": \"Stafford Crown\", \"warrantDate\": \"2021-09-27\" }"),
     createdTime = LocalDateTime.now(),
     createdByServiceName = "Remand and sentencing",
     createdByUsername = "CREATED_BY_USERNAME",
@@ -65,7 +65,7 @@ class TelemetryTransformFunctionsTest {
 
   @Test
   fun `documents search event to custom event properties`() {
-    val documentSearchRequest = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }"))
+    val documentSearchRequest = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }"))
     val event = DocumentsSearchedEvent(documentSearchRequest, 10, 13)
     with(event.toCustomEventProperties(documentRequestContext)) {
       assertThat(this[SERVICE_NAME_PROPERTY_KEY]).isEqualTo(documentRequestContext.serviceName)
@@ -80,7 +80,7 @@ class TelemetryTransformFunctionsTest {
 
   @Test
   fun `documents search event to custom event properties no active case load id`() {
-    val documentSearchRequest = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }"))
+    val documentSearchRequest = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }"))
     val event = DocumentsSearchedEvent(documentSearchRequest, 10, 13)
     val eventProperties = event.toCustomEventProperties(DocumentRequestContext("Service name", null, null))
     assertThat(eventProperties[ACTIVE_CASE_LOAD_ID_PROPERTY_KEY]).isEqualTo("")
@@ -88,7 +88,7 @@ class TelemetryTransformFunctionsTest {
 
   @Test
   fun `documents search event to custom event properties no username`() {
-    val documentSearchRequest = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }"))
+    val documentSearchRequest = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }"))
     val event = DocumentsSearchedEvent(documentSearchRequest, 10, 13)
     val eventProperties = event.toCustomEventProperties(DocumentRequestContext("Service name", null, null))
     assertThat(eventProperties[USERNAME_PROPERTY_KEY]).isEqualTo("")
@@ -96,7 +96,7 @@ class TelemetryTransformFunctionsTest {
 
   @Test
   fun `documents search event to custom event properties no document type`() {
-    val documentSearchRequest = DocumentSearchRequest(null, JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }"))
+    val documentSearchRequest = DocumentSearchRequest(null, ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }"))
     val event = DocumentsSearchedEvent(documentSearchRequest, 10, 13)
     with(event.toCustomEventProperties(documentRequestContext)) {
       assertThat(this[DOCUMENT_TYPE_PROPERTY_KEY]).isEqualTo("")
@@ -147,7 +147,7 @@ class TelemetryTransformFunctionsTest {
   fun `document metadata replaced event to custom event metrics`() {
     val documentMetadataReplacedEvent = DocumentMetadataReplacedEvent(
       document,
-      JacksonUtil.toJsonNode("{ \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\" }"),
+      ObjectMapper().readTree("{ \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\" }"),
     )
     with(documentMetadataReplacedEvent.toCustomEventMetrics(eventTimeMs)) {
       assertThat(this[EVENT_TIME_MS_METRIC_KEY]).isEqualTo(eventTimeMs.toDouble())
@@ -159,7 +159,7 @@ class TelemetryTransformFunctionsTest {
 
   @Test
   fun `documents searched event to custom event metrics`() {
-    val documentSearchRequest = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }"))
+    val documentSearchRequest = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }"))
     val event = DocumentsSearchedEvent(documentSearchRequest, 10, 13)
     with(event.toCustomEventMetrics(eventTimeMs)) {
       assertThat(this[EVENT_TIME_MS_METRIC_KEY]).isEqualTo(eventTimeMs.toDouble())

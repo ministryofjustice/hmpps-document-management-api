@@ -1,8 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.readValue
-import io.hypersistence.utils.hibernate.type.json.internal.JacksonUtil
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
@@ -18,6 +15,9 @@ import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.reactive.server.WebTestClient
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.readValue
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentSearchOrderBy
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
@@ -53,9 +53,13 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as
   ],
 )
 class DocumentSearchIntTest : IntegrationTestBase() {
+  private val jsonMapper = ObjectMapper()
+
   private val deletedDocumentUuid = UUID.fromString("f73a0f91-2957-4224-b477-714370c04d37")
   private val documentType = DocumentType.HMCTS_WARRANT
-  private val metadata: JsonNode = JacksonUtil.toJsonNode("{ \"prisonNumber\": \"A1234BC\" }")
+
+  private val metadata: JsonNode = jsonMapper.readTree("{ \"prisonNumber\": \"A1234BC\" }")
+
   private val serviceName = "Searched using service name"
   private val activeCaseLoadId = "KPI"
   private val username = "SEARCHED_BY_USERNAME"
@@ -156,7 +160,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   fun `400 bad request - metadata property values must not be empty`() {
     val response = webTestClient.post()
       .uri("/documents/search")
-      .bodyValue(DocumentSearchRequest(null, JacksonUtil.toJsonNode("{ \"prisonNumber\": \"\" }")))
+      .bodyValue(DocumentSearchRequest(null, jsonMapper.readTree("{ \"prisonNumber\": \"\" }")))
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
       .headers(setDocumentContext())
       .exchange()
@@ -219,7 +223,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   fun `400 bad request - invalid order by`() {
     webTestClient.post()
       .uri("/documents/search")
-      .bodyValue(JacksonUtil.toJsonNode("{ \"documentType\": \"${documentType.name}\", \"orderBy\": \"INVALID\" }"))
+      .bodyValue(jsonMapper.readTree("{ \"documentType\": \"${documentType.name}\", \"orderBy\": \"INVALID\" }"))
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
       .headers(setDocumentContext())
       .exchange()
@@ -232,7 +236,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   fun `400 bad request - invalid order by direction`() {
     webTestClient.post()
       .uri("/documents/search")
-      .bodyValue(JacksonUtil.toJsonNode("{ \"documentType\": \"${documentType.name}\", \"orderByDirection\": \"INVALID\" }"))
+      .bodyValue(jsonMapper.readTree("{ \"documentType\": \"${documentType.name}\", \"orderByDirection\": \"INVALID\" }"))
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
       .headers(setDocumentContext())
       .exchange()
@@ -321,7 +325,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   @Sql("classpath:test_data/document-search.sql")
   @Test
   fun `search metadata is case insensitive`() {
-    val metadata = JacksonUtil.toJsonNode("{ \"court\": \"stafford crown\" }")
+    val metadata = jsonMapper.readTree("{ \"court\": \"stafford crown\" }")
 
     val response = webTestClient.searchDocuments(documentType, metadata)
 
@@ -333,7 +337,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   @Sql("classpath:test_data/document-search.sql")
   @Test
   fun `search metadata contains text`() {
-    val metadata = JacksonUtil.toJsonNode("{ \"court\": \"agist\" }")
+    val metadata = jsonMapper.readTree("{ \"court\": \"agist\" }")
 
     val response = webTestClient.searchDocuments(documentType, metadata)
 
@@ -345,7 +349,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   @Sql("classpath:test_data/document-search.sql")
   @Test
   fun `search string array metadata property`() {
-    val metadata = JacksonUtil.toJsonNode("{ \"previousPrisonNumbers\": \"A1234BC\" }")
+    val metadata = jsonMapper.readTree("{ \"previousPrisonNumbers\": \"A1234BC\" }")
 
     val response = webTestClient.searchDocuments(documentType, metadata)
 
@@ -357,7 +361,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   @Sql("classpath:test_data/document-search.sql")
   @Test
   fun `search by multiple metadata properties`() {
-    val metadata = JacksonUtil.toJsonNode("{ \"prisonCode\": \"SFI\", \"prisonNumber\": \"D4567EF\" }")
+    val metadata = jsonMapper.readTree("{ \"prisonCode\": \"SFI\", \"prisonNumber\": \"D4567EF\" }")
 
     val response = webTestClient.searchDocuments(documentType, metadata)
 
@@ -448,11 +452,13 @@ class DocumentSearchIntTest : IntegrationTestBase() {
     await untilCallTo { auditSqsClient.countMessagesOnQueue(auditQueueUrl).get() } matches { it == 1 }
 
     val messageBody = auditSqsClient.receiveMessage(ReceiveMessageRequest.builder().queueUrl(auditQueueUrl).build()).get().messages()[0].body()
+
     with(objectMapper.readValue<AuditService.AuditEvent>(messageBody)) {
       assertThat(what).isEqualTo(EventType.DOCUMENTS_SEARCHED.name)
       assertThat(whenLocalDateTime()).isCloseTo(LocalDateTime.now(), Assertions.within(3, ChronoUnit.SECONDS))
       assertThat(who).isEqualTo(username)
       assertThat(service).isEqualTo(serviceName)
+
       with(objectMapper.readValue<DocumentsSearchedEvent>(details)) {
         assertThat(request).isEqualTo(DocumentSearchRequest(documentType, metadata))
         assertThat(resultsCount).isEqualTo(1)

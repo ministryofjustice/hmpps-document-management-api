@@ -1,10 +1,10 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.validation
 
-import com.fasterxml.jackson.databind.JsonNode
 import jakarta.validation.Constraint
 import jakarta.validation.ConstraintValidator
 import jakarta.validation.ConstraintValidatorContext
 import jakarta.validation.Payload
+import tools.jackson.databind.JsonNode
 import kotlin.reflect.KClass
 
 class NoNullOrEmptyStringMetadataValuesValidator : ConstraintValidator<NoNullOrEmptyStringMetadataValues, JsonNode> {
@@ -13,7 +13,7 @@ class NoNullOrEmptyStringMetadataValuesValidator : ConstraintValidator<NoNullOrE
       return true
     }
 
-    for (fieldName in value.fieldNames()) {
+    for (fieldName in value.propertyNames()) {
       if (value[fieldName].isNullOrEmpty()) {
         return false
       }
