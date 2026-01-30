@@ -10,11 +10,6 @@ spring:
 
   jackson:
     date-format: "yyyy-MM-dd HH:mm:ss"
-  cache:
-    type: caffeine
-    cache-names: jwks
-    caffeine:
-      spec: maximumSize=100,expireAfterWrite=1h
 
   security:
     oauth2:
