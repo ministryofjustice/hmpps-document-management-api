@@ -43,7 +43,4 @@ class ResourceServerConfiguration {
 
     return http.build()
   }
-
-  @Bean
-  fun cacheManager(): CacheManager = org.springframework.cache.caffeine.CaffeineCacheManager()
 }
