@@ -37,10 +37,6 @@ jobs:
     secrets: inherit
     with:
       environment: ${{ matrix.environments }}
-  kotlin_validate:
-    name: Validate the kotlin
-    uses: ./.github/workflows/setup-and-validate.yml
-    secrets: inherit
   app_version:
     runs-on: ubuntu-latest
     outputs:
@@ -64,7 +60,7 @@ jobs:
     name: Build docker image from hmpps-github-actions
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/docker_build.yml@v2 # WORKFLOW_VERSION
     needs:
-      - kotlin_validate
+      - gradle_verify
       - helm_lint
     with:
       docker_registry: 'ghcr.io'
