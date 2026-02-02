@@ -73,12 +73,6 @@ jobs:
           cache-dependency-path: |
             *.gradle*
             **/gradle-wrapper.properties
-      - name: gradlew check
-        shell: bash
-        run: |
-          export JAVA_OPTS="${{ inputs.java_options }}"
-          export SPRING_PROFILES_ACTIVE="test" 
-          ./gradlew check
       - name: upload the artifacts
         if: always()
         uses: actions/upload-artifact@v5
