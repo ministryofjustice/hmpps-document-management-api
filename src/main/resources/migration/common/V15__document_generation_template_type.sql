@@ -1,0 +1,1 @@
+insert into document_type(code, description) values ('DOCUMENT_GENERATION_TEMPLATES', 'Template documents used by the Document Generation API');
