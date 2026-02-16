@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration
 
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.ROLE_DOCUMENT_GENERATION_TEMPLATE_RW
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.ROLE_DOCUMENT_TYPE_SAR
 
 enum class DocumentType(
@@ -53,5 +54,9 @@ enum class DocumentType(
   ),
   PRISONER_APPLICATION(
     description = "Image of prisoner application forms",
+  ),
+  DOCUMENT_GENERATION_TEMPLATES(
+    description = "Template documents used by the Document Generation API",
+    additionalRoles = setOf(ROLE_DOCUMENT_GENERATION_TEMPLATE_RW),
   ),
 }
