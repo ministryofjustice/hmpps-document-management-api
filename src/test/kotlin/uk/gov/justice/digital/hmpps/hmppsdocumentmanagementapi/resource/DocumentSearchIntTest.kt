@@ -354,7 +354,8 @@ class DocumentSearchIntTest : IntegrationTestBase() {
     val response = webTestClient.searchDocuments(documentType, metadata)
 
     response.results.onEach { document ->
-      assertThat(document.metadata["previousPrisonNumbers"].map { it.asText() }).contains("A1234BC")
+      assertThat(document.metadata["previousPrisonNumbers"][0].asText())
+        .isEqualTo("A1234BC")
     }
   }
 
