@@ -10,7 +10,7 @@ import kotlin.reflect.KClass
 
 class DocumentTypeOrMetadataCriteriaRequiredValidator : ConstraintValidator<DocumentTypeOrMetadataCriteriaRequired, DocumentSearchRequest> {
   override fun isValid(value: DocumentSearchRequest, context: ConstraintValidatorContext): Boolean {
-    if (value.documentType != null) {
+    if (value.documentTypes != null) {
       return true
     }
 

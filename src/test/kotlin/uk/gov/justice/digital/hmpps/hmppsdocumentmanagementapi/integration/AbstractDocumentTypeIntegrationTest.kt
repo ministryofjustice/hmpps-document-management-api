@@ -114,7 +114,7 @@ abstract class AbstractDocumentTypeIntegrationTest : IntegrationTestBase() {
   @Test
   fun `search documents - 403 forbidden - document reader only`() {
     searchDocuments(
-      DocumentSearchRequest(documentType, metadata),
+      DocumentSearchRequest(listOf(documentType), metadata),
       listOf(ROLE_DOCUMENT_READER),
     ).expectStatus().isForbidden
   }
@@ -122,7 +122,7 @@ abstract class AbstractDocumentTypeIntegrationTest : IntegrationTestBase() {
   @Test
   fun `search documents - 403 forbidden - document type role only`() {
     searchDocuments(
-      DocumentSearchRequest(documentType, metadata),
+      DocumentSearchRequest(listOf(documentType), metadata),
       listOf(documentTypeRole),
     ).expectStatus().isForbidden
   }
@@ -130,13 +130,13 @@ abstract class AbstractDocumentTypeIntegrationTest : IntegrationTestBase() {
   @Test
   fun `search documents success`() {
     val response = searchDocuments(
-      DocumentSearchRequest(documentType, metadata),
+      DocumentSearchRequest(listOf(documentType), metadata),
       listOf(ROLE_DOCUMENT_READER, documentTypeRole),
     ).expectStatus().isOk.expectHeader().contentType(MediaType.APPLICATION_JSON)
       .expectBody(DocumentSearchResult::class.java).returnResult().responseBody!!
 
     with(response.request) {
-      assertThat(documentType).isEqualTo(this.documentType)
+      assertThat(documentTypes).isEqualTo(this.documentTypes)
       assertThat(metadata).isEqualTo(this.metadata)
     }
     assertThat(response.results).isNotEmpty()

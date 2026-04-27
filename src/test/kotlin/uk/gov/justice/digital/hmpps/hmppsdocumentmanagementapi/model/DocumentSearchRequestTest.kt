@@ -13,19 +13,19 @@ class DocumentSearchRequestTest {
 
   @Test
   fun `valid request - document type specified null metadata`() {
-    val request = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, null)
+    val request = DocumentSearchRequest(listOf(DocumentType.HMCTS_WARRANT), null)
     assertThat(validator.validate(request)).isEmpty()
   }
 
   @Test
   fun `valid request - document type specified empty metadata`() {
-    val request = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, ObjectMapper().readTree("{}"))
+    val request = DocumentSearchRequest(listOf(DocumentType.HMCTS_WARRANT), ObjectMapper().readTree("{}"))
     assertThat(validator.validate(request)).isEmpty()
   }
 
   @Test
   fun `valid request - document type specified non object metadata`() {
-    val request = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, ObjectMapper().readTree("[ \"test\" ]"))
+    val request = DocumentSearchRequest(listOf(DocumentType.HMCTS_WARRANT), ObjectMapper().readTree("[ \"test\" ]"))
     assertThat(validator.validate(request)).isEmpty()
   }
 
@@ -79,37 +79,37 @@ class DocumentSearchRequestTest {
 
   @Test
   fun `page must be 0 or greater - valid`() {
-    val request = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, null, page = 0)
+    val request = DocumentSearchRequest(listOf(DocumentType.HMCTS_WARRANT), null, page = 0)
     assertThat(validator.validate(request)).isEmpty()
   }
 
   @Test
   fun `page must be 0 or greater - invalid`() {
-    val request = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, null, page = -1)
+    val request = DocumentSearchRequest(listOf(DocumentType.HMCTS_WARRANT), null, page = -1)
     validator.validate(request).assertSingleValidationError("page", "Page must be 0 or greater.")
   }
 
   @Test
   fun `page size must be 1 or greater - valid`() {
-    val request = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, null, pageSize = 1)
+    val request = DocumentSearchRequest(listOf(DocumentType.HMCTS_WARRANT), null, pageSize = 1)
     assertThat(validator.validate(request)).isEmpty()
   }
 
   @Test
   fun `page size must be 1 or greater - invalid`() {
-    val request = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, null, pageSize = 0)
+    val request = DocumentSearchRequest(listOf(DocumentType.HMCTS_WARRANT), null, pageSize = 0)
     validator.validate(request).assertSingleValidationError("pageSize", "Page size must be between 1 and 100.")
   }
 
   @Test
   fun `page size must be 100 or less - valid`() {
-    val request = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, null, pageSize = 100)
+    val request = DocumentSearchRequest(listOf(DocumentType.HMCTS_WARRANT), null, pageSize = 100)
     assertThat(validator.validate(request)).isEmpty()
   }
 
   @Test
   fun `page size must be 100 or less - invalid`() {
-    val request = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, null, pageSize = 101)
+    val request = DocumentSearchRequest(listOf(DocumentType.HMCTS_WARRANT), null, pageSize = 101)
     validator.validate(request).assertSingleValidationError("pageSize", "Page size must be between 1 and 100.")
   }
 

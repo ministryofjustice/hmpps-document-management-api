@@ -69,7 +69,7 @@ class DocumentSearchServiceTest {
 
     whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>())).thenReturn(Page.empty())
 
-    service.searchDocuments(DocumentSearchRequest(documentType, null), DocumentType.entries, documentRequestContext)
+    service.searchDocuments(DocumentSearchRequest(listOf(documentType), null), DocumentType.entries, documentRequestContext)
 
     verify(documentSearchSpecification).documentTypeIn(setOf(documentType))
     verifyNoMoreInteractions(documentSearchSpecification)
@@ -85,7 +85,7 @@ class DocumentSearchServiceTest {
 
     whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>())).thenReturn(Page.empty())
 
-    service.searchDocuments(DocumentSearchRequest(documentType, metadata), DocumentType.entries, documentRequestContext)
+    service.searchDocuments(DocumentSearchRequest(listOf(documentType), metadata), DocumentType.entries, documentRequestContext)
 
     verify(documentSearchSpecification).documentTypeIn(setOf(documentType))
     verify(documentSearchSpecification).metadataContains("prisonNumber", "A1234BC")
@@ -118,7 +118,7 @@ class DocumentSearchServiceTest {
 
     whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>())).thenReturn(Page.empty())
 
-    service.searchDocuments(DocumentSearchRequest(documentType, metadata), DocumentType.entries, documentRequestContext)
+    service.searchDocuments(DocumentSearchRequest(listOf(documentType), metadata), DocumentType.entries, documentRequestContext)
 
     verify(documentSearchSpecification).documentTypeIn(setOf(documentType))
     verify(documentSearchSpecification).metadataContains("prisonCode", "KPI")
@@ -147,7 +147,7 @@ class DocumentSearchServiceTest {
   @Test
   fun `search uses page and page size`() {
     val request = DocumentSearchRequest(
-      DocumentType.HMCTS_WARRANT,
+      listOf(DocumentType.HMCTS_WARRANT),
       null,
       2,
       25,
@@ -169,7 +169,7 @@ class DocumentSearchServiceTest {
 
   @Test
   fun `default search is ordered by created time descending`() {
-    val request = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, null)
+    val request = DocumentSearchRequest(listOf(DocumentType.HMCTS_WARRANT), null)
 
     whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>())).thenReturn(Page.empty())
 
@@ -188,7 +188,7 @@ class DocumentSearchServiceTest {
   @Test
   fun `non default search ordering includes created time to resolve equal values`() {
     val request = DocumentSearchRequest(
-      DocumentType.HMCTS_WARRANT,
+      listOf(DocumentType.HMCTS_WARRANT),
       null,
       orderBy = DocumentSearchOrderBy.FILESIZE,
       orderByDirection = Direction.ASC,
@@ -212,7 +212,7 @@ class DocumentSearchServiceTest {
   fun `returns results`() {
     val documentType = DocumentType.HMCTS_WARRANT
     val metadata = ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }")
-    val request = DocumentSearchRequest(documentType, metadata)
+    val request = DocumentSearchRequest(listOf(documentType), metadata)
 
     whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>()))
       .thenReturn(PageImpl(listOf(warrantDocument)))
@@ -226,7 +226,7 @@ class DocumentSearchServiceTest {
   fun `records event`() {
     val documentType = DocumentType.HMCTS_WARRANT
     val metadata = ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }")
-    val request = DocumentSearchRequest(documentType, metadata, 0, 2)
+    val request = DocumentSearchRequest(listOf(documentType), metadata, 0, 2)
 
     whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>()))
       .thenReturn(

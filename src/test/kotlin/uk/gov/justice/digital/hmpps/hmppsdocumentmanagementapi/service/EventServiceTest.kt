@@ -149,7 +149,7 @@ class EventServiceTest {
   @Test
   fun `record documents searched audits event`() {
     val event = DocumentsSearchedEvent(
-      DocumentSearchRequest(DocumentType.HMCTS_WARRANT, ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }")),
+      DocumentSearchRequest(listOf(DocumentType.HMCTS_WARRANT), ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }")),
       10,
       13,
     )
@@ -162,7 +162,7 @@ class EventServiceTest {
   @Test
   fun `record documents searched tracks event`() {
     val event = DocumentsSearchedEvent(
-      DocumentSearchRequest(DocumentType.HMCTS_WARRANT, ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }")),
+      DocumentSearchRequest(listOf(DocumentType.HMCTS_WARRANT), ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }")),
       10,
       13,
     )

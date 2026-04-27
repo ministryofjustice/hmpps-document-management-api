@@ -21,8 +21,8 @@ fun DocumentsSearchedEvent.toCustomEventProperties(documentRequestContext: Docum
   SERVICE_NAME_PROPERTY_KEY to documentRequestContext.serviceName,
   ACTIVE_CASE_LOAD_ID_PROPERTY_KEY to (documentRequestContext.activeCaseLoadId ?: ""),
   USERNAME_PROPERTY_KEY to (documentRequestContext.username ?: ""),
-  DOCUMENT_TYPE_PROPERTY_KEY to (request.documentType?.name ?: ""),
-  DOCUMENT_TYPE_DESCRIPTION_PROPERTY_KEY to (request.documentType?.description ?: ""),
+  DOCUMENT_TYPE_PROPERTY_KEY to (request.documentTypes?.joinToString { it.name } ?: ""),
+  DOCUMENT_TYPE_DESCRIPTION_PROPERTY_KEY to (request.documentTypes?.joinToString { it.description } ?: ""),
   ORDER_BY_PROPERTY_KEY to request.orderBy.name,
   ORDER_BY_DIRECTION_PROPERTY_KEY to request.orderByDirection.name,
 )

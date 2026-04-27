@@ -68,7 +68,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   fun `401 unauthorised`() {
     webTestClient.post()
       .uri("/documents/search")
-      .bodyValue(DocumentSearchRequest(documentType, metadata))
+      .bodyValue(DocumentSearchRequest(listOf(documentType), metadata))
       .exchange()
       .expectStatus().isUnauthorized
   }
@@ -77,7 +77,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   fun `403 forbidden - no roles`() {
     webTestClient.post()
       .uri("/documents/search")
-      .bodyValue(DocumentSearchRequest(documentType, metadata))
+      .bodyValue(DocumentSearchRequest(listOf(documentType), metadata))
       .headers(setAuthorisation())
       .headers(setDocumentContext())
       .exchange()
@@ -88,7 +88,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   fun `403 forbidden - document writer`() {
     webTestClient.post()
       .uri("/documents/search")
-      .bodyValue(DocumentSearchRequest(documentType, metadata))
+      .bodyValue(DocumentSearchRequest(listOf(documentType), metadata))
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_WRITER)))
       .headers(setDocumentContext())
       .exchange()
@@ -99,7 +99,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   fun `400 bad request - missing service name header`() {
     val response = webTestClient.post()
       .uri("/documents/search")
-      .bodyValue(DocumentSearchRequest(documentType, metadata))
+      .bodyValue(DocumentSearchRequest(listOf(documentType), metadata))
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
       .exchange()
       .expectStatus().isBadRequest
@@ -181,7 +181,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   fun `400 bad request - page must be 0 or greater`() {
     val response = webTestClient.post()
       .uri("/documents/search")
-      .bodyValue(DocumentSearchRequest(documentType, null, page = -1))
+      .bodyValue(DocumentSearchRequest(listOf(documentType), null, page = -1))
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
       .headers(setDocumentContext())
       .exchange()
@@ -202,7 +202,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   fun `400 bad request - page size must be between 1 and 100`() {
     val response = webTestClient.post()
       .uri("/documents/search")
-      .bodyValue(DocumentSearchRequest(documentType, null, pageSize = 0))
+      .bodyValue(DocumentSearchRequest(listOf(documentType), null, pageSize = 0))
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
       .headers(setDocumentContext())
       .exchange()
@@ -223,7 +223,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   fun `400 bad request - invalid order by`() {
     webTestClient.post()
       .uri("/documents/search")
-      .bodyValue(jsonMapper.readTree("{ \"documentType\": \"${documentType.name}\", \"orderBy\": \"INVALID\" }"))
+      .bodyValue(jsonMapper.readTree("{ \"documentTypes\": [\"${documentType.name}\"], \"orderBy\": \"INVALID\" }"))
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
       .headers(setDocumentContext())
       .exchange()
@@ -236,7 +236,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   fun `400 bad request - invalid order by direction`() {
     webTestClient.post()
       .uri("/documents/search")
-      .bodyValue(jsonMapper.readTree("{ \"documentType\": \"${documentType.name}\", \"orderByDirection\": \"INVALID\" }"))
+      .bodyValue(jsonMapper.readTree("{ \"documentTypes\": [\"${documentType.name}\"], \"orderByDirection\": \"INVALID\" }"))
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
       .headers(setDocumentContext())
       .exchange()
@@ -249,7 +249,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   @Test
   fun `response contains search request`() {
     val response = webTestClient.searchDocuments(
-      documentType,
+      listOf(documentType),
       metadata,
       1,
       2,
@@ -270,7 +270,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   @Sql("classpath:test_data/document-search.sql")
   @Test
   fun `find all warrants`() {
-    val response = webTestClient.searchDocuments(documentType, null)
+    val response = webTestClient.searchDocuments(listOf(documentType), null)
 
     response.results.onEach {
       assertThat(it.documentType).isEqualTo(documentType)
@@ -280,7 +280,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   @Sql("classpath:test_data/document-search.sql")
   @Test
   fun `search warrants by prison number`() {
-    val response = webTestClient.searchDocuments(documentType, metadata)
+    val response = webTestClient.searchDocuments(listOf(documentType), metadata)
 
     response.results.onEach {
       assertThat(it.documentType).isEqualTo(documentType)
@@ -327,7 +327,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   fun `search metadata is case insensitive`() {
     val metadata = jsonMapper.readTree("{ \"court\": \"stafford crown\" }")
 
-    val response = webTestClient.searchDocuments(documentType, metadata)
+    val response = webTestClient.searchDocuments(listOf(documentType), metadata)
 
     response.results.onEach {
       assertThat(it.metadata["court"].asText()).isEqualTo("Stafford Crown")
@@ -339,7 +339,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   fun `search metadata contains text`() {
     val metadata = jsonMapper.readTree("{ \"court\": \"agist\" }")
 
-    val response = webTestClient.searchDocuments(documentType, metadata)
+    val response = webTestClient.searchDocuments(listOf(documentType), metadata)
 
     response.results.onEach {
       assertThat(it.metadata["court"].asText()).contains("Magistrates")
@@ -351,7 +351,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   fun `search string array metadata property`() {
     val metadata = jsonMapper.readTree("{ \"previousPrisonNumbers\": \"A1234BC\" }")
 
-    val response = webTestClient.searchDocuments(documentType, metadata)
+    val response = webTestClient.searchDocuments(listOf(documentType), metadata)
 
     response.results.onEach { document ->
       assertThat(document.metadata["previousPrisonNumbers"][0].asText())
@@ -364,7 +364,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   fun `search by multiple metadata properties`() {
     val metadata = jsonMapper.readTree("{ \"prisonCode\": \"SFI\", \"prisonNumber\": \"D4567EF\" }")
 
-    val response = webTestClient.searchDocuments(documentType, metadata)
+    val response = webTestClient.searchDocuments(listOf(documentType), metadata)
 
     response.results.onEach {
       assertThat(it.metadata["prisonCode"].asText()).isEqualTo("SFI")
@@ -375,7 +375,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   @Sql("classpath:test_data/document-search.sql")
   @Test
   fun `search does not return deleted documents`() {
-    val response = webTestClient.searchDocuments(documentType, metadata)
+    val response = webTestClient.searchDocuments(listOf(documentType), metadata)
 
     response.results.onEach {
       assertThat(it.documentUuid).isNotEqualTo(deletedDocumentUuid)
@@ -385,7 +385,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   @Sql("classpath:test_data/document-search-pagination-and-ordering.sql")
   @Test
   fun `search limits results to page size and returns total results count`() {
-    val response = webTestClient.searchDocuments(documentType, metadata, pageSize = 3)
+    val response = webTestClient.searchDocuments(listOf(documentType), metadata, pageSize = 3)
 
     with(response) {
       assertThat(results).hasSize(3)
@@ -396,7 +396,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   @Sql("classpath:test_data/document-search-pagination-and-ordering.sql")
   @Test
   fun `search skips to second page and returns total results count`() {
-    val response = webTestClient.searchDocuments(documentType, metadata, page = 1, pageSize = 3)
+    val response = webTestClient.searchDocuments(listOf(documentType), metadata, page = 1, pageSize = 3)
 
     with(response) {
       assertThat(results).hasSize(2)
@@ -407,7 +407,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   @Sql("classpath:test_data/document-search-pagination-and-ordering.sql")
   @Test
   fun `search returns no results for page out of range`() {
-    val response = webTestClient.searchDocuments(documentType, metadata, page = 2, pageSize = 3)
+    val response = webTestClient.searchDocuments(listOf(documentType), metadata, page = 2, pageSize = 3)
 
     with(response) {
       assertThat(results).isEmpty()
@@ -418,7 +418,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   @Sql("classpath:test_data/document-search-pagination-and-ordering.sql")
   @Test
   fun `default ordering is by created time descending`() {
-    val response = webTestClient.searchDocuments(documentType, metadata)
+    val response = webTestClient.searchDocuments(listOf(documentType), metadata)
 
     assertThat(response.results).containsExactlyElementsOf(
       response.results.sortedByDescending { it.createdTime },
@@ -428,7 +428,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   @Sql("classpath:test_data/document-search-pagination-and-ordering.sql")
   @Test
   fun `order by file size ascending`() {
-    val response = webTestClient.searchDocuments(documentType, metadata, orderBy = DocumentSearchOrderBy.FILESIZE, orderByDirection = Direction.ASC)
+    val response = webTestClient.searchDocuments(listOf(documentType), metadata, orderBy = DocumentSearchOrderBy.FILESIZE, orderByDirection = Direction.ASC)
 
     assertThat(response.results).containsExactlyElementsOf(
       response.results.sortedBy { it.fileSize },
@@ -438,7 +438,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   @Sql("classpath:test_data/document-search-pagination-and-ordering.sql")
   @Test
   fun `order by uses created time to resolve equal values`() {
-    val response = webTestClient.searchDocuments(documentType, metadata, orderBy = DocumentSearchOrderBy.FILE_EXTENSION, orderByDirection = Direction.ASC)
+    val response = webTestClient.searchDocuments(listOf(documentType), metadata, orderBy = DocumentSearchOrderBy.FILE_EXTENSION, orderByDirection = Direction.ASC)
 
     assertThat(response.results).containsExactlyElementsOf(
       response.results.sortedWith(compareBy<DocumentModel> { it.fileExtension }.thenBy { it.createdTime }),
@@ -448,7 +448,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   @Sql("classpath:test_data/document-search.sql")
   @Test
   fun `audits event`() {
-    webTestClient.searchDocuments(documentType, metadata)
+    webTestClient.searchDocuments(listOf(documentType), metadata)
 
     await untilCallTo { auditSqsClient.countMessagesOnQueue(auditQueueUrl).get() } matches { it == 1 }
 
@@ -461,7 +461,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
       assertThat(service).isEqualTo(serviceName)
 
       with(objectMapper.readValue<DocumentsSearchedEvent>(details)) {
-        assertThat(request).isEqualTo(DocumentSearchRequest(documentType, metadata))
+        assertThat(request).isEqualTo(DocumentSearchRequest(listOf(documentType), metadata))
         assertThat(resultsCount).isEqualTo(1)
       }
     }
@@ -470,7 +470,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   @Sql("classpath:test_data/document-search.sql")
   @Test
   fun `tracks event`() {
-    webTestClient.searchDocuments(documentType, metadata)
+    webTestClient.searchDocuments(listOf(documentType), metadata)
 
     val customEventProperties = argumentCaptor<Map<String, String>>()
     val customEventMetrics = argumentCaptor<Map<String, Double>>()
@@ -497,7 +497,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
   }
 
   private fun WebTestClient.searchDocuments(
-    documentType: DocumentType?,
+    documentTypes: List<DocumentType>?,
     metadata: JsonNode?,
     page: Int = 0,
     pageSize: Int = 10,
@@ -506,7 +506,7 @@ class DocumentSearchIntTest : IntegrationTestBase() {
     roles: List<String> = listOf(ROLE_DOCUMENT_READER),
   ) = post()
     .uri("/documents/search")
-    .bodyValue(DocumentSearchRequest(documentType, metadata, page, pageSize, orderBy, orderByDirection))
+    .bodyValue(DocumentSearchRequest(documentTypes, metadata, page, pageSize, orderBy, orderByDirection))
     .headers(setAuthorisation(roles = roles))
     .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
     .exchange()
