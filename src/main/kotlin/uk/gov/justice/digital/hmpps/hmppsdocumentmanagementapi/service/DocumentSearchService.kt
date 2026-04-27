@@ -25,14 +25,16 @@ class DocumentSearchService(
   ): DocumentSearchResult {
     val startTimeInMs = System.currentTimeMillis()
 
-    request.documentType?.also {
-      if (!authorisedDocumentTypes.contains(it)) {
-        throw AccessDeniedException("Document type '$it' requires additional role")
+    request.documentTypes?.also {
+      it.forEach { type ->
+        if (!authorisedDocumentTypes.contains(type)) {
+          throw AccessDeniedException("Document types '$type' require additional role")
+        }
       }
     }
 
     var spec = documentSearchSpecification.documentTypeIn(
-      if (request.documentType != null) setOf(request.documentType) else authorisedDocumentTypes,
+      if (request.documentTypes != null) request.documentTypes.toSet() else authorisedDocumentTypes,
     )
 
     request.metadata?.properties()?.forEach {

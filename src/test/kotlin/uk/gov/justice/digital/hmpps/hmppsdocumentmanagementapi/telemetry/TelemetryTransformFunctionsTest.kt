@@ -65,14 +65,14 @@ class TelemetryTransformFunctionsTest {
 
   @Test
   fun `documents search event to custom event properties`() {
-    val documentSearchRequest = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }"))
+    val documentSearchRequest = DocumentSearchRequest(listOf(DocumentType.HMCTS_WARRANT, DocumentType.PRISON_COURT_REGISTER), ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }"))
     val event = DocumentsSearchedEvent(documentSearchRequest, 10, 13)
     with(event.toCustomEventProperties(documentRequestContext)) {
       assertThat(this[SERVICE_NAME_PROPERTY_KEY]).isEqualTo(documentRequestContext.serviceName)
       assertThat(this[ACTIVE_CASE_LOAD_ID_PROPERTY_KEY]).isEqualTo(documentRequestContext.activeCaseLoadId)
       assertThat(this[USERNAME_PROPERTY_KEY]).isEqualTo(documentRequestContext.username)
-      assertThat(this[DOCUMENT_TYPE_PROPERTY_KEY]).isEqualTo(documentSearchRequest.documentType!!.name)
-      assertThat(this[DOCUMENT_TYPE_DESCRIPTION_PROPERTY_KEY]).isEqualTo(documentSearchRequest.documentType!!.description)
+      assertThat(this[DOCUMENT_TYPE_PROPERTY_KEY]).isEqualTo("HMCTS_WARRANT, PRISON_COURT_REGISTER")
+      assertThat(this[DOCUMENT_TYPE_DESCRIPTION_PROPERTY_KEY]).isEqualTo("Warrants for Remand and Sentencing, Prison court register")
       assertThat(this[ORDER_BY_PROPERTY_KEY]).isEqualTo(documentSearchRequest.orderBy.name)
       assertThat(this[ORDER_BY_DIRECTION_PROPERTY_KEY]).isEqualTo(documentSearchRequest.orderByDirection.name)
     }
@@ -80,7 +80,7 @@ class TelemetryTransformFunctionsTest {
 
   @Test
   fun `documents search event to custom event properties no active case load id`() {
-    val documentSearchRequest = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }"))
+    val documentSearchRequest = DocumentSearchRequest(listOf(DocumentType.HMCTS_WARRANT), ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }"))
     val event = DocumentsSearchedEvent(documentSearchRequest, 10, 13)
     val eventProperties = event.toCustomEventProperties(DocumentRequestContext("Service name", null, null))
     assertThat(eventProperties[ACTIVE_CASE_LOAD_ID_PROPERTY_KEY]).isEqualTo("")
@@ -88,7 +88,7 @@ class TelemetryTransformFunctionsTest {
 
   @Test
   fun `documents search event to custom event properties no username`() {
-    val documentSearchRequest = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }"))
+    val documentSearchRequest = DocumentSearchRequest(listOf(DocumentType.HMCTS_WARRANT), ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }"))
     val event = DocumentsSearchedEvent(documentSearchRequest, 10, 13)
     val eventProperties = event.toCustomEventProperties(DocumentRequestContext("Service name", null, null))
     assertThat(eventProperties[USERNAME_PROPERTY_KEY]).isEqualTo("")
@@ -159,7 +159,7 @@ class TelemetryTransformFunctionsTest {
 
   @Test
   fun `documents searched event to custom event metrics`() {
-    val documentSearchRequest = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }"))
+    val documentSearchRequest = DocumentSearchRequest(listOf(DocumentType.HMCTS_WARRANT), ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }"))
     val event = DocumentsSearchedEvent(documentSearchRequest, 10, 13)
     with(event.toCustomEventMetrics(eventTimeMs)) {
       assertThat(this[EVENT_TIME_MS_METRIC_KEY]).isEqualTo(eventTimeMs.toDouble())
@@ -173,7 +173,7 @@ class TelemetryTransformFunctionsTest {
 
   @Test
   fun `documents searched event to custom event metrics no metadata`() {
-    val documentSearchRequest = DocumentSearchRequest(DocumentType.HMCTS_WARRANT, null)
+    val documentSearchRequest = DocumentSearchRequest(listOf(DocumentType.HMCTS_WARRANT), null)
     val event = DocumentsSearchedEvent(documentSearchRequest, 10, 13)
     val eventProperties = event.toCustomEventMetrics(eventTimeMs)
     assertThat(eventProperties[METADATA_FIELD_COUNT_METRIC_KEY]).isEqualTo(0.0)

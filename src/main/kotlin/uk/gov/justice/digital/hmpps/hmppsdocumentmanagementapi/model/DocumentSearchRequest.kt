@@ -17,10 +17,10 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.validation.
 @DocumentTypeOrMetadataCriteriaRequired
 data class DocumentSearchRequest(
   @Schema(
-    description = "The type or category of the document within HMPPS",
-    example = "HMCTS_WARRANT",
+    description = "The types or categories of the document within HMPPS",
+    example = "[HMCTS_WARRANT]",
   )
-  val documentType: DocumentType?,
+  val documentTypes: List<DocumentType>?,
 
   @Schema(
     description = "JSON structured metadata to match with document metadata. Documents will match if their metadata " +
