@@ -283,6 +283,8 @@ class DocumentSearchIntTest : IntegrationTestBase() {
     val documentTypes = listOf(DocumentType.HMCTS_WARRANT, DocumentType.PRISON_COURT_REGISTER)
     val response = webTestClient.searchDocuments(documentTypes, null)
 
+    assertThat(response.results.any { it.documentType == DocumentType.HMCTS_WARRANT }).isEqualTo(true)
+    assertThat(response.results.any { it.documentType == DocumentType.PRISON_COURT_REGISTER }).isEqualTo(true)
     response.results.onEach {
       assertThat(it.documentType).isIn(documentTypes)
     }
