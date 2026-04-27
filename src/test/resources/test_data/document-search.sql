@@ -111,6 +111,20 @@ VALUES
     NOW(),
     'Remand and Sentencing',
     'CREATED_BY_USER'
+),
+(
+    8,
+    '0f34f117-0a5d-4dd6-9450-7c6fc7909a40',
+    'PRISON_COURT_REGISTER',
+    'prison_court_register_8',
+    'pdf',
+    45777,
+    'd58e3582afa99040e27b92b13c8f2280',
+    'application/pdf',
+    JSON '{ "prisonCode": "SFI", "prisonNumber": "E5678FG", "court": "Stafford Crown", "warrantDate": "2022-09-08" }',
+    NOW(),
+    'Remand and Sentencing',
+    'CREATED_BY_USER'
 );
 
 -- Deleted HMCTS_WARRANT document

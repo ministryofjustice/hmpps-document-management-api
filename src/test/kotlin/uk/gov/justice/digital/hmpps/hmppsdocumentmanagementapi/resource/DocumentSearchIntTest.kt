@@ -279,6 +279,17 @@ class DocumentSearchIntTest : IntegrationTestBase() {
 
   @Sql("classpath:test_data/document-search.sql")
   @Test
+  fun `find all warrants and pcrs`() {
+    val documentTypes = listOf(DocumentType.HMCTS_WARRANT, DocumentType.PRISON_COURT_REGISTER)
+    val response = webTestClient.searchDocuments(documentTypes, null)
+
+    response.results.onEach {
+      assertThat(it.documentType).isIn(documentTypes)
+    }
+  }
+
+  @Sql("classpath:test_data/document-search.sql")
+  @Test
   fun `search warrants by prison number`() {
     val response = webTestClient.searchDocuments(listOf(documentType), metadata)
 
