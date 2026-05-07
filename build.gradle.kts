@@ -30,7 +30,7 @@ dependencies {
   runtimeOnly("org.postgresql:postgresql")
 
   // AWS
-  implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:4.0.2")
+  implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:4.0.1")
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:7.3.1")
 
   // OpenAPI
