@@ -59,4 +59,7 @@ enum class DocumentType(
     description = "Template documents used by the Document Generation API",
     additionalRoles = setOf(ROLE_DOCUMENT_GENERATION_TEMPLATE_RW),
   ),
+  APPEAL_ORDER(
+    description = "Appeal order",
+  ),
 }
