@@ -41,7 +41,7 @@ data class Document(
 
   val fileSize: Long,
 
-  val fileHash: String,
+  var fileHash: String,
 
   val mimeType: String,
 
@@ -55,6 +55,8 @@ data class Document(
   val createdByServiceName: String,
 
   val createdByUsername: String?,
+
+  var fileContentHash: String? = null,
 ) {
   var deletedTime: LocalDateTime? = null
 
@@ -111,6 +113,7 @@ data class Document(
     fileExtension,
     fileSize,
     fileHash,
+    fileContentHash,
     mimeType,
     metadata,
     createdTime,

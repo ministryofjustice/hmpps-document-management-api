@@ -51,10 +51,17 @@ data class Document(
   val fileSize: Long,
 
   @Schema(
-    description = "The md5 hash of the document file",
-    example = "d58e3582afa99040e27b92b13c8f2280",
+    description = "The SHA-256 hash of the document file as stored, as lowercase hex",
+    example = "e930ef8c3af7860ff15b34a174078f1152f1554e65f6ed0883b35f08af6b0a64",
   )
   val fileHash: String,
+
+  @Schema(
+    description = "Optional SHA-256 hash of the document's extracted content, as lowercase hex. " +
+      "Supplied by a consuming service, since the store does not derive content itself. Null when not provided.",
+    example = "9b5338484b3ed7b9a89666b6fa71a30d8186b67a4c0933c5f11b2d1f67998ba5",
+  )
+  val fileContentHash: String? = null,
 
   @Schema(
     description = "The application/pdf of the document file",

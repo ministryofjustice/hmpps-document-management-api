@@ -92,3 +92,8 @@ hmpps.s3:
       bucketArn: ${S3_PRISONER_IMAGES_BUCKET_ARN}
 hmpps.sqs:
   queueAdminRole: ROLE_DOCUMENT_ADMIN
+
+document:
+  hashing:
+    file-hash-document-types: [HMCTS_WARRANT, PRISON_COURT_REGISTER]
+    content-hash-document-types: [HMCTS_WARRANT, PRISON_COURT_REGISTER]

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import tools.jackson.databind.JsonNode
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentAlreadyUploadedException
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentHashingProperties
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
@@ -17,6 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.findBy
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.utils.fileExtension
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.utils.filenameWithoutExtension
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.utils.mimeType
+import java.security.MessageDigest
 import java.util.UUID
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as DocumentModel
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentFile as DocumentFileModel
@@ -27,6 +29,7 @@ class DocumentService(
   private val documentFileService: DocumentFileService,
   private val eventService: EventService,
   private val virusScanService: VirusScanService,
+  private val hashingProperties: DocumentHashingProperties,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -59,6 +62,8 @@ class DocumentService(
     file: MultipartFile,
     metadata: JsonNode,
     documentRequestContext: DocumentRequestContext,
+    fileHash: String? = null,
+    fileContentHash: String? = null,
   ): DocumentModel {
     val startTimeInMs = System.currentTimeMillis()
 
@@ -74,8 +79,8 @@ class DocumentService(
         filename = file.filenameWithoutExtension(documentType),
         fileExtension = file.fileExtension(documentType),
         fileSize = file.size,
-        // TODO: Agree on a hashing algorithm and implement
-        fileHash = "",
+        fileHash = resolveFileHash(documentType, fileHash, file),
+        fileContentHash = if (documentType in hashingProperties.contentHashDocumentTypes) fileContentHash else null,
         mimeType = file.mimeType(),
         metadata = metadata,
         createdByServiceName = documentRequestContext.serviceName,
@@ -149,5 +154,21 @@ class DocumentService(
     return virusScanService.scan(fileToScan.inputStream).also {
       eventService.recordDocumentScannedEvent(DocumentsScannedEvent(documentRequestContext, fileToScan.size), System.currentTimeMillis() - startTimeInMs)
     }
+  }
+
+  private fun resolveFileHash(documentType: DocumentType, suppliedHash: String?, file: MultipartFile): String = suppliedHash?.takeIf { it.isNotBlank() }
+    ?: if (documentType in hashingProperties.fileHashDocumentTypes) file.sha256() else ""
+
+  private fun MultipartFile.sha256(): String {
+    val digest = MessageDigest.getInstance("SHA-256")
+    inputStream.use { input ->
+      val buffer = ByteArray(8192)
+      var read = input.read(buffer)
+      while (read != -1) {
+        digest.update(buffer, 0, read)
+        read = input.read(buffer)
+      }
+    }
+    return digest.digest().joinToString("") { "%02x".format(it) }
   }
 }

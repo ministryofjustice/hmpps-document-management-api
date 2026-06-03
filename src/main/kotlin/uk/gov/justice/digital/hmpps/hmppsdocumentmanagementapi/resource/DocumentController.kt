@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import tools.jackson.databind.JsonNode
-import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.AUTHORISED_DOCUMENT_TYPES
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
@@ -211,13 +211,27 @@ class DocumentController(
       """,
     )
     metadata: String,
+    @RequestPart(required = false)
+    @Parameter(
+      description = "Optional SHA-256 hash of the file, as lowercase hex. If omitted the service computes it from the uploaded file",
+      required = false,
+    )
+    fileHash: String?,
+    @RequestPart(required = false)
+    @Parameter(
+      description = "Optional SHA-256 hash of the document's extracted content, as lowercase hex. Supplied by the calling service",
+      required = false,
+    )
+    fileContentHash: String?,
     request: HttpServletRequest,
   ) = documentService.uploadDocument(
     documentType,
     documentUuid,
     file,
-    ObjectMapper().readTree(metadata),
+    JsonMapper().readTree(metadata),
     request.documentRequestContext(),
+    fileHash,
+    fileContentHash,
   )
 
   @ResponseStatus(HttpStatus.OK)

@@ -63,7 +63,8 @@ abstract class AbstractDocumentTypeIntegrationTest : IntegrationTestBase() {
     ).expectStatus().isCreated.expectHeader().contentType(MediaType.APPLICATION_JSON)
       .expectBody(Document::class.java).returnResult().responseBody!!
 
-    assertDocumentDataIsCorrect(newUuid, "", response)
+    assertThat(response.fileHash).matches("[0-9a-f]{64}")
+    assertDocumentDataIsCorrect(newUuid, response.fileHash, response)
   }
 
   @Test
