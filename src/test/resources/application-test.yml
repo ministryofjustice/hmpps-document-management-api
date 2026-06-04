@@ -33,3 +33,11 @@ hmpps.sqs:
   topics:
     domainevents:
       arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
+
+document:
+  hashing:
+    file-hash-document-types:
+      - HMCTS_WARRANT
+      - SUBJECT_ACCESS_REQUEST_REPORT
+    content-hash-document-types:
+      - HMCTS_WARRANT

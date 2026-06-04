@@ -19,7 +19,7 @@ import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.reactive.server.WebTestClient
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
-import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import tools.jackson.module.kotlin.readValue
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
@@ -59,7 +59,12 @@ class UploadDocumentIntTest : IntegrationTestBase() {
   @Autowired
   lateinit var fileService: DocumentFileService
 
-  private val metadata = ObjectMapper().readTree("{ \"caseReferenceNumber\": \"T20231234\", \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\" }")
+  private val jsonMapper = jacksonObjectMapper()
+
+  private val metadata = jsonMapper.readTree(
+    """{ "caseReferenceNumber": "T20231234", "prisonCode": "KMI", "prisonNumber": "A1234BC" }""",
+  )
+
   private val serviceName = "Uploaded via service name"
   private val activeCaseLoadId = "RSI"
   private val username = "UPLOADED_BY_USERNAME"
@@ -324,7 +329,7 @@ class UploadDocumentIntTest : IntegrationTestBase() {
       assertThat(filename).isEqualTo("warrant-for-remand")
       assertThat(fileExtension).isEqualTo("pdf")
       assertThat(fileSize).isEqualTo(20688)
-      assertThat(fileHash).isEqualTo("")
+      assertThat(fileHash).isEqualTo("e930ef8c3af7860ff15b34a174078f1152f1554e65f6ed0883b35f08af6b0a64")
       assertThat(mimeType).isEqualTo("application/pdf")
     }
   }
@@ -339,7 +344,7 @@ class UploadDocumentIntTest : IntegrationTestBase() {
       assertThat(filename).isEqualTo("warrant-for-remand")
       assertThat(fileExtension).isEqualTo("pdf")
       assertThat(fileSize).isEqualTo(20688)
-      assertThat(fileHash).isEqualTo("")
+      assertThat(fileHash).isEqualTo("e930ef8c3af7860ff15b34a174078f1152f1554e65f6ed0883b35f08af6b0a64")
       assertThat(mimeType).isEqualTo("application/pdf")
     }
   }
@@ -403,19 +408,27 @@ class UploadDocumentIntTest : IntegrationTestBase() {
     await untilCallTo { auditSqsClient.countMessagesOnQueue(auditQueueUrl).get() } matches { it == 1 }
 
     val messageBody = auditSqsClient.receiveMessage(ReceiveMessageRequest.builder().queueUrl(auditQueueUrl).build()).get().messages()[0].body()
-    with(objectMapper.readValue<AuditService.AuditEvent>(messageBody)) {
+
+    val auditEvent: AuditService.AuditEvent = jsonMapper.readValue(messageBody)
+
+    with(auditEvent) {
       assertThat(what).isEqualTo(EventType.DOCUMENT_UPLOADED.name)
       assertThat(whenLocalDateTime()).isCloseTo(LocalDateTime.now(), within(3, ChronoUnit.SECONDS))
       assertThat(who).isEqualTo(username)
       assertThat(service).isEqualTo(serviceName)
-      with(objectMapper.readValue<DocumentModel>(details)) {
+
+      val document: DocumentModel = jsonMapper.readValue(details)
+
+      with(document) {
         assertThat(this.documentUuid).isEqualTo(documentUuid)
+        assertThat(this.documentType).isEqualTo(documentType)
         assertThat(this.documentType).isEqualTo(documentType)
         assertThat(documentFilename).isEqualTo("warrant-for-remand.pdf")
         assertThat(filename).isEqualTo("warrant-for-remand")
         assertThat(fileExtension).isEqualTo("pdf")
         assertThat(fileSize).isEqualTo(20688)
-        assertThat(fileHash).isEqualTo("")
+        assertThat(fileHash).isEqualTo("e930ef8c3af7860ff15b34a174078f1152f1554e65f6ed0883b35f08af6b0a64")
+        assertThat(fileContentHash).isNull()
         assertThat(mimeType).isEqualTo("application/pdf")
         assertThat(metadata).isEqualTo(metadata)
         assertThat(createdTime).isCloseTo(LocalDateTime.now(), within(3, ChronoUnit.SECONDS))

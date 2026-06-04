@@ -3,7 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Test
-import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -18,13 +18,14 @@ class DocumentTest {
       fileExtension = "pdf",
       fileSize = 3876,
       fileHash = "d58e3582afa99040e27b92b13c8f2280",
+      fileContentHash = "a58e3582afa99040e27b92b13c8f2280",
       mimeType = "application/pdf",
-      metadata = ObjectMapper().readTree("{ \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\" }"),
+      metadata = JsonMapper().readTree("{ \"prisonCode\": \"KMI\", \"prisonNumber\": \"A1234BC\" }"),
       createdByServiceName = "Remand and sentencing",
       createdByUsername = "CREATED_BY_USERNAME",
     )
 
-  private val replacementMetadata = ObjectMapper().readTree("{ \"prisonCode\": \"RSI\", \"prisonNumber\": \"B2345CD\" }")
+  private val replacementMetadata = JsonMapper().readTree("{ \"prisonCode\": \"RSI\", \"prisonNumber\": \"B2345CD\" }")
 
   @Test
   fun `document filename uses filename and extension`() {
@@ -124,6 +125,7 @@ class DocumentTest {
           fileExtension,
           fileSize,
           fileHash,
+          fileContentHash,
           mimeType,
           metadata,
           createdTime,
@@ -147,6 +149,7 @@ class DocumentTest {
             fileExtension,
             fileSize,
             fileHash,
+            fileContentHash,
             mimeType,
             metadata,
             createdTime,

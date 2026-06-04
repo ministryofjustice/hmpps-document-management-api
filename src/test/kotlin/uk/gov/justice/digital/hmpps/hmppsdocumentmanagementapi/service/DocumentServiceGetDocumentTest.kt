@@ -10,6 +10,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentHashingProperties
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
@@ -21,7 +22,13 @@ class DocumentServiceGetDocumentTest {
   private val eventService: EventService = mock()
   private val virusScanService: VirusScanService = mock()
 
-  private val service = DocumentService(documentRepository, mock(), eventService, virusScanService)
+  private val service = DocumentService(
+    documentRepository,
+    mock(),
+    eventService,
+    virusScanService,
+    DocumentHashingProperties(),
+  )
 
   private val documentUuid = UUID.randomUUID()
   private val document = mock<Document>()

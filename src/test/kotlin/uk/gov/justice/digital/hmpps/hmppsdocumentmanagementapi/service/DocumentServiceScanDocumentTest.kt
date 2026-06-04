@@ -9,6 +9,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.web.multipart.MultipartFile
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentHashingProperties
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.VirusScanResult
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsScannedEvent
@@ -20,8 +21,13 @@ class DocumentServiceScanDocumentTest {
   private val eventService: EventService = mock()
   private val virusScanService: VirusScanService = mock()
 
-  private val service =
-    DocumentService(documentRepository, documentFileService, eventService, virusScanService)
+  private val service = DocumentService(
+    documentRepository,
+    mock(),
+    eventService,
+    virusScanService,
+    DocumentHashingProperties(),
+  )
 
   private val file = mock<MultipartFile>()
   private val size = 1234L

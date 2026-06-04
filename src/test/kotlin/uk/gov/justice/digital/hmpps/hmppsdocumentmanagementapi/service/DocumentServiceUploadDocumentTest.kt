@@ -14,6 +14,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.web.multipart.MultipartFile
 import tools.jackson.databind.JsonNode
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentAlreadyUploadedException
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentHashingProperties
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
@@ -29,7 +30,13 @@ class DocumentServiceUploadDocumentTest {
   private val eventService: EventService = mock()
   private val virusScanService: VirusScanService = mock()
 
-  private val service = DocumentService(documentRepository, documentFileService, eventService, virusScanService)
+  private val hashingProperties = DocumentHashingProperties(
+    fileHashDocumentTypes = setOf(DocumentType.HMCTS_WARRANT),
+    contentHashDocumentTypes = setOf(DocumentType.HMCTS_WARRANT),
+  )
+  private val service = DocumentService(documentRepository, documentFileService, eventService, virusScanService, hashingProperties)
+  private val serviceWithHashingDisabled =
+    DocumentService(documentRepository, documentFileService, eventService, virusScanService, DocumentHashingProperties())
 
   private val documentType = DocumentType.HMCTS_WARRANT
   private val documentUuid = UUID.randomUUID()
@@ -89,10 +96,92 @@ class DocumentServiceUploadDocumentTest {
   }
 
   @Test
-  fun `no currently defined hashing algorithm`() {
+  fun `computes the sha-256 file hash from the uploaded file when none is supplied`() {
     service.uploadDocument(documentType, documentUuid, file, mock(), documentRequestContext)
 
+    // sha-256 of the stubbed file content "A"
+    assertThat(documentCaptor.firstValue.fileHash)
+      .isEqualTo("559aead08264d5795d3909718cdd05abd49572e84fe55590eef31a88a08fdffd")
+  }
+
+  @Test
+  fun `uses the supplied file hash verbatim and does not recompute`() {
+    service.uploadDocument(
+      documentType,
+      documentUuid,
+      file,
+      mock(),
+      documentRequestContext,
+      fileHash = "supplied-file-hash",
+    )
+
+    assertThat(documentCaptor.firstValue.fileHash).isEqualTo("supplied-file-hash")
+  }
+
+  @Test
+  fun `falls back to computing the file hash when the supplied value is blank`() {
+    service.uploadDocument(
+      documentType,
+      documentUuid,
+      file,
+      mock(),
+      documentRequestContext,
+      fileHash = "  ",
+    )
+
+    assertThat(documentCaptor.firstValue.fileHash)
+      .isEqualTo("559aead08264d5795d3909718cdd05abd49572e84fe55590eef31a88a08fdffd")
+  }
+
+  @Test
+  fun `stores the supplied content hash and leaves it null when not supplied`() {
+    service.uploadDocument(
+      documentType,
+      documentUuid,
+      file,
+      mock(),
+      documentRequestContext,
+      fileContentHash = "supplied-content-hash",
+    )
+    assertThat(documentCaptor.firstValue.fileContentHash).isEqualTo("supplied-content-hash")
+
+    service.uploadDocument(documentType, UUID.randomUUID(), file, mock(), documentRequestContext)
+    assertThat(documentCaptor.lastValue.fileContentHash).isNull()
+  }
+
+  @Test
+  fun `leaves the file hash empty for a document type that is not enabled for hashing`() {
+    serviceWithHashingDisabled.uploadDocument(documentType, documentUuid, file, mock(), documentRequestContext)
+
     assertThat(documentCaptor.firstValue.fileHash).isEmpty()
+  }
+
+  @Test
+  fun `uses a supplied file hash even when the document type is not enabled for hashing`() {
+    serviceWithHashingDisabled.uploadDocument(
+      documentType,
+      documentUuid,
+      file,
+      mock(),
+      documentRequestContext,
+      fileHash = "supplied-file-hash",
+    )
+
+    assertThat(documentCaptor.firstValue.fileHash).isEqualTo("supplied-file-hash")
+  }
+
+  @Test
+  fun `ignores a supplied content hash for a document type that is not enabled`() {
+    serviceWithHashingDisabled.uploadDocument(
+      documentType,
+      documentUuid,
+      file,
+      mock(),
+      documentRequestContext,
+      fileContentHash = "supplied-content-hash",
+    )
+
+    assertThat(documentCaptor.firstValue.fileContentHash).isNull()
   }
 
   @Test

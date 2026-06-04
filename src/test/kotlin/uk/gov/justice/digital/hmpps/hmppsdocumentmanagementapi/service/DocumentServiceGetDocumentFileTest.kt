@@ -10,10 +10,12 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentHashingProperties
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.findByDocumentUuidOrThrowNotFound
 import java.io.InputStream
 import java.util.UUID
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as DocumentModel
@@ -24,7 +26,13 @@ class DocumentServiceGetDocumentFileTest {
   private val eventService: EventService = mock()
   private val virusScanService: VirusScanService = mock()
 
-  private val service = DocumentService(documentRepository, documentFileService, eventService, virusScanService)
+  private val service = DocumentService(
+    documentRepository,
+    documentFileService,
+    eventService,
+    virusScanService,
+    DocumentHashingProperties(),
+  )
 
   private val documentUuid = UUID.randomUUID()
   private val documentFilename = "test.pdf"
@@ -43,6 +51,7 @@ class DocumentServiceGetDocumentFileTest {
   @BeforeEach
   fun setUp() {
     whenever(documentRepository.findByDocumentUuid(documentUuid)).thenReturn(document)
+    whenever(documentRepository.findByDocumentUuidOrThrowNotFound(documentUuid)).thenReturn(document)
     whenever(document.toModel()).thenReturn(documentModel)
     whenever(documentModel.documentFilename).thenReturn(documentFilename)
     whenever(documentModel.fileSize).thenReturn(fileSize)
@@ -63,7 +72,6 @@ class DocumentServiceGetDocumentFileTest {
   @Test
   fun `finds document by unique identifier`() {
     service.getDocumentFile(documentUuid, documentRequestContext)
-
     verify(documentRepository).findByDocumentUuid(documentUuid)
   }
 
