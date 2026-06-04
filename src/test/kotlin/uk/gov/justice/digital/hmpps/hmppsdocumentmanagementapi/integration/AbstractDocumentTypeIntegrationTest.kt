@@ -35,7 +35,6 @@ abstract class AbstractDocumentTypeIntegrationTest : IntegrationTestBase() {
   abstract val bucketName: String
   abstract val testFileHash: String
 
-
   protected companion object {
     const val SHA256_HEX_REGEX = "[0-9a-f]{64}"
   }
