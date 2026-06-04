@@ -35,6 +35,11 @@ abstract class AbstractDocumentTypeIntegrationTest : IntegrationTestBase() {
   abstract val bucketName: String
   abstract val testFileHash: String
 
+
+  protected companion object {
+    const val SHA256_HEX_REGEX = "[0-9a-f]{64}"
+  }
+
   @Test
   fun `upload document - 403 forbidden - document writer only`() {
     uploadDocument(
@@ -63,7 +68,7 @@ abstract class AbstractDocumentTypeIntegrationTest : IntegrationTestBase() {
     ).expectStatus().isCreated.expectHeader().contentType(MediaType.APPLICATION_JSON)
       .expectBody(Document::class.java).returnResult().responseBody!!
 
-    assertThat(response.fileHash).matches("[0-9a-f]{64}")
+    assertThat(response.fileHash).matches(SHA256_HEX_REGEX)
     assertDocumentDataIsCorrect(newUuid, response.fileHash, response)
   }
 
