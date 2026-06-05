@@ -101,4 +101,11 @@ data class Document(
     example = "AAA01U",
   )
   val createdByUsername: String?,
+
+  @Schema(
+    description = "When the document is a duplicate of another, the unique identifier of the canonical document it " +
+      "points at. Null means this document is itself canonical.",
+    example = "8cdadcf3-b003-4116-9956-c99bd8df6a00",
+  )
+  val duplicateOf: UUID? = null,
 )

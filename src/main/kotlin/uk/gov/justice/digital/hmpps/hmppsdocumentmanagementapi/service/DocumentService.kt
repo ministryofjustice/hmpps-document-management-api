@@ -163,6 +163,32 @@ class DocumentService(
     return document.toModel()
   }
 
+  fun setDuplicateOf(
+    documentUuid: UUID,
+    duplicateOf: UUID?,
+    documentRequestContext: DocumentRequestContext,
+  ): DocumentModel {
+    val document = documentRepository.findByDocumentUuidOrThrowNotFound(documentUuid)
+
+    require(duplicateOf != document.documentUuid) {
+      "A document cannot be a duplicate of itself"
+    }
+
+    if (document.duplicateOf != duplicateOf) {
+      log.info(
+        "Updating duplicateOf for document {} from {} to {} (service {})",
+        documentUuid,
+        document.duplicateOf,
+        duplicateOf,
+        documentRequestContext.serviceName,
+      )
+      document.duplicateOf = duplicateOf
+      documentRepository.saveAndFlush(document)
+    }
+
+    return document.toModel()
+  }
+
   fun deleteDocument(
     documentUuid: UUID,
     documentRequestContext: DocumentRequestContext,

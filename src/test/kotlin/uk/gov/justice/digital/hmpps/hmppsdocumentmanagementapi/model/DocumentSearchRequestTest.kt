@@ -48,6 +48,18 @@ class DocumentSearchRequestTest {
   }
 
   @Test
+  fun `canonical alone is not a sufficient criterion`() {
+    val request = DocumentSearchRequest(null, null, canonical = true)
+    validator.validate(request).assertSingleValidationError("", "Document type or metadata criteria must be supplied.")
+  }
+
+  @Test
+  fun `valid request - canonical combined with a document type`() {
+    val request = DocumentSearchRequest(listOf(DocumentType.HMCTS_WARRANT), null, canonical = true)
+    assertThat(validator.validate(request)).isEmpty()
+  }
+
+  @Test
   fun `document type or metadata criteria must be supplied - null document type and metadata`() {
     val request = DocumentSearchRequest(null, null)
     validator.validate(request).assertSingleValidationError("", "Document type or metadata criteria must be supplied.")

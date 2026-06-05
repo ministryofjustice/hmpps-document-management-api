@@ -49,6 +49,10 @@ class DocumentSearchService(
       spec = spec.and(documentSearchSpecification.fileHashEquals(it))
     }
 
+    request.canonical?.let {
+      spec = spec.and(documentSearchSpecification.canonical(it))
+    }
+
     val pageRequest = PageRequest.of(request.page, request.pageSize)
       .withSort(request.orderByDirection, *setOf(request.orderBy.property, "createdTime").toTypedArray())
     val page = documentRepository.findAll(spec, pageRequest)

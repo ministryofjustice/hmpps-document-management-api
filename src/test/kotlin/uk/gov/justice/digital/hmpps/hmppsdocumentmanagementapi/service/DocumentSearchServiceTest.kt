@@ -162,6 +162,22 @@ class DocumentSearchServiceTest {
   }
 
   @Test
+  fun `search by canonical filter combined with a document type`() {
+    val documentType = DocumentType.HMCTS_WARRANT
+
+    whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>())).thenReturn(Page.empty())
+
+    service.searchDocuments(DocumentSearchRequest(listOf(documentType), null, canonical = true), DocumentType.entries, documentRequestContext)
+
+    verify(documentSearchSpecification).documentTypeIn(setOf(documentType))
+    verify(documentSearchSpecification).canonical(true)
+    verifyNoMoreInteractions(documentSearchSpecification)
+
+    verify(documentRepository).findAll(any<Specification<Document>>(), any<PageRequest>())
+    verifyNoMoreInteractions(documentRepository)
+  }
+
+  @Test
   fun `ignores non object metadata`() {
     val metadata = ObjectMapper().readTree("[ \"test\" ]")
 

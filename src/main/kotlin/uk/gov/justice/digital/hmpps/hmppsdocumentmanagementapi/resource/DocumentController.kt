@@ -34,6 +34,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.Docum
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResult
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.SetDocumentDuplicateOfRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.SetDocumentFileContentHashRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.VirusScanResult
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.DocumentSearchService
@@ -356,6 +357,64 @@ class DocumentController(
   ) = documentService.setFileContentHash(
     documentUuid,
     setRequest.fileContentHash,
+    request.documentRequestContext(),
+  )
+
+  @ResponseStatus(HttpStatus.OK)
+  @PutMapping("/{documentUuid}/duplicate-of")
+  @Operation(
+    summary = "Set or clear the canonical document a document is a duplicate of",
+    description = "Records that the document identified by the supplied unique identifier is a duplicate of another " +
+      "document, or clears that relationship to make it canonical. Intended for the owning service to populate after " +
+      "upload, for example during ingestion or a reconciliation sweep.",
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Document duplicate relationship set successfully",
+        content = [Content(schema = Schema(implementation = Document::class))],
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Bad request, for example a document set as a duplicate of itself",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role. Note that the required role can be document type dependent",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "The document associated with this unique identifier was not found.",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  @PreAuthorize("hasAnyRole('$ROLE_DOCUMENT_WRITER', '$ROLE_DOCUMENT_ADMIN')")
+  fun setDocumentDuplicateOf(
+    @PathVariable
+    @Parameter(
+      description = "Document unique identifier",
+      required = true,
+    )
+    documentUuid: UUID,
+    @RequestBody
+    @Parameter(
+      description = "The canonical document this document duplicates, or null to make it canonical",
+      required = true,
+    )
+    setRequest: SetDocumentDuplicateOfRequest,
+    request: HttpServletRequest,
+  ) = documentService.setDuplicateOf(
+    documentUuid,
+    setRequest.duplicateOf,
     request.documentRequestContext(),
   )
 

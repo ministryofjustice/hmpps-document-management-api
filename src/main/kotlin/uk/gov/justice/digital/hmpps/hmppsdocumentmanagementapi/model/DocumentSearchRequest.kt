@@ -85,4 +85,12 @@ data class DocumentSearchRequest(
     example = "fffac8f1a93fabc8ad1629d255527c6ae12abfc5cc0921def588bfa2ce00b024",
   )
   val fileHash: String? = null,
+
+  @Schema(
+    description = "Filter by canonical status. True returns only canonical documents (those that are not a duplicate " +
+      "of another), false returns only duplicates. Low selectivity on its own, so it refines a query rather than " +
+      "standing alone and must be combined with document types or metadata.",
+    example = "true",
+  )
+  val canonical: Boolean? = null,
 )

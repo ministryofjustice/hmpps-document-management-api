@@ -25,13 +25,15 @@ class DocumentSearchSpecification {
     )
   }
 
-  // Exact equality on the indexed hash columns. Hashes are stored as lowercase hex (see the upload
-  // contract), so we lowercase the input and compare directly, which keeps the btree index usable.
   fun fileContentHashEquals(hash: String) = Specification<Document> { root, _, cb ->
     cb.equal(root.get<String>("fileContentHash"), hash.lowercase())
   }
 
   fun fileHashEquals(hash: String) = Specification<Document> { root, _, cb ->
     cb.equal(root.get<String>("fileHash"), hash.lowercase())
+  }
+
+  fun canonical(isCanonical: Boolean) = Specification<Document> { root, _, cb ->
+    if (isCanonical) cb.isNull(root.get<Any>("duplicateOf")) else cb.isNotNull(root.get<Any>("duplicateOf"))
   }
 }
