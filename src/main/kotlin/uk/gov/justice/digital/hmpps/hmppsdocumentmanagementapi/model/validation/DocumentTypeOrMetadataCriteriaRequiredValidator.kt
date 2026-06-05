@@ -18,6 +18,14 @@ class DocumentTypeOrMetadataCriteriaRequiredValidator : ConstraintValidator<Docu
       return true
     }
 
+    if (!value.fileContentHash.isNullOrBlank()) {
+      return true
+    }
+
+    if (!value.fileHash.isNullOrBlank()) {
+      return true
+    }
+
     return false
   }
 

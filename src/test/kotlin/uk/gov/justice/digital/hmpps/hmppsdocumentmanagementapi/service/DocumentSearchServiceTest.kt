@@ -130,6 +130,38 @@ class DocumentSearchServiceTest {
   }
 
   @Test
+  fun `search by file content hash only`() {
+    val contentHash = "58ed0c987864be01771eb171a24f369a664e0c5440c97b0c8f917ed5e5d63dae"
+
+    whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>())).thenReturn(Page.empty())
+
+    service.searchDocuments(DocumentSearchRequest(null, null, fileContentHash = contentHash), DocumentType.entries, documentRequestContext)
+
+    verify(documentSearchSpecification).documentTypeIn(DocumentType.entries)
+    verify(documentSearchSpecification).fileContentHashEquals(contentHash)
+    verifyNoMoreInteractions(documentSearchSpecification)
+
+    verify(documentRepository).findAll(any<Specification<Document>>(), any<PageRequest>())
+    verifyNoMoreInteractions(documentRepository)
+  }
+
+  @Test
+  fun `search by file hash only`() {
+    val fileHash = "fffac8f1a93fabc8ad1629d255527c6ae12abfc5cc0921def588bfa2ce00b024"
+
+    whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>())).thenReturn(Page.empty())
+
+    service.searchDocuments(DocumentSearchRequest(null, null, fileHash = fileHash), DocumentType.entries, documentRequestContext)
+
+    verify(documentSearchSpecification).documentTypeIn(DocumentType.entries)
+    verify(documentSearchSpecification).fileHashEquals(fileHash)
+    verifyNoMoreInteractions(documentSearchSpecification)
+
+    verify(documentRepository).findAll(any<Specification<Document>>(), any<PageRequest>())
+    verifyNoMoreInteractions(documentRepository)
+  }
+
+  @Test
   fun `ignores non object metadata`() {
     val metadata = ObjectMapper().readTree("[ \"test\" ]")
 

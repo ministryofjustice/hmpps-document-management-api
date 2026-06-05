@@ -69,4 +69,20 @@ data class DocumentSearchRequest(
     defaultValue = "DESC",
   )
   val orderByDirection: Direction = Direction.DESC,
+
+  @Schema(
+    description = "Exact match on the SHA-256 of the document's extracted content, as lowercase hex. Unlike metadata " +
+      "matching this is an exact, case insensitive equality check, intended for finding documents that share the same " +
+      "extracted content. Combine with documentTypes to keep the match scoped to a single source's documents.",
+    example = "58ed0c987864be01771eb171a24f369a664e0c5440c97b0c8f917ed5e5d63dae",
+  )
+  val fileContentHash: String? = null,
+
+  @Schema(
+    description = "Exact match on the SHA-256 of the stored file bytes, as lowercase hex. An exact, case insensitive " +
+      "equality check intended for finding byte-identical copies of a file. Combine with documentTypes to keep the " +
+      "match scoped to a single source's documents.",
+    example = "fffac8f1a93fabc8ad1629d255527c6ae12abfc5cc0921def588bfa2ce00b024",
+  )
+  val fileHash: String? = null,
 )

@@ -41,6 +41,14 @@ class DocumentSearchService(
       spec = spec.and(documentSearchSpecification.metadataContains(it.key, it.value.asText()))
     }
 
+    request.fileContentHash?.takeIf { it.isNotBlank() }?.let {
+      spec = spec.and(documentSearchSpecification.fileContentHashEquals(it))
+    }
+
+    request.fileHash?.takeIf { it.isNotBlank() }?.let {
+      spec = spec.and(documentSearchSpecification.fileHashEquals(it))
+    }
+
     val pageRequest = PageRequest.of(request.page, request.pageSize)
       .withSort(request.orderByDirection, *setOf(request.orderBy.property, "createdTime").toTypedArray())
     val page = documentRepository.findAll(spec, pageRequest)
