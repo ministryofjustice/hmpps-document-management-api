@@ -104,8 +104,6 @@ class DocumentServiceSetDuplicateOfTest {
 
   @Test
   fun `throws when the document is not found`() {
-    whenever(documentRepository.findByDocumentUuid(documentUuid)).thenReturn(warrant())
-
     assertThrows<EntityNotFoundException> {
       service.setDuplicateOf(UUID.randomUUID(), canonicalUuid, documentRequestContext)
     }
