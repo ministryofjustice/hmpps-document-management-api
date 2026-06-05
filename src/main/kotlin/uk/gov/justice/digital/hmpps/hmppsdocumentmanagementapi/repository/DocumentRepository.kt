@@ -26,6 +26,16 @@ interface DocumentRepository :
 
   @Query("SELECT d.documentType FROM Document d WHERE d.documentUuid = :documentUuid")
   fun getDocumentTypeByDocumentUuid(documentUuid: UUID): DocumentType?
+
+  fun findByFileContentHashIn(fileContentHashes: Collection<String>): List<Document>
+
+  fun findByFileHashIn(fileHashes: Collection<String>): List<Document>
+
+  @Query(
+    value = "SELECT 1 FROM (SELECT pg_advisory_xact_lock(hashtextextended(:hash, 0))) AS lock_acquired",
+    nativeQuery = true,
+  )
+  fun lockOnHash(hash: String): Int
 }
 
 fun DocumentRepository.findByDocumentUuidOrThrowNotFound(documentUuid: UUID) = this.findByDocumentUuid(documentUuid) ?: throw EntityNotFoundException("Document with UUID '$documentUuid' not found.")

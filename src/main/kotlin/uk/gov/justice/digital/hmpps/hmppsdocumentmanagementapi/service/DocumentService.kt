@@ -30,6 +30,7 @@ class DocumentService(
   private val eventService: EventService,
   private val virusScanService: VirusScanService,
   private val hashingProperties: DocumentHashingProperties,
+  private val canonicalService: DocumentCanonicalService,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -100,6 +101,8 @@ class DocumentService(
 
     return document.toModel().also {
       eventService.recordDocumentUploadedEvent(it, documentRequestContext, System.currentTimeMillis() - startTimeInMs)
+    }.also {
+      canonicalService.recompute(document)
     }
   }
 
@@ -160,31 +163,7 @@ class DocumentService(
       documentRepository.saveAndFlush(document)
     }
 
-    return document.toModel()
-  }
-
-  fun setDuplicateOf(
-    documentUuid: UUID,
-    duplicateOf: UUID?,
-    documentRequestContext: DocumentRequestContext,
-  ): DocumentModel {
-    val document = documentRepository.findByDocumentUuidOrThrowNotFound(documentUuid)
-
-    require(duplicateOf != document.documentUuid) {
-      "A document cannot be a duplicate of itself"
-    }
-
-    if (document.duplicateOf != duplicateOf) {
-      log.info(
-        "Updating duplicateOf for document {} from {} to {} (service {})",
-        documentUuid,
-        document.duplicateOf,
-        duplicateOf,
-        documentRequestContext.serviceName,
-      )
-      document.duplicateOf = duplicateOf
-      documentRepository.saveAndFlush(document)
-    }
+    canonicalService.recompute(document)
 
     return document.toModel()
   }
@@ -198,6 +177,8 @@ class DocumentService(
     val document = documentRepository.findByDocumentUuid(documentUuid)
 
     document?.apply {
+      val contentHash = fileContentHash
+      val byteHash = fileHash
       delete(
         deletedByServiceName = documentRequestContext.serviceName,
         deletedByUsername = documentRequestContext.username,
@@ -205,6 +186,7 @@ class DocumentService(
       documentRepository.saveAndFlush(this).toModel().also {
         eventService.recordDocumentDeletedEvent(it, documentRequestContext, System.currentTimeMillis() - startTimeInMs)
       }
+      canonicalService.recomputeForHashes(contentHash, byteHash)
     }
   }
 
