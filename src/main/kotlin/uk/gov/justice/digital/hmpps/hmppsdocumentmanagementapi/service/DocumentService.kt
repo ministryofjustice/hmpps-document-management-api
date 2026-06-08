@@ -30,7 +30,7 @@ class DocumentService(
   private val eventService: EventService,
   private val virusScanService: VirusScanService,
   private val hashingProperties: DocumentHashingProperties,
-  private val canonicalService: DocumentCanonicalService,
+  private val documentDuplicateService: DocumentDuplicateService,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -102,7 +102,7 @@ class DocumentService(
     return document.toModel().also {
       eventService.recordDocumentUploadedEvent(it, documentRequestContext, System.currentTimeMillis() - startTimeInMs)
     }.also {
-      canonicalService.recompute(document)
+      documentDuplicateService.redetermineCanonicalFor(document)
     }
   }
 
@@ -163,7 +163,7 @@ class DocumentService(
       documentRepository.saveAndFlush(document)
     }
 
-    canonicalService.recompute(document)
+    documentDuplicateService.redetermineCanonicalFor(document)
 
     return document.toModel()
   }
@@ -186,7 +186,7 @@ class DocumentService(
       documentRepository.saveAndFlush(this).toModel().also {
         eventService.recordDocumentDeletedEvent(it, documentRequestContext, System.currentTimeMillis() - startTimeInMs)
       }
-      canonicalService.recomputeForHashes(contentHash, byteHash)
+      documentDuplicateService.redetermineCanonicalFor(contentHash, byteHash)
     }
   }
 

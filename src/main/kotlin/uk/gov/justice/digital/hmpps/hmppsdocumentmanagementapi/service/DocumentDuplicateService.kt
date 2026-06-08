@@ -22,7 +22,7 @@ import java.util.UUID
  * per set without any external coordination.
  */
 @Service
-class DocumentCanonicalService(
+class DocumentDuplicateService(
   private val documentRepository: DocumentRepository,
   private val canonicalProperties: DocumentCanonicalProperties,
 ) {
@@ -32,19 +32,19 @@ class DocumentCanonicalService(
     private const val NOT_AUTHORITATIVE = Int.MAX_VALUE
   }
 
-  fun recompute(document: Document) = recomputeForHashes(document.fileContentHash, document.fileHash)
+  fun redetermineCanonicalFor(document: Document) = redetermineCanonicalFor(document.fileContentHash, document.fileHash)
 
   @Transactional
-  fun recomputeForHashes(fileContentHash: String?, fileHash: String?) {
+  fun redetermineCanonicalFor(fileContentHash: String?, fileHash: String?) {
     val seedContentHash = fileContentHash?.takeIf { it.isNotBlank() }
     val seedFileHash = fileHash?.takeIf { it.isNotBlank() }
     val seedHashes = listOfNotNull(seedContentHash, seedFileHash)
     if (seedHashes.isEmpty()) return
 
-    // Serialise concurrent recomputes that touch any of these hashes. Sorted to avoid deadlock.
+    // Locks are taken in sorted order so concurrent recomputes that share a hash cannot deadlock.
     seedHashes.sorted().forEach { documentRepository.lockOnHash(it) }
 
-    val group = closure(seedContentHash, seedFileHash)
+    val group = findMatchingDocuments(seedContentHash, seedFileHash)
     if (group.size <= 1) {
       group.singleOrNull()?.let { setDuplicateOf(it, null) }
       return
@@ -65,13 +65,13 @@ class DocumentCanonicalService(
   }
 
   /**
-   * Iteratively expands from the seed hashes, following content and byte hashes of each document
-   * found, until the set stops growing. Soft-deleted documents are excluded by the entity restriction,
-   * so a deleted document simply drops out and the survivors are re-ranked. Blank byte hashes (the
-   * value used for document types that are not hashed) are never followed, otherwise every unhashed
-   * document would collapse into one set.
+   * Expands from the seed hashes, following the content and byte hashes of each document found until
+   * the set stops growing, so a content match and a byte match resolve to one set even when no single
+   * pair shares both. Soft-deleted documents are excluded by the entity restriction, so a deleted
+   * document drops out and the survivors are re-ranked. Blank byte hashes, used by document types that
+   * are not hashed, are never followed, otherwise every unhashed document would collapse into one set.
    */
-  private fun closure(seedContentHash: String?, seedFileHash: String?): Collection<Document> {
+  private fun findMatchingDocuments(seedContentHash: String?, seedFileHash: String?): Collection<Document> {
     val members = LinkedHashMap<UUID, Document>()
     val seenContentHashes = HashSet<String>()
     val seenFileHashes = HashSet<String>()
@@ -83,19 +83,24 @@ class DocumentCanonicalService(
       seenContentHashes.addAll(frontierContent)
       seenFileHashes.addAll(frontierFile)
 
-      val found = buildList {
-        if (frontierContent.isNotEmpty()) addAll(documentRepository.findByFileContentHashIn(frontierContent))
-        if (frontierFile.isNotEmpty()) addAll(documentRepository.findByFileHashIn(frontierFile))
+      val found = buildMap {
+        if (frontierContent.isNotEmpty()) {
+          documentRepository.findByFileContentHashIn(frontierContent).forEach { put(it.documentUuid, it) }
+        }
+        if (frontierFile.isNotEmpty()) {
+          documentRepository.findByFileHashIn(frontierFile).forEach { put(it.documentUuid, it) }
+        }
       }
 
       val nextContent = HashSet<String>()
       val nextFile = HashSet<String>()
-      found.forEach { document ->
+      found.values.forEach { document ->
         if (members.putIfAbsent(document.documentUuid, document) == null) {
           document.fileContentHash?.takeIf { it.isNotBlank() && it !in seenContentHashes }?.let { nextContent.add(it) }
           document.fileHash.takeIf { it.isNotBlank() && it !in seenFileHashes }?.let { nextFile.add(it) }
         }
       }
+
       frontierContent = nextContent
       frontierFile = nextFile
     }

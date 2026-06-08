@@ -11,12 +11,12 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.Docume
 import java.time.LocalDateTime
 import java.util.UUID
 
-class DocumentCanonicalServiceIntTest : IntegrationTestBase() {
+class DocumentDuplicateServiceIntTest : IntegrationTestBase() {
   @Autowired
   private lateinit var documentRepository: DocumentRepository
 
   @Autowired
-  private lateinit var documentCanonicalService: DocumentCanonicalService
+  private lateinit var documentDuplicateService: DocumentDuplicateService
 
   @Autowired
   private lateinit var documentService: DocumentService
@@ -55,7 +55,7 @@ class DocumentCanonicalServiceIntTest : IntegrationTestBase() {
     val older = save(courtIngestion, ageMinutes = 10, fileContentHash = "content-1", fileHash = "byte-a")
     val newer = save(courtIngestion, ageMinutes = 5, fileContentHash = "content-1", fileHash = "byte-b")
 
-    documentCanonicalService.recompute(newer)
+    documentDuplicateService.redetermineCanonicalFor(newer)
 
     assertThat(reload(older)!!.duplicateOf).isNull()
     assertThat(reload(newer)!!.duplicateOf).isEqualTo(older.documentUuid)
@@ -66,7 +66,7 @@ class DocumentCanonicalServiceIntTest : IntegrationTestBase() {
     val courtCopy = save(courtIngestion, ageMinutes = 10, fileContentHash = "content-2", fileHash = "byte-shared")
     val rasCopy = save(remandAndSentencing, ageMinutes = 1, fileContentHash = null, fileHash = "byte-shared")
 
-    documentCanonicalService.recompute(rasCopy)
+    documentDuplicateService.redetermineCanonicalFor(rasCopy)
 
     assertThat(reload(rasCopy)!!.duplicateOf).isNull()
     assertThat(reload(courtCopy)!!.duplicateOf).isEqualTo(rasCopy.documentUuid)
@@ -78,7 +78,7 @@ class DocumentCanonicalServiceIntTest : IntegrationTestBase() {
     val b = save(courtIngestion, ageMinutes = 9, fileContentHash = "content-3", fileHash = "byte-prison")
     val ras = save(remandAndSentencing, ageMinutes = 1, fileContentHash = null, fileHash = "byte-pecs")
 
-    documentCanonicalService.recompute(a)
+    documentDuplicateService.redetermineCanonicalFor(a)
 
     assertThat(reload(ras)!!.duplicateOf).isNull()
     assertThat(reload(a)!!.duplicateOf).isEqualTo(ras.documentUuid)
@@ -89,7 +89,7 @@ class DocumentCanonicalServiceIntTest : IntegrationTestBase() {
   fun `deleting the canonical promotes the next`() {
     val older = save(courtIngestion, ageMinutes = 10, fileContentHash = "content-4", fileHash = "byte-c")
     val newer = save(courtIngestion, ageMinutes = 5, fileContentHash = "content-4", fileHash = "byte-d")
-    documentCanonicalService.recompute(newer)
+    documentDuplicateService.redetermineCanonicalFor(newer)
     assertThat(reload(newer)!!.duplicateOf).isEqualTo(older.documentUuid)
 
     documentService.deleteDocument(older.documentUuid, DocumentRequestContext(courtIngestion, "KMI", "USER"))
@@ -103,7 +103,7 @@ class DocumentCanonicalServiceIntTest : IntegrationTestBase() {
     val a = save(courtIngestion, ageMinutes = 5, fileContentHash = "content-5", fileHash = "byte-e")
     val b = save(courtIngestion, ageMinutes = 5, fileContentHash = "content-6", fileHash = "byte-f")
 
-    documentCanonicalService.recompute(a)
+    documentDuplicateService.redetermineCanonicalFor(a)
 
     assertThat(reload(a)!!.duplicateOf).isNull()
     assertThat(reload(b)!!.duplicateOf).isNull()
@@ -114,7 +114,7 @@ class DocumentCanonicalServiceIntTest : IntegrationTestBase() {
     val a = save(courtIngestion, ageMinutes = 5, fileContentHash = "content-7", fileHash = "")
     val b = save(courtIngestion, ageMinutes = 5, fileContentHash = "content-8", fileHash = "")
 
-    documentCanonicalService.recompute(a)
+    documentDuplicateService.redetermineCanonicalFor(a)
 
     assertThat(reload(a)!!.duplicateOf).isNull()
     assertThat(reload(b)!!.duplicateOf).isNull()
