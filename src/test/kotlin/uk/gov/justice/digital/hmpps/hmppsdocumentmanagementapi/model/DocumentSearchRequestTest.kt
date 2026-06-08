@@ -36,6 +36,30 @@ class DocumentSearchRequestTest {
   }
 
   @Test
+  fun `valid request - file content hash only`() {
+    val request = DocumentSearchRequest(null, null, fileContentHash = "58ed0c987864be01771eb171a24f369a664e0c5440c97b0c8f917ed5e5d63dae")
+    assertThat(validator.validate(request)).isEmpty()
+  }
+
+  @Test
+  fun `valid request - file hash only`() {
+    val request = DocumentSearchRequest(null, null, fileHash = "fffac8f1a93fabc8ad1629d255527c6ae12abfc5cc0921def588bfa2ce00b024")
+    assertThat(validator.validate(request)).isEmpty()
+  }
+
+  @Test
+  fun `canonical alone is not a sufficient criterion`() {
+    val request = DocumentSearchRequest(null, null, canonical = true)
+    validator.validate(request).assertSingleValidationError("", "Document type or metadata criteria must be supplied.")
+  }
+
+  @Test
+  fun `valid request - canonical combined with a document type`() {
+    val request = DocumentSearchRequest(listOf(DocumentType.HMCTS_WARRANT), null, canonical = true)
+    assertThat(validator.validate(request)).isEmpty()
+  }
+
+  @Test
   fun `document type or metadata criteria must be supplied - null document type and metadata`() {
     val request = DocumentSearchRequest(null, null)
     validator.validate(request).assertSingleValidationError("", "Document type or metadata criteria must be supplied.")

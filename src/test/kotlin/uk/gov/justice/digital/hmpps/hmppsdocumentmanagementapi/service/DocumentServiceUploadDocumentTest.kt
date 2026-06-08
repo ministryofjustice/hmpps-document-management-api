@@ -34,9 +34,9 @@ class DocumentServiceUploadDocumentTest {
     fileHashDocumentTypes = setOf(DocumentType.HMCTS_WARRANT),
     contentHashDocumentTypes = setOf(DocumentType.HMCTS_WARRANT),
   )
-  private val service = DocumentService(documentRepository, documentFileService, eventService, virusScanService, hashingProperties)
+  private val service = DocumentService(documentRepository, documentFileService, eventService, virusScanService, hashingProperties, mock())
   private val serviceWithHashingDisabled =
-    DocumentService(documentRepository, documentFileService, eventService, virusScanService, DocumentHashingProperties())
+    DocumentService(documentRepository, documentFileService, eventService, virusScanService, DocumentHashingProperties(), mock())
 
   private val documentType = DocumentType.HMCTS_WARRANT
   private val documentUuid = UUID.randomUUID()

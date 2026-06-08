@@ -34,6 +34,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.Docum
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResult
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.SetDocumentFileContentHashRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.VirusScanResult
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.DocumentSearchService
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.DocumentService
@@ -295,6 +296,66 @@ class DocumentController(
   ) = documentService.replaceDocumentMetadata(
     documentUuid,
     metadata,
+    request.documentRequestContext(),
+  )
+
+  @ResponseStatus(HttpStatus.OK)
+  @PutMapping("/{documentUuid}/file-content-hash")
+  @Operation(
+    summary = "Set the extracted-content hash of a document after upload",
+    description = "Sets the SHA-256 of the document's extracted content for the document identified by the supplied " +
+      "unique identifier. Intended for the owning service to populate or correct the value after upload, for example " +
+      "during a backfill or after an extraction library change. Only supported for document types configured for " +
+      "content hashing.",
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Document content hash set successfully",
+        content = [Content(schema = Schema(implementation = Document::class))],
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Bad request, for example the document type does not support a content hash",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role. Note that the required role can be document type dependent",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "The document associated with this unique identifier was not found.",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  @PreAuthorize("hasAnyRole('$ROLE_DOCUMENT_WRITER', '$ROLE_DOCUMENT_ADMIN')")
+  fun setDocumentFileContentHash(
+    @PathVariable
+    @Parameter(
+      description = "Document unique identifier",
+      required = true,
+    )
+    documentUuid: UUID,
+    @Valid
+    @RequestBody
+    @Parameter(
+      description = "The extracted-content hash to associate with the document",
+      required = true,
+    )
+    setRequest: SetDocumentFileContentHashRequest,
+    request: HttpServletRequest,
+  ) = documentService.setFileContentHash(
+    documentUuid,
+    setRequest.fileContentHash,
     request.documentRequestContext(),
   )
 

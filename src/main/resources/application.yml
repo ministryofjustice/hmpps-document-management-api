@@ -97,3 +97,6 @@ document:
   hashing:
     file-hash-document-types: [HMCTS_WARRANT, PRISON_COURT_REGISTER]
     content-hash-document-types: [HMCTS_WARRANT, PRISON_COURT_REGISTER]
+  canonical:
+    authoritative-service-names:
+      - "Remand and Sentencing"

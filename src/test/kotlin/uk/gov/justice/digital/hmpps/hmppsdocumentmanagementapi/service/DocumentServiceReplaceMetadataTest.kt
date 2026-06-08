@@ -34,6 +34,7 @@ class DocumentServiceReplaceMetadataTest {
     eventService,
     virusScanService,
     DocumentHashingProperties(),
+    mock(),
   )
 
   private val documentUuid = UUID.randomUUID()

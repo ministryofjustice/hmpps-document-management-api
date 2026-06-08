@@ -58,6 +58,8 @@ data class Document(
 
   var fileContentHash: String? = null,
 ) {
+  var duplicateOf: UUID? = null
+
   var deletedTime: LocalDateTime? = null
 
   var deletedByServiceName: String? = null
@@ -119,6 +121,7 @@ data class Document(
     createdTime,
     createdByServiceName,
     createdByUsername,
+    duplicateOf,
   )
 }
 

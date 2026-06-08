@@ -30,6 +30,7 @@ class DocumentService(
   private val eventService: EventService,
   private val virusScanService: VirusScanService,
   private val hashingProperties: DocumentHashingProperties,
+  private val documentDuplicateService: DocumentDuplicateService,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -100,6 +101,8 @@ class DocumentService(
 
     return document.toModel().also {
       eventService.recordDocumentUploadedEvent(it, documentRequestContext, System.currentTimeMillis() - startTimeInMs)
+    }.also {
+      documentDuplicateService.redetermineCanonicalFor(document)
     }
   }
 
@@ -130,6 +133,41 @@ class DocumentService(
     }
   }
 
+  /**
+   * Update the extracted-content hash for a document after upload. The owning service may set this
+   * during backfill or when its extraction changed (a new or fixed library). Gated by the same type
+   * allowlist as upload. Rare by nature, so the change is logged rather than raised as a domain event,
+   * and writing the same value is a no-op.
+   */
+  fun setFileContentHash(
+    documentUuid: UUID,
+    fileContentHash: String,
+    documentRequestContext: DocumentRequestContext,
+  ): DocumentModel {
+    val document = documentRepository.findByDocumentUuidOrThrowNotFound(documentUuid)
+
+    require(document.documentType in hashingProperties.contentHashDocumentTypes) {
+      "Content hash is not supported for document type ${document.documentType}"
+    }
+
+    val normalised = fileContentHash.lowercase()
+    if (document.fileContentHash != normalised) {
+      log.info(
+        "Updating fileContentHash for document {} from {} to {} (service {})",
+        documentUuid,
+        document.fileContentHash,
+        normalised,
+        documentRequestContext.serviceName,
+      )
+      document.fileContentHash = normalised
+      documentRepository.saveAndFlush(document)
+    }
+
+    documentDuplicateService.redetermineCanonicalFor(document)
+
+    return document.toModel()
+  }
+
   fun deleteDocument(
     documentUuid: UUID,
     documentRequestContext: DocumentRequestContext,
@@ -139,6 +177,8 @@ class DocumentService(
     val document = documentRepository.findByDocumentUuid(documentUuid)
 
     document?.apply {
+      val contentHash = fileContentHash
+      val byteHash = fileHash
       delete(
         deletedByServiceName = documentRequestContext.serviceName,
         deletedByUsername = documentRequestContext.username,
@@ -146,6 +186,7 @@ class DocumentService(
       documentRepository.saveAndFlush(this).toModel().also {
         eventService.recordDocumentDeletedEvent(it, documentRequestContext, System.currentTimeMillis() - startTimeInMs)
       }
+      documentDuplicateService.redetermineCanonicalFor(contentHash, byteHash)
     }
   }
 
