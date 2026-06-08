@@ -5,9 +5,11 @@ import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
+import io.swagger.v3.oas.models.media.ObjectSchema
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.security.SecurityScheme
 import org.springdoc.core.customizers.OperationCustomizer
+import org.springdoc.core.utils.SpringDocUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.info.BuildProperties
 import org.springframework.context.ApplicationContext
@@ -19,6 +21,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser
 import org.springframework.expression.spel.support.StandardEvaluationContext
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.method.HandlerMethod
+import tools.jackson.databind.JsonNode
 
 @Configuration
 class OpenApiConfiguration(buildProperties: BuildProperties) {
@@ -86,4 +89,13 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
 
   private fun HandlerMethod.preAuthorizeForMethodOrClass() = getMethodAnnotation(PreAuthorize::class.java)?.value
     ?: beanType.getAnnotation(PreAuthorize::class.java)?.value
+
+  companion object {
+    init {
+      SpringDocUtils.getConfig().replaceWithSchema(
+        JsonNode::class.java,
+        ObjectSchema().additionalProperties(true),
+      )
+    }
+  }
 }
