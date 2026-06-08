@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository
 
 import jakarta.persistence.EntityNotFoundException
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
@@ -36,6 +37,16 @@ interface DocumentRepository :
     nativeQuery = true,
   )
   fun lockOnHash(hash: String): Int
+
+  @Query(
+    "SELECT d FROM Document d WHERE d.documentType IN :documentTypes " +
+      "AND d.fileHash = '' AND d.documentUuid > :afterUuid ORDER BY d.documentUuid",
+  )
+  fun findBlankFileHashBatch(
+    documentTypes: Collection<DocumentType>,
+    afterUuid: UUID,
+    pageable: Pageable,
+  ): List<Document>
 }
 
 fun DocumentRepository.findByDocumentUuidOrThrowNotFound(documentUuid: UUID) = this.findByDocumentUuid(documentUuid) ?: throw EntityNotFoundException("Document with UUID '$documentUuid' not found.")
