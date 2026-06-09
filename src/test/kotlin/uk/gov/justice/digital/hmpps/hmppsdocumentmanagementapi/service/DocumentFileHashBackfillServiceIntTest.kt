@@ -25,8 +25,7 @@ class DocumentFileHashBackfillServiceIntTest : IntegrationTestBase() {
 
   private val courtIngestion = "court-data-ingestion-api"
 
-  private fun bucketFor(documentType: DocumentType) =
-    hmppsS3Properties.buckets[documentType.s3BucketName.value]!!.bucketName
+  private fun bucketFor(documentType: DocumentType) = hmppsS3Properties.buckets[documentType.s3BucketName.value]!!.bucketName
 
   private fun putObject(documentUuid: UUID, bytes: ByteArray, documentType: DocumentType = DocumentType.HMCTS_WARRANT) {
     s3Client.putObject(
@@ -35,23 +34,22 @@ class DocumentFileHashBackfillServiceIntTest : IntegrationTestBase() {
     )
   }
 
-  private fun seedBlankHash(ageMinutes: Long, serviceName: String = courtIngestion): Document =
-    documentRepository.saveAndFlush(
-      Document(
-        documentUuid = UUID.randomUUID(),
-        documentType = DocumentType.HMCTS_WARRANT,
-        filename = "warrant",
-        fileExtension = "pdf",
-        fileSize = 1234,
-        fileHash = "",
-        mimeType = "application/pdf",
-        metadata = objectMapper.readTree("{}"),
-        createdTime = LocalDateTime.now().minusMinutes(ageMinutes),
-        createdByServiceName = serviceName,
-        createdByUsername = "USER",
-        fileContentHash = null,
-      ),
-    )
+  private fun seedBlankHash(ageMinutes: Long, serviceName: String = courtIngestion): Document = documentRepository.saveAndFlush(
+    Document(
+      documentUuid = UUID.randomUUID(),
+      documentType = DocumentType.HMCTS_WARRANT,
+      filename = "warrant",
+      fileExtension = "pdf",
+      fileSize = 1234,
+      fileHash = "",
+      mimeType = "application/pdf",
+      metadata = objectMapper.readTree("{}"),
+      createdTime = LocalDateTime.now().minusMinutes(ageMinutes),
+      createdByServiceName = serviceName,
+      createdByUsername = "USER",
+      fileContentHash = null,
+    ),
+  )
 
   private fun reload(document: Document) = documentRepository.findByDocumentUuid(document.documentUuid)!!
 
