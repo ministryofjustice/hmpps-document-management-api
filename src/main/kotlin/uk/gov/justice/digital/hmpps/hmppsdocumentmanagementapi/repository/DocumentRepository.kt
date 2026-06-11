@@ -5,10 +5,12 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Repository
@@ -47,6 +49,38 @@ interface DocumentRepository :
     afterUuid: UUID,
     pageable: Pageable,
   ): List<Document>
+
+  @Query(
+    value = "SELECT * FROM document WHERE document_type IN (:documentTypes) AND created_time < :before AND document_id > :afterId ORDER BY document_id LIMIT :batchSize",
+    nativeQuery = true,
+  )
+  fun findPurgeableBatch(
+    documentTypes: Collection<String>,
+    before: LocalDateTime,
+    afterId: Long,
+    batchSize: Int,
+  ): List<Document>
+
+  @Modifying
+  @Query(
+    value = "UPDATE document SET duplicate_of = NULL WHERE duplicate_of IN (:uuids)",
+    nativeQuery = true,
+  )
+  fun clearDuplicateOfPointersTo(uuids: Collection<UUID>)
+
+  @Modifying
+  @Query(
+    value = "DELETE FROM document_metadata_history WHERE document_id IN (:documentIds)",
+    nativeQuery = true,
+  )
+  fun deleteMetadataHistoryByDocumentIds(documentIds: Collection<Long>)
+
+  @Modifying
+  @Query(
+    value = "DELETE FROM document WHERE document_id IN (:documentIds)",
+    nativeQuery = true,
+  )
+  fun deleteByDocumentIds(documentIds: Collection<Long>)
 }
 
 fun DocumentRepository.findByDocumentUuidOrThrowNotFound(documentUuid: UUID) = this.findByDocumentUuid(documentUuid) ?: throw EntityNotFoundException("Document with UUID '$documentUuid' not found.")

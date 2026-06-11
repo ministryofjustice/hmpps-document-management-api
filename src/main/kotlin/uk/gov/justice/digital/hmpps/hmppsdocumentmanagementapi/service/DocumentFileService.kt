@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
@@ -44,8 +45,17 @@ class DocumentFileService(
 
     try {
       return s3Client.getObject(request)
-    } catch (e: NoSuchKeyException) {
+    } catch (_: NoSuchKeyException) {
       throw DocumentFileNotFoundException(documentUuid)
     }
+  }
+
+  fun deleteDocumentFile(documentUuid: UUID, documentType: DocumentType) {
+    val request = DeleteObjectRequest.builder()
+      .bucket(getBucketName(documentType))
+      .key(documentUuid.toString())
+      .build()
+
+    s3Client.deleteObject(request)
   }
 }
