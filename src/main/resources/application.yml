@@ -100,3 +100,7 @@ document:
   canonical:
     authoritative-service-names:
       - "Remand and Sentencing"
+  purge:
+    batch-size: 250
+    before: "2026-06-01"
+    document-types: [HMCTS_WARRANT, PRISON_COURT_REGISTER]
