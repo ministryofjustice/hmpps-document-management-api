@@ -11,9 +11,9 @@
 version: v1.25.1
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
-  SNYK-JAVA-ORGAPACHETOMCATEMBED-16643259:
+  SNYK-JAVA-IOOPENTELEMETRY-17280222:
     - '*':
-        reason: Only relevant for WebDAV commands
-        expires: 2026-07-01T00:00:00.000Z
-        created: 2026-05-13T09:38:00.250Z
+        reason: Suppression for baggage limits issue as we use header size limits
+        expires: 2026-07-11T00:00:00.000Z
+        created: 2026-06-11T07:38:00.250Z
 patch: {}
