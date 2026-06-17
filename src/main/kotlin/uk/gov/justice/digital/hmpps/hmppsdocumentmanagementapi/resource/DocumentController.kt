@@ -32,6 +32,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRe
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchByUuidsRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResult
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.SetDocumentFileContentHashRequest
@@ -451,6 +452,47 @@ class DocumentController(
     request.authorisedDocumentTypes(),
     request.documentRequestContext(),
   )
+
+  @ResponseStatus(HttpStatus.OK)
+  @PostMapping("/searchByUuids")
+  @Operation(
+    summary = "Search for documents contained in the given document UUID list",
+    description = "Uses the supplied document UUID list to filter and return documents. ",
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Search request accepted and results returned",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Bad request",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role. Note that the required role can be document type dependent",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  @PreAuthorize("hasAnyRole('$ROLE_DOCUMENT_READER', '$ROLE_DOCUMENT_ADMIN')")
+  fun searchByDocumentUuids(
+    @Valid
+    @RequestBody
+    @Parameter(
+      description = "The list of document UUIDS to use to filter documents",
+      required = true,
+    )
+    searchRequest: DocumentSearchByUuidsRequest,
+    request: HttpServletRequest,
+  ): Collection<Document> = documentSearchService.searchByDocumentUuids(searchRequest, request.documentRequestContext())
 
   @ResponseStatus(HttpStatus.OK)
   @PostMapping("/scan")

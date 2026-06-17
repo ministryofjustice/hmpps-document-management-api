@@ -4,7 +4,6 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.toModels
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchByUuidsRequest
@@ -14,6 +13,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.Docum
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsSearchedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentSearchSpecification
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as DocumentModel
 
 @Service
 class DocumentSearchService(
@@ -76,13 +76,13 @@ class DocumentSearchService(
   fun searchByDocumentUuids(
     request: DocumentSearchByUuidsRequest,
     documentRequestContext: DocumentRequestContext,
-  ): Collection<Document> {
+  ): Collection<DocumentModel> {
     if (request.documentUuids.isEmpty()) return emptyList()
 
     val startTimeInMs = System.currentTimeMillis()
     val spec = documentSearchSpecification.documentUuidIn(request.documentUuids.toSet())
 
-    return documentRepository.findAll(spec).also {
+    return documentRepository.findAll(spec).toModels().also {
       eventService.recordDocumentSearchedByUuidsEvent(
         DocumentSearchedByUuidsEvent(request, it.size),
         documentRequestContext,

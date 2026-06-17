@@ -35,7 +35,7 @@ class DocumentRequestContextConfigurationTest {
 
   @Test
   fun `missing service name throws exception`() {
-    assertThrows<IllegalArgumentException>("$SERVICE_NAME header is required") {
+    assertThrows<IllegalArgumentException>("${SERVICE_NAME} header is required") {
       interceptor.preHandle(req, res, "null")
     }
   }
@@ -44,7 +44,7 @@ class DocumentRequestContextConfigurationTest {
   fun `empty service name throws exception`() {
     req.addHeader(SERVICE_NAME, "")
 
-    assertThrows<IllegalArgumentException>("$SERVICE_NAME header is required") {
+    assertThrows<IllegalArgumentException>("${SERVICE_NAME} header is required") {
       interceptor.preHandle(req, res, "null")
     }
   }
@@ -53,7 +53,7 @@ class DocumentRequestContextConfigurationTest {
   fun `whitespace service name throws exception`() {
     req.addHeader(SERVICE_NAME, "    ")
 
-    assertThrows<IllegalArgumentException>("$SERVICE_NAME header is required") {
+    assertThrows<IllegalArgumentException>("${SERVICE_NAME} header is required") {
       interceptor.preHandle(req, res, "null")
     }
   }

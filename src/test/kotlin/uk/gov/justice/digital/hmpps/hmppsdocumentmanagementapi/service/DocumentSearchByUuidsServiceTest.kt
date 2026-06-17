@@ -23,6 +23,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.Docum
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentSearchSpecification
 import java.util.UUID
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as DocumentModel
 
 class DocumentSearchByUuidsServiceTest {
   private val documentRepository: DocumentRepository = mock()
@@ -101,7 +102,7 @@ class DocumentSearchByUuidsServiceTest {
       .thenReturn(getMockedRepositoryResponse(documentUuids))
     val request = DocumentSearchByUuidsRequest(documentUuids)
 
-    val response: Collection<Document> = service.searchByDocumentUuids(request, documentRequestContext)
+    val response: Collection<DocumentModel> = service.searchByDocumentUuids(request, documentRequestContext)
 
     assertThat(response.size).isEqualTo(1)
     assertThat(response.filter { doc -> doc.documentUuid == UUID.fromString(MATCHING_DOCUMENT_UUID) }.size).isEqualTo(1)
@@ -115,7 +116,7 @@ class DocumentSearchByUuidsServiceTest {
       .thenReturn(getMockedRepositoryResponse(documentUuids))
     val request = DocumentSearchByUuidsRequest(documentUuids)
 
-    val response: Collection<Document> = service.searchByDocumentUuids(request, documentRequestContext)
+    val response: Collection<DocumentModel> = service.searchByDocumentUuids(request, documentRequestContext)
 
     assertThat(response.size).isEqualTo(expectedResults)
     assertThat(response.filter { doc -> documentUuids.contains(doc.documentUuid) }.size).isEqualTo(expectedResults)
@@ -128,7 +129,7 @@ class DocumentSearchByUuidsServiceTest {
       .thenReturn(getMockedRepositoryResponse(documentUuids))
     val request = DocumentSearchByUuidsRequest(documentUuids)
 
-    val response: Collection<Document> = service.searchByDocumentUuids(request, documentRequestContext)
+    val response: Collection<DocumentModel> = service.searchByDocumentUuids(request, documentRequestContext)
 
     verify(eventService).recordDocumentSearchedByUuidsEvent(
       eq(DocumentSearchedByUuidsEvent(request, expectedResults)),
