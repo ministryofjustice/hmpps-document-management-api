@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.EventType
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentSearchedByUuidsEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentMetadataReplacedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsScannedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsSearchedEvent
@@ -84,6 +85,34 @@ class EventService(
     eventTimeMs: Long,
   ) {
     log.info("Documents searched {}", event)
+    auditService.auditEvent(EventType.DOCUMENTS_SEARCHED, event, documentRequestContext)
+    telemetryClient.trackEvent(
+      EventType.DOCUMENTS_SEARCHED.name,
+      event.toCustomEventProperties(documentRequestContext),
+      event.toCustomEventMetrics(eventTimeMs),
+    )
+  }
+
+  fun recordDocumentsSearchedEvent(
+    event: DocumentSearchedByUuidsEvent,
+    documentRequestContext: DocumentRequestContext,
+    eventTimeMs: Long,
+  ) {
+    log.info("Document UUIDs searched {}", event)
+    auditService.auditEvent(EventType.DOCUMENTS_SEARCHED, event, documentRequestContext)
+    telemetryClient.trackEvent(
+      EventType.DOCUMENTS_SEARCHED.name,
+      event.toCustomEventProperties(documentRequestContext),
+      event.toCustomEventMetrics(eventTimeMs),
+    )
+  }
+
+  fun recordDocumentSearchedByUuidsEvent(
+    event: DocumentSearchedByUuidsEvent,
+    documentRequestContext: DocumentRequestContext,
+    eventTimeMs: Long,
+  ) {
+    log.info("Documents searched by Ids [{}]", event)
     auditService.auditEvent(EventType.DOCUMENTS_SEARCHED, event, documentRequestContext)
     telemetryClient.trackEvent(
       EventType.DOCUMENTS_SEARCHED.name,
