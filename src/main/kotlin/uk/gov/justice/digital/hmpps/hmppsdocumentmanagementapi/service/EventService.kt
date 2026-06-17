@@ -12,8 +12,8 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.Docum
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsSearchedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.toCustomEventMetrics
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.toCustomEventProperties
-import java.time.LocalDateTime
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as DocumentModel
+import java.time.LocalDateTime
 
 @Service
 class EventService(
