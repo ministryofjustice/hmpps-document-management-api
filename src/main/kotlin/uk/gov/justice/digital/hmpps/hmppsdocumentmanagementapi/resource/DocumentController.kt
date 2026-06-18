@@ -138,9 +138,9 @@ class DocumentController(
   ): ResponseEntity<InputStreamResource> {
     val documentFile = documentService.getDocumentFile(documentUuid, request.documentRequestContext())
     val inputStreamResource = InputStreamResource(documentFile.inputStream)
-    // Only PDFs may be served inline. The == is a deliberate safety gate, not an assumption that the
-    // store only holds PDFs: serving arbitrary stored content inline (e.g. text/html, image/svg+xml)
-    // would let a browser render it in-context, which is a stored-XSS vector. Widen with care.
+    // We currently only want PDFs served inline on request (the store may hold many other types).
+    // Be cautious widening this: serving arbitrary stored content inline (e.g. text/html,
+    // image/svg+xml) lets a browser render it in-context, which is a stored-XSS vector.
     val renderInline = inline && documentFile.mimeType == MediaType.APPLICATION_PDF_VALUE
     val disposition = if (renderInline) "inline" else "attachment"
     return ResponseEntity.ok()
