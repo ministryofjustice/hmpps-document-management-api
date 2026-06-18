@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
@@ -126,14 +127,26 @@ class DocumentController(
       required = true,
     )
     documentUuid: UUID,
+    @RequestParam(name = "inline", required = false, defaultValue = "false")
+    @Parameter(
+      description = "When true, serves the file with Content-Disposition: inline so it renders in the " +
+        "browser instead of downloading. Only honoured for PDFs; any other type falls back to attachment. " +
+        "Defaults to false.",
+    )
+    inline: Boolean,
     request: HttpServletRequest,
   ): ResponseEntity<InputStreamResource> {
     val documentFile = documentService.getDocumentFile(documentUuid, request.documentRequestContext())
     val inputStreamResource = InputStreamResource(documentFile.inputStream)
+    // We currently only want PDFs served inline on request (the store may hold many other types).
+    // Be cautious widening this: serving arbitrary stored content inline (e.g. text/html,
+    // image/svg+xml) lets a browser render it in-context, which is a stored-XSS vector.
+    val renderInline = inline && documentFile.mimeType == MediaType.APPLICATION_PDF_VALUE
+    val disposition = if (renderInline) "inline" else "attachment"
     return ResponseEntity.ok()
       .contentType(MediaType.parseMediaType(documentFile.mimeType))
       .contentLength(documentFile.fileSize)
-      .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"${documentFile.filename}\"")
+      .header(HttpHeaders.CONTENT_DISPOSITION, "$disposition; filename=\"${documentFile.filename}\"")
       .body(inputStreamResource)
   }
 
