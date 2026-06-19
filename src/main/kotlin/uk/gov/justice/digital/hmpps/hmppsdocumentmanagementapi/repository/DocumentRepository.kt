@@ -27,6 +27,8 @@ interface DocumentRepository :
   )
   fun findByDocumentUuidIncludingSoftDeleted(documentUuid: UUID): Document?
 
+  fun findByDocumentUuidIn(documentUuid: Collection<UUID>): List<Document>
+
   @Query("SELECT d.documentType FROM Document d WHERE d.documentUuid = :documentUuid")
   fun getDocumentTypeByDocumentUuid(documentUuid: UUID): DocumentType?
 
