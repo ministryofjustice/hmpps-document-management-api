@@ -178,6 +178,57 @@ class DownloadDocumentIntTest : IntegrationTestBase() {
 
   @Sql("classpath:test_data/document-with-no-metadata-history-id-1.sql")
   @Test
+  fun `download document inline renders pdf inline`() {
+    val fileBytes = putDocumentInS3(documentUuid, "test_data/warrant-for-remand.pdf", S3BucketName.DOCUMENT_MANAGEMENT.value)
+
+    val response = webTestClient.downloadDocument(
+      documentUuid,
+      MediaType.APPLICATION_PDF,
+      20688,
+      "warrant_for_remand.pdf",
+      inline = true,
+      expectedDisposition = "inline",
+    )
+
+    assertThat(response.responseBody).isEqualTo(fileBytes)
+  }
+
+  @Sql("classpath:test_data/document-with-no-metadata-history-id-1.sql")
+  @Test
+  fun `download document inline false uses attachment`() {
+    val fileBytes = putDocumentInS3(documentUuid, "test_data/warrant-for-remand.pdf", S3BucketName.DOCUMENT_MANAGEMENT.value)
+
+    val response = webTestClient.downloadDocument(
+      documentUuid,
+      MediaType.APPLICATION_PDF,
+      20688,
+      "warrant_for_remand.pdf",
+      inline = false,
+      expectedDisposition = "attachment",
+    )
+
+    assertThat(response.responseBody).isEqualTo(fileBytes)
+  }
+
+  @Sql("classpath:test_data/document-with-non-pdf-mime-id-1.sql")
+  @Test
+  fun `download document inline is ignored for non-pdf and falls back to attachment`() {
+    val fileBytes = putDocumentInS3(documentUuid, "test_data/warrant-for-remand.pdf", S3BucketName.DOCUMENT_MANAGEMENT.value)
+
+    val response = webTestClient.downloadDocument(
+      documentUuid,
+      MediaType.TEXT_HTML,
+      20688,
+      "preview_me.html",
+      inline = true,
+      expectedDisposition = "attachment",
+    )
+
+    assertThat(response.responseBody).isEqualTo(fileBytes)
+  }
+
+  @Sql("classpath:test_data/document-with-no-metadata-history-id-1.sql")
+  @Test
   fun `audits event`() {
     putDocumentInS3(documentUuid, "test_data/warrant-for-remand.pdf", S3BucketName.DOCUMENT_MANAGEMENT.value)
 
@@ -239,15 +290,21 @@ class DownloadDocumentIntTest : IntegrationTestBase() {
     contentType: MediaType,
     contentLength: Long,
     filename: String,
+    inline: Boolean? = null,
+    expectedDisposition: String = "attachment",
   ) = get()
-    .uri("/documents/$documentUuid/file")
+    .uri { builder ->
+      builder.path("/documents/$documentUuid/file")
+      if (inline != null) builder.queryParam("inline", inline)
+      builder.build()
+    }
     .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
     .headers(setDocumentContext(serviceName, activeCaseLoadId, username))
     .exchange()
     .expectStatus().isOk
     .expectHeader().contentType(contentType)
     .expectHeader().contentLength(contentLength)
-    .expectHeader().contentDisposition(ContentDisposition.parse("attachment; filename=\"$filename\""))
+    .expectHeader().contentDisposition(ContentDisposition.parse("$expectedDisposition; filename=\"$filename\""))
     .expectBody(ByteArray::class.java)
     .returnResult()
 }
