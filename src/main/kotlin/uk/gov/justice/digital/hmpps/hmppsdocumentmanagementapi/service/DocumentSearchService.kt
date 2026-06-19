@@ -6,14 +6,11 @@ import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.toModels
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchByUuidsRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResult
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentSearchedByUuidsEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsSearchedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentSearchSpecification
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as DocumentModel
 
 @Service
 class DocumentSearchService(
@@ -67,24 +64,6 @@ class DocumentSearchService(
     ).also {
       eventService.recordDocumentsSearchedEvent(
         DocumentsSearchedEvent(it.request, it.results.size, it.totalResultsCount),
-        documentRequestContext,
-        System.currentTimeMillis() - startTimeInMs,
-      )
-    }
-  }
-
-  fun searchByDocumentUuids(
-    request: DocumentSearchByUuidsRequest,
-    documentRequestContext: DocumentRequestContext,
-  ): Collection<DocumentModel> {
-    if (request.documentUuids.isEmpty()) return emptyList()
-
-    val startTimeInMs = System.currentTimeMillis()
-    val spec = documentSearchSpecification.documentUuidIn(request.documentUuids.toSet())
-
-    return documentRepository.findAll(spec).toModels().also {
-      eventService.recordDocumentSearchedByUuidsEvent(
-        DocumentSearchedByUuidsEvent(request, it.size),
         documentRequestContext,
         System.currentTimeMillis() - startTimeInMs,
       )

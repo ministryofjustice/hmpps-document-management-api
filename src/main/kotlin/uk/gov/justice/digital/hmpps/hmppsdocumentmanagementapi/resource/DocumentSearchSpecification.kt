@@ -4,7 +4,6 @@ import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
-import java.util.UUID
 
 @Component
 class DocumentSearchSpecification {
@@ -37,6 +36,4 @@ class DocumentSearchSpecification {
   fun canonical(isCanonical: Boolean) = Specification<Document> { root, _, cb ->
     if (isCanonical) cb.isNull(root.get<Any>("duplicateOf")) else cb.isNotNull(root.get<Any>("duplicateOf"))
   }
-
-  fun documentUuidIn(documentIds: Collection<UUID>) = Specification<Document> { root, _, _ -> root.get<UUID>("documentUuid").`in`(documentIds) }
 }

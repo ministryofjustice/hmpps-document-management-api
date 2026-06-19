@@ -9,9 +9,12 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentAl
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentHashingProperties
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.toModels
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentFindByUuidsRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.VirusScanResult
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentMetadataReplacedEvent
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentRetrievedByUuidsEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsScannedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.findByDocumentUuidOrThrowNotFound
@@ -55,6 +58,23 @@ class DocumentService(
       document.mimeType,
       inputStream,
     )
+  }
+
+  fun findByDocumentUuids(
+    request: DocumentFindByUuidsRequest,
+    documentRequestContext: DocumentRequestContext,
+  ): Collection<DocumentModel> {
+    if (request.documentUuids.isEmpty()) return emptyList()
+
+    val startTimeInMs = System.currentTimeMillis()
+
+    return documentRepository.findByDocumentUuidIn(request.documentUuids.toSet()).toModels().also {
+      eventService.recordDocumentRetrievedByUuidsEvent(
+        DocumentRetrievedByUuidsEvent(request, it.size),
+        documentRequestContext,
+        System.currentTimeMillis() - startTimeInMs,
+      )
+    }
   }
 
   fun uploadDocument(

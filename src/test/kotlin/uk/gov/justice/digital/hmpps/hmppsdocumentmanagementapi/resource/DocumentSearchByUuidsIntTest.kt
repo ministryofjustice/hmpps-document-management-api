@@ -20,8 +20,8 @@ import tools.jackson.module.kotlin.readValue
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.EventType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.IntegrationTestBase
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchByUuidsRequest
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentSearchedByUuidsEvent
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentFindByUuidsRequest
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentRetrievedByUuidsEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.AuditService
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.whenLocalDateTime
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.ACTIVE_CASE_LOAD_ID_PROPERTY_KEY
@@ -106,8 +106,8 @@ class DocumentSearchByUuidsIntTest : IntegrationTestBase() {
       assertThat(who).isEqualTo(TEST_USERNAME)
       assertThat(service).isEqualTo(SERVICE_NAME)
 
-      with(objectMapper.readValue<DocumentSearchedByUuidsEvent>(details)) {
-        assertThat(request).isEqualTo(DocumentSearchByUuidsRequest(documentUuids))
+      with(objectMapper.readValue<DocumentRetrievedByUuidsEvent>(details)) {
+        assertThat(request).isEqualTo(DocumentFindByUuidsRequest(documentUuids))
         assertThat(resultsCount).isEqualTo(expectedResults)
       }
     }
@@ -150,7 +150,7 @@ class DocumentSearchByUuidsIntTest : IntegrationTestBase() {
     setContext: Boolean = true,
   ): WebTestClient.ResponseSpec = post().uri(URI_SEARCH_BY_DOCUMENT_UUIDS).also {
     if (documentUuids != null) {
-      it.bodyValue(DocumentSearchByUuidsRequest(documentUuids))
+      it.bodyValue(DocumentFindByUuidsRequest(documentUuids))
     }
 
     if (setContext) {

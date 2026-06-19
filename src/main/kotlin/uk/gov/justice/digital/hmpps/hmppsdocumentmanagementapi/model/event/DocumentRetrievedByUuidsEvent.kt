@@ -1,7 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event
 
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchByUuidsRequest
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentFindByUuidsRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.ACTIVE_CASE_LOAD_ID_PROPERTY_KEY
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.DOCUMENT_UUID_PROPERTY_KEY
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.EVENT_TIME_MS_METRIC_KEY
@@ -10,8 +10,8 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.SERVICE
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.TOTAL_RESULTS_COUNT_METRIC_KEY
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.USERNAME_PROPERTY_KEY
 
-data class DocumentSearchedByUuidsEvent(
-  val request: DocumentSearchByUuidsRequest,
+data class DocumentRetrievedByUuidsEvent(
+  val request: DocumentFindByUuidsRequest,
   val resultsCount: Int,
 ) {
   fun toCustomEventProperties(documentRequestContext: DocumentRequestContext) = mapOf(

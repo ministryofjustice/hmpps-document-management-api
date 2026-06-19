@@ -32,7 +32,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRe
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchByUuidsRequest
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentFindByUuidsRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResult
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.SetDocumentFileContentHashRequest
@@ -483,16 +483,16 @@ class DocumentController(
     ],
   )
   @PreAuthorize("hasAnyRole('$ROLE_DOCUMENT_READER', '$ROLE_DOCUMENT_ADMIN')")
-  fun searchByDocumentUuids(
+  fun findByDocumentUuids(
     @Valid
     @RequestBody
     @Parameter(
       description = "The list of document UUIDS to use to filter documents",
       required = true,
     )
-    searchRequest: DocumentSearchByUuidsRequest,
+    documentFindRequest: DocumentFindByUuidsRequest,
     request: HttpServletRequest,
-  ): Collection<Document> = documentSearchService.searchByDocumentUuids(searchRequest, request.documentRequestContext())
+  ): Collection<Document> = documentService.findByDocumentUuids(documentFindRequest, request.documentRequestContext())
 
   @ResponseStatus(HttpStatus.OK)
   @PostMapping("/scan")

@@ -8,7 +8,7 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.util.UUID
 
-class DocumentSearchByUuidsRequestTest {
+class DocumentFindByUuidsRequestTest {
   private val validator: Validator = Validation.buildDefaultValidatorFactory().validator
 
   @ParameterizedTest
@@ -16,7 +16,7 @@ class DocumentSearchByUuidsRequestTest {
   fun `valid request - list of document UUIDs is provided`(documentUuidListSize: Int) {
     val documentUuids = ArrayList(List(documentUuidListSize) { UUID.randomUUID() })
 
-    val request = DocumentSearchByUuidsRequest(documentUuids)
+    val request = DocumentFindByUuidsRequest(documentUuids)
 
     assertThat(validator.validate(request)).isEmpty()
   }
