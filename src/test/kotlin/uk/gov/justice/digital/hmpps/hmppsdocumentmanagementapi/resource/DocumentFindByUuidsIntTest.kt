@@ -45,13 +45,13 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as
 )
 class DocumentFindByUuidsIntTest : IntegrationTestBase() {
   @ParameterizedTest
-  @MethodSource("documentSearchByUuidsAccessDeniedTestParameters")
-  fun `test search by document UUIDs error when access is denied`(expectedStatus: Int, roles: List<String>?) = webTestClient.searchDocumentsAndAssertExpectedStatus(expectedStatus, roles)
+  @MethodSource("documentFindByUuidsAccessDeniedTestParameters")
+  fun `test find by document UUIDs error when access is denied`(expectedStatus: Int, roles: List<String>?) = webTestClient.findDocumentByUuidsAndAssertExpectedStatus(expectedStatus, roles)
 
   @ParameterizedTest
-  @MethodSource("documentSearchByUuidsBadRequestTestParameters")
-  fun `test search by document UUIDs error when it is a bad request`(expectedStatus: Int, setContext: Boolean, roles: List<String>, documentUuids: Collection<UUID>?, expectedUserMessage: String, expectedDeveloperMessage: String) {
-    val response = webTestClient.searchDocumentsAndAssertExpectedStatus(expectedStatus, roles, documentUuids, setContext)
+  @MethodSource("documentFindByUuidsBadRequestTestParameters")
+  fun `test find by document UUIDs error when it is a bad request`(expectedStatus: Int, setContext: Boolean, roles: List<String>, documentUuids: Collection<UUID>?, expectedUserMessage: String, expectedDeveloperMessage: String) {
+    val response = webTestClient.findDocumentByUuidsAndAssertExpectedStatus(expectedStatus, roles, documentUuids, setContext)
       .expectHeader().contentType(MediaType.APPLICATION_JSON)
       .expectBody(ErrorResponse::class.java)
       .returnResult().responseBody!!
@@ -67,12 +67,12 @@ class DocumentFindByUuidsIntTest : IntegrationTestBase() {
 
   @Sql("classpath:test_data/document-search.sql")
   @ParameterizedTest
-  @MethodSource("documentSearchByUuidsTestParameters")
-  fun `response contains search request`(documentUuids: Collection<UUID>, expectedResults: Int) {
+  @MethodSource("documentFindByUuidsTestParameters")
+  fun `test find bt document UUIDs response with documents found`(documentUuids: Collection<UUID>, expectedResults: Int) {
     val expectedStatus = 200
     val roles = listOf(ROLE_DOCUMENT_READER)
 
-    val response = webTestClient.searchDocumentsAndAssertExpectedStatus(expectedStatus, roles, documentUuids)
+    val response = webTestClient.findDocumentByUuidsAndAssertExpectedStatus(expectedStatus, roles, documentUuids)
       .expectHeader().contentType(MediaType.APPLICATION_JSON)
       .expectBody(typeReference<Collection<DocumentModel>>())
       .returnResult().responseBody!!
@@ -85,12 +85,12 @@ class DocumentFindByUuidsIntTest : IntegrationTestBase() {
 
   @Sql("classpath:test_data/document-search.sql")
   @ParameterizedTest
-  @MethodSource("documentSearchByUuidsTestParameters")
-  fun `audits event`(documentUuids: Collection<UUID>, expectedResults: Int) {
+  @MethodSource("documentFindByUuidsTestParameters")
+  fun `test find by document UUIds audits event`(documentUuids: Collection<UUID>, expectedResults: Int) {
     val expectedStatus = 200
     val roles = listOf(ROLE_DOCUMENT_READER)
 
-    webTestClient.searchDocumentsAndAssertExpectedStatus(expectedStatus, roles, documentUuids)
+    webTestClient.findDocumentByUuidsAndAssertExpectedStatus(expectedStatus, roles, documentUuids)
       .expectHeader().contentType(MediaType.APPLICATION_JSON)
       .expectBody(typeReference<Collection<DocumentModel>>())
       .returnResult().responseBody!!
@@ -114,12 +114,12 @@ class DocumentFindByUuidsIntTest : IntegrationTestBase() {
 
   @Sql("classpath:test_data/document-search.sql")
   @ParameterizedTest
-  @MethodSource("documentSearchByUuidsTestParameters")
-  fun `tracks event`(documentUuids: Collection<UUID>, expectedResults: Int) {
+  @MethodSource("documentFindByUuidsTestParameters")
+  fun `test find by document UUIds tracks event`(documentUuids: Collection<UUID>, expectedResults: Int) {
     val expectedStatus = 200
     val roles = listOf(ROLE_DOCUMENT_READER)
 
-    webTestClient.searchDocumentsAndAssertExpectedStatus(expectedStatus, roles, documentUuids)
+    webTestClient.findDocumentByUuidsAndAssertExpectedStatus(expectedStatus, roles, documentUuids)
       .expectHeader().contentType(MediaType.APPLICATION_JSON)
       .expectBody(typeReference<Collection<DocumentModel>>())
       .returnResult().responseBody!!
@@ -142,12 +142,12 @@ class DocumentFindByUuidsIntTest : IntegrationTestBase() {
     }
   }
 
-  private fun WebTestClient.searchDocumentsAndAssertExpectedStatus(
+  private fun WebTestClient.findDocumentByUuidsAndAssertExpectedStatus(
     expectedStatus: Int,
     roles: List<String>? = null,
     documentUuids: Collection<UUID>? = listOf(),
     setContext: Boolean = true,
-  ): WebTestClient.ResponseSpec = post().uri(URI_SEARCH_BY_DOCUMENT_UUIDS).also {
+  ): WebTestClient.ResponseSpec = post().uri(URI_FIND_BY_DOCUMENT_UUIDS).also {
     if (documentUuids != null) {
       it.bodyValue(documentUuids)
     }
@@ -177,30 +177,30 @@ class DocumentFindByUuidsIntTest : IntegrationTestBase() {
   }
 
   companion object {
-    const val URI_SEARCH_BY_DOCUMENT_UUIDS: String = "/documents/"
-    const val SERVICE_NAME = "Searched using service name"
+    const val URI_FIND_BY_DOCUMENT_UUIDS: String = "/documents/"
+    const val SERVICE_NAME = "Find by UUIDs using service name"
     const val ACTIVE_CASE_LOAD_ID = "KPI"
-    const val TEST_USERNAME = "SEARCHED_BY_USERNAME"
+    const val TEST_USERNAME = "FOUND_BY_USERNAME"
 
     val MATCHING_DOCUMENT_UUID: UUID = UUID.fromString("443b5592-a87d-4b3d-8691-61daa7ec882f")
     val MATCHING_DOCUMENT_UUID_2: UUID = UUID.fromString("91211779-fccc-4e40-a7f5-27decf107df4")
     val NOT_MATCHING_DOCUMENT_UUID: UUID = UUID.fromString("00000000-0000-0000-0000-000000000000")
 
     @JvmStatic
-    fun documentSearchByUuidsAccessDeniedTestParameters() = listOf(
+    fun documentFindByUuidsAccessDeniedTestParameters() = listOf(
       Arguments.of(401, null),
       Arguments.of(403, listOf<String>()),
       Arguments.of(403, listOf(ROLE_DOCUMENT_WRITER)),
     )
 
     @JvmStatic
-    fun documentSearchByUuidsBadRequestTestParameters() = listOf(
+    fun documentFindByUuidsBadRequestTestParameters() = listOf(
       Arguments.of(400, false, listOf(ROLE_DOCUMENT_READER), listOf<UUID>(), "Exception: Service-Name header is required", "Service-Name header is required"),
       Arguments.of(400, true, listOf(ROLE_DOCUMENT_READER), null, "Validation failure: Couldn't read request body: Required request body is missing: public java.util.Collection<uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document> uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentController.findByDocumentUuids(java.util.Collection<java.util.UUID>,jakarta.servlet.http.HttpServletRequest)", "Required request body is missing: public java.util.Collection<uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document> uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentController.findByDocumentUuids(java.util.Collection<java.util.UUID>,jakarta.servlet.http.HttpServletRequest)"),
     )
 
     @JvmStatic
-    fun documentSearchByUuidsTestParameters() = listOf(
+    fun documentFindByUuidsTestParameters() = listOf(
       Arguments.of(listOf(NOT_MATCHING_DOCUMENT_UUID), 0),
       Arguments.of(listOf(MATCHING_DOCUMENT_UUID), 1),
       Arguments.of(listOf(MATCHING_DOCUMENT_UUID_2), 1),

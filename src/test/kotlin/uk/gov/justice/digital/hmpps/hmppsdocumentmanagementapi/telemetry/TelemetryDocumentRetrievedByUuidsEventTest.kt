@@ -19,8 +19,8 @@ class TelemetryDocumentRetrievedByUuidsEventTest {
   private val eventTimeMs = 100L
 
   @ParameterizedTest
-  @MethodSource("documentSearchByUuidsTestParameters")
-  fun `document search by UUIDs event to custom event properties`(documentUuids: Collection<UUID>, expectedUuids: String) {
+  @MethodSource("documentRetrievedByUuidsEventTestParameters")
+  fun `document retrieved by UUIDs event to custom event properties`(documentUuids: Collection<UUID>, expectedUuids: String) {
     val event = DocumentRetrievedByUuidsEvent(documentUuids, documentUuids.size)
 
     with(event.toCustomEventProperties(documentRequestContext)) {
@@ -32,7 +32,7 @@ class TelemetryDocumentRetrievedByUuidsEventTest {
   }
 
   @Test
-  fun `documents search by UUIDs event to custom event properties check empty context variables`() {
+  fun `test event custom event properties when empty context variables, should contain empty properties`() {
     val event = DocumentRetrievedByUuidsEvent(emptyList(), 0)
     val emptyContext = DocumentRequestContext("Service name", null, null)
 
@@ -44,8 +44,8 @@ class TelemetryDocumentRetrievedByUuidsEventTest {
   }
 
   @ParameterizedTest
-  @MethodSource("documentSearchByUuidsTestParameters")
-  fun `documents searched by UUIDs event to custom event metrics`(documentUuids: Collection<UUID>) {
+  @MethodSource("documentRetrievedByUuidsEventTestParameters")
+  fun `test event custom event metrics, should contain cound and time metrics properties as in event`(documentUuids: Collection<UUID>) {
     val expectedTotal = documentUuids.size
     val event = DocumentRetrievedByUuidsEvent(documentUuids, expectedTotal)
 
@@ -60,7 +60,7 @@ class TelemetryDocumentRetrievedByUuidsEventTest {
 
   companion object {
     @JvmStatic
-    fun documentSearchByUuidsTestParameters() = listOf(
+    fun documentRetrievedByUuidsEventTestParameters() = listOf(
       Arguments.of(listOf<UUID>(), ""),
       Arguments.of(listOf(UUID.fromString("4fd5f7b0-eebf-4b69-9489-0cc48550e03b")), "4fd5f7b0-eebf-4b69-9489-0cc48550e03b"),
       Arguments.of(listOf(UUID.fromString("4fd5f7b0-eebf-4b69-9489-0cc48550e03b"), UUID.fromString("8980c409-465c-41a4-969d-affe0d9b9df7")), "4fd5f7b0-eebf-4b69-9489-0cc48550e03b, 8980c409-465c-41a4-969d-affe0d9b9df7"),
