@@ -15,7 +15,6 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentHa
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentFindByUuidsRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentRetrievedByUuidsEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
 import java.util.UUID
@@ -77,9 +76,8 @@ class DocumentServiceFindByUuidsTest {
     val documentUuids = listOf(MATCHING_DOCUMENT_UUID)
     whenever(documentRepository.findByDocumentUuidIn(any<Collection<UUID>>()))
       .thenReturn(getMockedRepositoryResponse(documentUuids))
-    val request = DocumentFindByUuidsRequest(documentUuids)
 
-    val response: Collection<DocumentModel> = service.findByDocumentUuids(request, documentRequestContext)
+    val response: Collection<DocumentModel> = service.findByDocumentUuids(documentUuids, documentRequestContext)
 
     assertThat(response.size).isEqualTo(1)
     assertThat(response.filter { doc -> doc.documentUuid == MATCHING_DOCUMENT_UUID }.size).isEqualTo(1)
@@ -91,9 +89,8 @@ class DocumentServiceFindByUuidsTest {
   fun `test search by document UUIDs results when uuids are given`(documentUuids: Collection<UUID>, expectedResults: Int) {
     whenever(documentRepository.findByDocumentUuidIn(any<Collection<UUID>>()))
       .thenReturn(getMockedRepositoryResponse(documentUuids))
-    val request = DocumentFindByUuidsRequest(documentUuids)
 
-    val response: Collection<DocumentModel> = service.findByDocumentUuids(request, documentRequestContext)
+    val response: Collection<DocumentModel> = service.findByDocumentUuids(documentUuids, documentRequestContext)
 
     assertThat(response.size).isEqualTo(expectedResults)
     assertThat(response.filter { doc -> documentUuids.contains(doc.documentUuid) }.size).isEqualTo(expectedResults)
@@ -104,12 +101,11 @@ class DocumentServiceFindByUuidsTest {
   fun `records event`(documentUuids: Collection<UUID>, expectedResults: Int) {
     whenever(documentRepository.findByDocumentUuidIn(any<Collection<UUID>>()))
       .thenReturn(getMockedRepositoryResponse(documentUuids))
-    val request = DocumentFindByUuidsRequest(documentUuids)
 
-    val response: Collection<DocumentModel> = service.findByDocumentUuids(request, documentRequestContext)
+    val response: Collection<DocumentModel> = service.findByDocumentUuids(documentUuids, documentRequestContext)
 
     verify(eventService).recordDocumentRetrievedByUuidsEvent(
-      eq(DocumentRetrievedByUuidsEvent(request, expectedResults)),
+      eq(DocumentRetrievedByUuidsEvent(documentUuids, expectedResults)),
       eq(documentRequestContext),
       any<Long>(),
     )

@@ -6,7 +6,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentFindByUuidsRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentRetrievedByUuidsEvent
 import java.util.UUID
 
@@ -22,8 +21,7 @@ class TelemetryDocumentRetrievedByUuidsEventTest {
   @ParameterizedTest
   @MethodSource("documentSearchByUuidsTestParameters")
   fun `document search by UUIDs event to custom event properties`(documentUuids: Collection<UUID>, expectedUuids: String) {
-    val documentSearchRequest = DocumentFindByUuidsRequest(documentUuids)
-    val event = DocumentRetrievedByUuidsEvent(documentSearchRequest, documentUuids.size)
+    val event = DocumentRetrievedByUuidsEvent(documentUuids, documentUuids.size)
 
     with(event.toCustomEventProperties(documentRequestContext)) {
       assertThat(this[SERVICE_NAME_PROPERTY_KEY]).isEqualTo(documentRequestContext.serviceName)
@@ -35,8 +33,7 @@ class TelemetryDocumentRetrievedByUuidsEventTest {
 
   @Test
   fun `documents search by UUIDs event to custom event properties check empty context variables`() {
-    val documentSearchRequest = DocumentFindByUuidsRequest(listOf())
-    val event = DocumentRetrievedByUuidsEvent(documentSearchRequest, 0)
+    val event = DocumentRetrievedByUuidsEvent(emptyList(), 0)
     val emptyContext = DocumentRequestContext("Service name", null, null)
 
     with(event.toCustomEventProperties(emptyContext)) {
@@ -49,9 +46,8 @@ class TelemetryDocumentRetrievedByUuidsEventTest {
   @ParameterizedTest
   @MethodSource("documentSearchByUuidsTestParameters")
   fun `documents searched by UUIDs event to custom event metrics`(documentUuids: Collection<UUID>) {
-    val documentSearchRequest = DocumentFindByUuidsRequest(documentUuids)
     val expectedTotal = documentUuids.size
-    val event = DocumentRetrievedByUuidsEvent(documentSearchRequest, expectedTotal)
+    val event = DocumentRetrievedByUuidsEvent(documentUuids, expectedTotal)
 
     with(event.toCustomEventMetrics(eventTimeMs)) {
       assertThat(this[EVENT_TIME_MS_METRIC_KEY]).isEqualTo(eventTimeMs.toDouble())

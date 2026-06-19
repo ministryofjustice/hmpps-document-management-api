@@ -11,7 +11,6 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRe
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.toModels
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentFindByUuidsRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.VirusScanResult
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentMetadataReplacedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentRetrievedByUuidsEvent
@@ -61,16 +60,16 @@ class DocumentService(
   }
 
   fun findByDocumentUuids(
-    request: DocumentFindByUuidsRequest,
+    documentUuids: Collection<UUID>,
     documentRequestContext: DocumentRequestContext,
   ): Collection<DocumentModel> {
-    if (request.documentUuids.isEmpty()) return emptyList()
+    if (documentUuids.isEmpty()) return emptyList()
 
     val startTimeInMs = System.currentTimeMillis()
 
-    return documentRepository.findByDocumentUuidIn(request.documentUuids.toSet()).toModels().also {
+    return documentRepository.findByDocumentUuidIn(documentUuids.toSet()).toModels().also {
       eventService.recordDocumentRetrievedByUuidsEvent(
-        DocumentRetrievedByUuidsEvent(request, it.size),
+        DocumentRetrievedByUuidsEvent(documentUuids, it.size),
         documentRequestContext,
         System.currentTimeMillis() - startTimeInMs,
       )

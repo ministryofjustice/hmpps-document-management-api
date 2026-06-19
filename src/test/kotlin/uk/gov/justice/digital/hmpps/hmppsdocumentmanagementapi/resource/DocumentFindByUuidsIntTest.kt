@@ -20,7 +20,6 @@ import tools.jackson.module.kotlin.readValue
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.EventType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.integration.IntegrationTestBase
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentFindByUuidsRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentRetrievedByUuidsEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.AuditService
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.whenLocalDateTime
@@ -44,7 +43,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as
     "feature.hmpps.audit.enabled=true",
   ],
 )
-class DocumentSearchByUuidsIntTest : IntegrationTestBase() {
+class DocumentFindByUuidsIntTest : IntegrationTestBase() {
   @ParameterizedTest
   @MethodSource("documentSearchByUuidsAccessDeniedTestParameters")
   fun `test search by document UUIDs error when access is denied`(expectedStatus: Int, roles: List<String>?) = webTestClient.searchDocumentsAndAssertExpectedStatus(expectedStatus, roles)
@@ -101,13 +100,13 @@ class DocumentSearchByUuidsIntTest : IntegrationTestBase() {
     val messageBody = auditSqsClient.receiveMessage(ReceiveMessageRequest.builder().queueUrl(auditQueueUrl).build()).get().messages()[0].body()
 
     with(objectMapper.readValue<AuditService.AuditEvent>(messageBody)) {
-      assertThat(what).isEqualTo(EventType.DOCUMENTS_SEARCHED.name)
+      assertThat(what).isEqualTo(EventType.DOCUMENT_RETRIEVED.name)
       assertThat(whenLocalDateTime()).isCloseTo(LocalDateTime.now(), Assertions.within(3, ChronoUnit.SECONDS))
       assertThat(who).isEqualTo(TEST_USERNAME)
       assertThat(service).isEqualTo(SERVICE_NAME)
 
       with(objectMapper.readValue<DocumentRetrievedByUuidsEvent>(details)) {
-        assertThat(request).isEqualTo(DocumentFindByUuidsRequest(documentUuids))
+        assertThat(request).isEqualTo(documentUuids)
         assertThat(resultsCount).isEqualTo(expectedResults)
       }
     }
@@ -127,7 +126,7 @@ class DocumentSearchByUuidsIntTest : IntegrationTestBase() {
 
     val customEventProperties = argumentCaptor<Map<String, String>>()
     val customEventMetrics = argumentCaptor<Map<String, Double>>()
-    verify(telemetryClient).trackEvent(eq(EventType.DOCUMENTS_SEARCHED.name), customEventProperties.capture(), customEventMetrics.capture())
+    verify(telemetryClient).trackEvent(eq(EventType.DOCUMENT_RETRIEVED.name), customEventProperties.capture(), customEventMetrics.capture())
 
     with(customEventProperties.firstValue) {
       assertThat(this[SERVICE_NAME_PROPERTY_KEY]).isEqualTo(SERVICE_NAME)
@@ -150,7 +149,7 @@ class DocumentSearchByUuidsIntTest : IntegrationTestBase() {
     setContext: Boolean = true,
   ): WebTestClient.ResponseSpec = post().uri(URI_SEARCH_BY_DOCUMENT_UUIDS).also {
     if (documentUuids != null) {
-      it.bodyValue(DocumentFindByUuidsRequest(documentUuids))
+      it.bodyValue(documentUuids)
     }
 
     if (setContext) {
@@ -197,7 +196,7 @@ class DocumentSearchByUuidsIntTest : IntegrationTestBase() {
     @JvmStatic
     fun documentSearchByUuidsBadRequestTestParameters() = listOf(
       Arguments.of(400, false, listOf(ROLE_DOCUMENT_READER), listOf<UUID>(), "Exception: Service-Name header is required", "Service-Name header is required"),
-      Arguments.of(400, true, listOf(ROLE_DOCUMENT_READER), null, "Validation failure: Couldn't read request body: Required request body is missing: public java.util.Collection<uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document> uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentController.searchByDocumentUuids(uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchByUuidsRequest,jakarta.servlet.http.HttpServletRequest)", "Required request body is missing: public java.util.Collection<uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document> uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentController.searchByDocumentUuids(uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchByUuidsRequest,jakarta.servlet.http.HttpServletRequest)"),
+      Arguments.of(400, true, listOf(ROLE_DOCUMENT_READER), null, "Validation failure: Couldn't read request body: Required request body is missing: public java.util.Collection<uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document> uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentController.findByDocumentUuids(java.util.Collection<java.util.UUID>,jakarta.servlet.http.HttpServletRequest)", "Required request body is missing: public java.util.Collection<uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document> uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentController.findByDocumentUuids(java.util.Collection<java.util.UUID>,jakarta.servlet.http.HttpServletRequest)"),
     )
 
     @JvmStatic

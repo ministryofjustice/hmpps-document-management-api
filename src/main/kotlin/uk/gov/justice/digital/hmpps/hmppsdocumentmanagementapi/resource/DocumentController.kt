@@ -33,7 +33,6 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRe
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentFindByUuidsRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResult
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.SetDocumentFileContentHashRequest
@@ -503,9 +502,9 @@ class DocumentController(
       description = "The list of document UUIDS to use to filter documents",
       required = true,
     )
-    documentFindRequest: DocumentFindByUuidsRequest,
+    documentUuids: Collection<UUID>,
     request: HttpServletRequest,
-  ): Collection<Document> = documentService.findByDocumentUuids(documentFindRequest, request.documentRequestContext())
+  ): Collection<Document> = documentService.findByDocumentUuids(documentUuids, request.documentRequestContext())
 
   @ResponseStatus(HttpStatus.OK)
   @PostMapping("/scan")
