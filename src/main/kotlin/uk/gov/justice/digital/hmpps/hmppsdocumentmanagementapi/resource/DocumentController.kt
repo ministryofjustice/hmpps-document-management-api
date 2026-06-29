@@ -466,6 +466,47 @@ class DocumentController(
   )
 
   @ResponseStatus(HttpStatus.OK)
+  @PostMapping("/")
+  @Operation(
+    summary = "Search for documents contained in the given document UUID list",
+    description = "Uses the supplied document UUID list to filter and return documents. ",
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Search request accepted and results returned",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Bad request",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role. Note that the required role can be document type dependent",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  @PreAuthorize("hasAnyRole('$ROLE_DOCUMENT_READER', '$ROLE_DOCUMENT_ADMIN')")
+  fun findByDocumentUuids(
+    @Valid
+    @RequestBody
+    @Parameter(
+      description = "The list of document UUIDS to use to filter documents",
+      required = true,
+    )
+    documentUuids: Collection<UUID>,
+    request: HttpServletRequest,
+  ): Collection<Document> = documentService.findByDocumentUuids(documentUuids, request.documentRequestContext())
+
+  @ResponseStatus(HttpStatus.OK)
   @PostMapping("/scan")
   @Operation(
     summary = "Performs a virus check on the uploaded file.",
