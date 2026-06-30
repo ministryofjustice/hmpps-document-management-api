@@ -64,7 +64,6 @@ class DocumentSearchByMetadataExactIntTest : IntegrationTestBase() {
   private val activeCaseLoadId = "KPI"
   private val username = "SEARCHED_BY_USERNAME"
 
-
   @Test
   fun `400 bad request - document type or metadata criteria or metadataExact criteria must be supplied`() {
     val response = webTestClient.post()
@@ -187,7 +186,7 @@ class DocumentSearchByMetadataExactIntTest : IntegrationTestBase() {
 
     val response = webTestClient.searchDocuments(null, metadata, metadataExact = metadataExact)
 
-    with (response) {
+    with(response) {
       results.onEach {
         assertThat(it.metadata["prisonCode"].asString()).isEqualTo(PRISON_CODE_EXACT_VALUE)
         assertThat(it.metadata["prisonNumber"].asString()).contains(PRISON_NUMBER_PARTIAL_VALUE)
@@ -211,7 +210,7 @@ class DocumentSearchByMetadataExactIntTest : IntegrationTestBase() {
 
     val response = webTestClient.searchDocuments(listOf(DocumentType.HMCTS_WARRANT), null, metadataExact = metadataExact)
 
-    with (response) {
+    with(response) {
       results.onEach {
         assertThat(it.metadata["prisonNumber"].asString()).isEqualTo(PRISON_NUMBER_REQUEST_REPORT)
         assertThat(it.documentType).isEqualTo(DocumentType.HMCTS_WARRANT)
@@ -236,7 +235,7 @@ class DocumentSearchByMetadataExactIntTest : IntegrationTestBase() {
 
     val response = webTestClient.searchDocuments(listOf(DocumentType.HMCTS_WARRANT), metadata, metadataExact = metadataExact)
 
-    with (response) {
+    with(response) {
       results.onEach {
         assertThat(it.documentType).isEqualTo(DocumentType.HMCTS_WARRANT)
         assertThat(it.metadata["court"].asString().lowercase()).contains("magistrates")
@@ -260,7 +259,7 @@ class DocumentSearchByMetadataExactIntTest : IntegrationTestBase() {
 
     val response = webTestClient.searchDocuments(null, null, metadataExact = metadataExact)
 
-    with (response) {
+    with(response) {
       results.onEach {
         assertThat(it.metadata["prisonCode"].asString()).isEqualTo(PRISON_CODE_EXACT_VALUE)
         assertThat(it.metadata["prisonNumber"].asString()).isEqualTo("E5678FG")
@@ -278,7 +277,7 @@ class DocumentSearchByMetadataExactIntTest : IntegrationTestBase() {
 
     val response = webTestClient.searchDocuments(listOf(DocumentType.PRISON_COURT_REGISTER), null, metadataExact = metadataExact)
 
-    with (response) {
+    with(response) {
       results.onEach {
         assertThat(it.documentType).isEqualTo(DocumentType.PRISON_COURT_REGISTER)
         assertThat(it.metadata["prisonCode"].asString()).isEqualTo(PRISON_CODE_EXACT_VALUE)
@@ -297,7 +296,7 @@ class DocumentSearchByMetadataExactIntTest : IntegrationTestBase() {
 
     val response = webTestClient.searchDocuments(listOf(DocumentType.HMCTS_WARRANT, DocumentType.PRISON_COURT_REGISTER), null, metadataExact = metadataExact)
 
-    with (response) {
+    with(response) {
       results.onEach {
         assertThat(it.documentType).isIn(listOf(DocumentType.HMCTS_WARRANT, DocumentType.PRISON_COURT_REGISTER))
         assertThat(it.metadata["prisonCode"].asString()).isEqualTo(PRISON_CODE_EXACT_VALUE)
@@ -318,7 +317,7 @@ class DocumentSearchByMetadataExactIntTest : IntegrationTestBase() {
       null,
       null,
       roles = listOf(ROLE_DOCUMENT_READER, ROLE_DOCUMENT_TYPE_SAR),
-      metadataExact = metadataExact
+      metadataExact = metadataExact,
     )
 
     with(response) {
@@ -340,7 +339,7 @@ class DocumentSearchByMetadataExactIntTest : IntegrationTestBase() {
       null,
       null,
       roles = listOf(ROLE_DOCUMENT_READER),
-      metadataExact = metadataJson
+      metadataExact = metadataJson,
     )
 
     with(response) {
@@ -386,7 +385,7 @@ class DocumentSearchByMetadataExactIntTest : IntegrationTestBase() {
 
     val response = webTestClient.searchDocuments(listOf(documentType), metadata)
 
-    with (response) {
+    with(response) {
       results.onEach { document ->
         assertThat(document.metadata["previousPrisonNumbers"][0].asString()).isEqualTo(PRISON_NUMBER_REQUEST_REPORT)
         assertThat(document.metadata["previousPrisonNumbers"].size()).isEqualTo(2)
@@ -528,6 +527,5 @@ class DocumentSearchByMetadataExactIntTest : IntegrationTestBase() {
     val EXPECTED_PRISON_NUMBER_BY_CODE_MAP: Map<String, List<String>> = mapOf(
       Pair(PRISON_CODE_EXACT_VALUE, listOf("D4567EF", "E5678FG")),
     )
-
   }
 }
