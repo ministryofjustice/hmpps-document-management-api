@@ -26,6 +26,10 @@ class DocumentTypeOrMetadataCriteriaRequiredValidator : ConstraintValidator<Docu
       return true
     }
 
+    if (value.metadataExact.isNotNullWithAtLeastOneProperty()) {
+      return true
+    }
+
     return false
   }
 
