@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Min
 import org.springframework.data.domain.Sort.Direction
 import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.JsonNodeFactory
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentSearchOrderBy
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.validation.Between
@@ -93,4 +94,20 @@ data class DocumentSearchRequest(
     example = "true",
   )
   val canonical: Boolean? = null,
+
+  @Schema(
+    description = "JSON structured metadata to match with document metadata. Documents will match if their metadata " +
+      "contains all the supplied properties and their values e.g. prisonCode = \"KMI\" AND documentSubType = \"SENTENCING_WARRANT\". " +
+      "Value matching is exact but case insensitive so prisonCode = \"Kmi\" will match \"KMI\". " +
+      "Property values must be strings and cannot be null or empty.",
+    example =
+    """
+    {
+      "prisonCode": "KMI",
+      "documentSubType": "SENTENCING_WARRANT"
+    }
+    """,
+  )
+  @field:NoNullOrEmptyStringMetadataValues
+  val metadataExact: JsonNode? = JsonNodeFactory.instance.objectNode(),
 )
