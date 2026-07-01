@@ -360,10 +360,11 @@ class DocumentSearchByMetadataExactIntTest : IntegrationTestBase() {
     "STAFFORD CROWN, Stafford Crown, 2",
     "stafford crown, Stafford Crown, 2",
     "sTaFFoRd croWn, Stafford Crown, 2",
+    "Stafford,,0",
     "Stoke on Trent Crown, Stoke on Trent Crown, 1",
     "stoke on trent crown, Stoke on Trent Crown, 1",
   )
-  fun `search by metadata exact match court Stafford Crown is case insensitive`(court: String, expected: String, expectedTotal: Int) {
+  fun `search by metadata exact match court Stafford Crown is case insensitive`(court: String, expected: String?, expectedTotal: Int) {
     val metadataExact = jsonMapper.readTree("{ \"court\": \"${court}\" }")
 
     val response = webTestClient.searchDocuments(listOf(documentType), null, metadataExact = metadataExact)
