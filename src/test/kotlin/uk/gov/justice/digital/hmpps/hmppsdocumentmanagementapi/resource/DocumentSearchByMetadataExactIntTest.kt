@@ -85,11 +85,17 @@ class DocumentSearchByMetadataExactIntTest : IntegrationTestBase() {
     }
   }
 
-  @Test
-  fun `400 bad request - metadata property values must not be empty`() {
+  @ParameterizedTest
+  @CsvSource(
+    "{ \"prisonNumber\": \"\" }",
+    "{ \"prisonNumbers\": [] }",
+    "{ \"prisonNumbers\": [ \"\" ] }",
+    "'{ \"prisonNumbers\": [ \"V1\", \"V2\" ] }'",
+  )
+  fun `400 bad request - metadata-exact property values must not be empty`(metadataExact: String) {
     val response = webTestClient.post()
       .uri("/documents/search")
-      .bodyValue(DocumentSearchRequest(null, null, metadataExact = jsonMapper.readTree("{ \"prisonNumber\": \"\" }")))
+      .bodyValue(DocumentSearchRequest(null, null, metadataExact = jsonMapper.readTree(metadataExact)))
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
       .headers(setDocumentContext())
       .exchange()
