@@ -177,7 +177,7 @@ class DocumentFindByUuidsIntTest : IntegrationTestBase() {
   }
 
   companion object {
-    const val URI_FIND_BY_DOCUMENT_UUIDS: String = "/documents/"
+    const val URI_FIND_BY_DOCUMENT_UUIDS: String = "/documents"
     const val SERVICE_NAME = "Find by UUIDs using service name"
     const val ACTIVE_CASE_LOAD_ID = "KPI"
     const val TEST_USERNAME = "FOUND_BY_USERNAME"

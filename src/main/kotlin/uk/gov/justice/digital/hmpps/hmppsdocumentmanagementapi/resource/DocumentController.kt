@@ -466,7 +466,7 @@ class DocumentController(
   )
 
   @ResponseStatus(HttpStatus.OK)
-  @PostMapping("/")
+  @PostMapping
   @Operation(
     summary = "Search for documents contained in the given document UUID list",
     description = "Uses the supplied document UUID list to filter and return documents. ",
