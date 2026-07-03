@@ -14,6 +14,14 @@ class NoNullOrEmptyStringMetadataValuesValidator : ConstraintValidator<NoNullOrE
     }
 
     for (fieldName in value.propertyNames()) {
+      if (value[fieldName].isArray) {
+        if (!isValidList(value[fieldName])) {
+          return false
+        }
+
+        continue
+      }
+
       if (value[fieldName].isNullOrEmpty()) {
         return false
       }
@@ -23,6 +31,22 @@ class NoNullOrEmptyStringMetadataValuesValidator : ConstraintValidator<NoNullOrE
   }
 
   private fun JsonNode.isNullOrEmpty() = !isTextual || asText().isEmpty()
+
+  private fun isValidList(jsonProperty: JsonNode): Boolean {
+    if (!jsonProperty.isArray) {
+      return false
+    }
+
+    if (jsonProperty.isEmpty) {
+      return false
+    }
+
+    if (jsonProperty.size() > 1) {
+      return false
+    }
+
+    return (!jsonProperty[0].isNullOrEmpty())
+  }
 }
 
 @Target(AnnotationTarget.FIELD, AnnotationTarget.PROPERTY)
