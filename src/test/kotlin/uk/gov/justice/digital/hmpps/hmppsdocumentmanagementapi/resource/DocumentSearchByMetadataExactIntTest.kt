@@ -90,7 +90,10 @@ class DocumentSearchByMetadataExactIntTest : IntegrationTestBase() {
     "{ \"prisonNumber\": \"\" }",
     "{ \"prisonNumbers\": [] }",
     "{ \"prisonNumbers\": [ \"\" ] }",
-    "'{ \"prisonNumbers\": [ \"V1\", \"V2\" ] }'",
+    "'{ \"prisonNumber\": \"\", \"prisonNumbers\": [ \"V1\" ] }'",
+    "'{ \"prisonNumbers\": [ \"V1\" ], \"prisonNumber\": \"\" }'",
+    "'{ \"prisonNumber\": \"V1\", \"prisonNumbers\": [ \"\" ] }'",
+    "'{ \"prisonNumbers\": [ \"\" ], \"prisonNumber\": \"V1\" }'",
   )
   fun `400 bad request - metadata-exact property values must not be empty`(metadataExact: String) {
     val response = webTestClient.post()
