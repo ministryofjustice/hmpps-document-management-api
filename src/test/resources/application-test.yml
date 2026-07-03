@@ -6,6 +6,12 @@ spring:
   servlet:
     multipart:
       location: ${user.dir}/build/tmp
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
 server:
   shutdown: immediate
 

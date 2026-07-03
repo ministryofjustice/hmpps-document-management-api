@@ -54,7 +54,11 @@ class DocumentSearchService(
     }
 
     request.metadataExact?.properties()?.forEach {
-      spec = spec.and(documentSearchSpecification.metadataEquals(it.key, it.value.asString()))
+      spec = if (it.value.isArray) {
+        spec.and(documentSearchSpecification.metadataArrayContains(it.key, it.value[0].asString()))
+      } else {
+        spec.and(documentSearchSpecification.metadataEquals(it.key, it.value.asString()))
+      }
     }
 
     val pageRequest = PageRequest.of(request.page, request.pageSize)

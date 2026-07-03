@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource
 
+import jakarta.persistence.criteria.Expression
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
@@ -50,6 +51,27 @@ class DocumentSearchSpecification {
         ),
       ),
       value.lowercase(),
+    )
+  }
+
+  fun metadataArrayContains(property: String, value: String) = Specification<Document> { root, cq, cb ->
+    cb.literal(value.lowercase()).`in`(
+      cq.subquery(Expression::class.java).select(
+        cb.function(
+          "lower",
+          String::class.java,
+          cb.function(
+            "jsonb_array_elements_text",
+            String::class.java,
+            cb.function(
+              "jsonb_extract_path",
+              Any::class.java,
+              root.get<String>("metadata"),
+              cb.literal(property),
+            ),
+          ),
+        ) as Expression<Expression<*>?>?,
+      ),
     )
   }
 }

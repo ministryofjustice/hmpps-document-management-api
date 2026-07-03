@@ -214,7 +214,11 @@ class DocumentSearchServiceTest {
     }
 
     metadataExact?.propertyNames()?.toSet()?.forEach { property ->
-      verify(documentSearchSpecification).metadataEquals(property, metadataExact.get(property).asString())
+      if (metadataExact.get(property).isArray) {
+        verify(documentSearchSpecification).metadataArrayContains(property, metadataExact.get(property)[0].asString())
+      } else {
+        verify(documentSearchSpecification).metadataEquals(property, metadataExact.get(property).asString())
+      }
     }
 
     verifyNoMoreInteractions(documentSearchSpecification)
@@ -349,6 +353,8 @@ class DocumentSearchServiceTest {
 
     val METADATA_PRISON_NUMBER: JsonNode = ObjectMapper().readTree("{ \"${PRISON_NUMBER_KEY}\": \"${PRISON_NUMBER_VALUE}\" }")
     val METADATA_PRISON_CODE_AND_NUMBER: JsonNode = ObjectMapper().readTree("{ \"${PRISON_CODE_KEY}\": \"${PRISON_CODE_VALUE}\", \"${PRISON_NUMBER_KEY}\": \"${PRISON_NUMBER_VALUE}\" }")
+    val METADATA_PRISON_NUMBER_LIST: JsonNode = ObjectMapper().readTree("{ \"${PRISON_NUMBER_KEY}\": [ \"${PRISON_NUMBER_VALUE}\" ] }")
+    val METADATA_PRISON_CODE_AND_NUMBER_LIST: JsonNode = ObjectMapper().readTree("{ \"${PRISON_CODE_KEY}\": \"${PRISON_CODE_VALUE}\", \"${PRISON_NUMBER_KEY}\": [ \"${PRISON_NUMBER_VALUE}\" ] }")
     val METADATA_NO_OBJECT: JsonNode = ObjectMapper().readTree("[ \"test\" ]")
     val METADATA_PRISON_AND_SAR_REFERENCE: JsonNode = ObjectMapper().readTree("{ \"${SAR_REFERENCE_KEY}\": \"${SAR_REFERENCE_VALUE}\", \"${PRISON_CODE_KEY}\": \"${PRISON_CODE_VALUE}\", \"${PRISON_NUMBER_KEY}\": \"${PRISON_NUMBER_VALUE}\" }")
 
@@ -359,6 +365,8 @@ class DocumentSearchServiceTest {
       Arguments.of(null, METADATA_PRISON_NUMBER, METADATA_PRISON_NUMBER),
       Arguments.of(listOf(DocumentType.HMCTS_WARRANT), null, METADATA_PRISON_NUMBER),
       Arguments.of(null, null, METADATA_PRISON_CODE_AND_NUMBER),
+      Arguments.of(null, null, METADATA_PRISON_NUMBER_LIST),
+      Arguments.of(null, null, METADATA_PRISON_CODE_AND_NUMBER_LIST),
     )
   }
 }

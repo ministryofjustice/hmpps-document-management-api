@@ -85,11 +85,20 @@ class DocumentSearchByMetadataExactIntTest : IntegrationTestBase() {
     }
   }
 
-  @Test
-  fun `400 bad request - metadata property values must not be empty`() {
+  @ParameterizedTest
+  @CsvSource(
+    "{ \"prisonNumber\": \"\" }",
+    "{ \"prisonNumbers\": [] }",
+    "{ \"prisonNumbers\": [ \"\" ] }",
+    "'{ \"prisonNumber\": \"\", \"prisonNumbers\": [ \"V1\" ] }'",
+    "'{ \"prisonNumbers\": [ \"V1\" ], \"prisonNumber\": \"\" }'",
+    "'{ \"prisonNumber\": \"V1\", \"prisonNumbers\": [ \"\" ] }'",
+    "'{ \"prisonNumbers\": [ \"\" ], \"prisonNumber\": \"V1\" }'",
+  )
+  fun `400 bad request - metadata-exact property values must not be empty`(metadataExact: String) {
     val response = webTestClient.post()
       .uri("/documents/search")
-      .bodyValue(DocumentSearchRequest(null, null, metadataExact = jsonMapper.readTree("{ \"prisonNumber\": \"\" }")))
+      .bodyValue(DocumentSearchRequest(null, null, metadataExact = jsonMapper.readTree(metadataExact)))
       .headers(setAuthorisation(roles = listOf(ROLE_DOCUMENT_READER)))
       .headers(setDocumentContext())
       .exchange()
@@ -394,6 +403,37 @@ class DocumentSearchByMetadataExactIntTest : IntegrationTestBase() {
 
       assertThat(results.size).isEqualTo(1)
       assertThat(totalResultsCount).isEqualTo(1)
+    }
+  }
+
+  @Sql("classpath:test_data/document-search.sql")
+  @ParameterizedTest
+  @CsvSource(
+    "{ \"previousPrisonCodes\": [\"MDI\"] },,, MDI, 1",
+    "{ \"previousPrisonCodes\": [\"MDI\"] }, HMCTS_WARRANT,, MDI, 1",
+    "{ \"previousPrisonCodes\": [\"MDI\"] },, { \"prisonNumber\": \"345\" }, MDI, 1",
+    "{ \"previousPrisonCodes\": [\"MDI\"] }, HMCTS_WARRANT, { \"prisonNumber\": \"345\" }, MDI, 1",
+    "'{ \"previousPrisonCodes\": [\"MDI\"], \"prisonNumber\": \"C3456DE\" }',,, MDI, 1",
+    "'{ \"previousPrisonCodes\": [\"MDI\"], \"prisonNumber\": \"B2345CD\" }',,, MDI, 0",
+    "{ \"previousPrisonCodes\": [\"mdi\"] },,, MDI, 1",
+    "{ \"previousPrisonCodes\": [\"kmi\"] },,, KMI, 2",
+    "{ \"previousPrisonCodes\": [\"fake\"] },,, fake, 0",
+  )
+  fun `search by metadata exact match prisonCode {prisonCode} is in list of previousPrisonCodes, should return {expected} total results`(searchMetadataExact: String, searchDocumentType: DocumentType?, searchMetadata: String?, expected: String, expectedTotal: Int) {
+    val documentTypes = if (searchDocumentType != null) listOf(searchDocumentType) else null
+    val metadata = if (searchMetadata != null) jsonMapper.readTree(searchMetadata) else null
+    val metadataExact = jsonMapper.readTree(searchMetadataExact)
+
+    val response = webTestClient.searchDocuments(documentTypes, metadata, metadataExact = metadataExact)
+
+    with(response) {
+      results.onEach {
+        assertThat(it.metadata["previousPrisonCodes"]).isNotEmpty()
+        assertThat(it.metadata["previousPrisonCodes"].firstOrNull { p -> p.asString().equals(expected) }).isNotNull()
+      }
+
+      assertThat(results.size).isEqualTo(expectedTotal)
+      assertThat(totalResultsCount).isEqualTo(expectedTotal.toLong())
     }
   }
 
