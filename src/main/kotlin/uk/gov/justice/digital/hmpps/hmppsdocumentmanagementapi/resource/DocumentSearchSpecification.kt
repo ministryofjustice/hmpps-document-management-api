@@ -36,4 +36,20 @@ class DocumentSearchSpecification {
   fun canonical(isCanonical: Boolean) = Specification<Document> { root, _, cb ->
     if (isCanonical) cb.isNull(root.get<Any>("duplicateOf")) else cb.isNotNull(root.get<Any>("duplicateOf"))
   }
+
+  fun metadataEquals(property: String, value: String) = Specification<Document> { root, _, cb ->
+    cb.equal(
+      cb.function(
+        "lower",
+        String::class.java,
+        cb.function(
+          "jsonb_extract_path_text",
+          String::class.java,
+          root.get<String>("metadata"),
+          cb.literal(property),
+        ),
+      ),
+      value.lowercase(),
+    )
+  }
 }

@@ -2,6 +2,9 @@ package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -14,6 +17,7 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort.Direction
 import org.springframework.data.jpa.domain.Specification
+import tools.jackson.databind.JsonNode
 import tools.jackson.databind.ObjectMapper
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
@@ -40,7 +44,7 @@ class DocumentSearchServiceTest {
     fileSize = 48243,
     fileHash = "d58e3582afa99040e27b92b13c8f2280",
     mimeType = "application/pdf",
-    metadata = ObjectMapper().readTree("{ \"prisonCode\": \"KPI\", \"prisonNumber\": \"A1234BC\" }"),
+    metadata = METADATA_PRISON_CODE_AND_NUMBER,
     createdByServiceName = "Remand and Sentencing",
     createdByUsername = "CREATED_BY_USER",
   )
@@ -52,7 +56,7 @@ class DocumentSearchServiceTest {
     fileSize = 63621,
     fileHash = "0e0396b7a0e931762c167abb7da85398",
     mimeType = "application/pdf",
-    metadata = ObjectMapper().readTree("{ \"sarCaseReference\": \"SAR-1234\", \"prisonCode\": \"KPI\", \"prisonNumber\": \"A1234BC\" }"),
+    metadata = METADATA_PRISON_AND_SAR_REFERENCE,
     createdByServiceName = "Manage Subject Access Requests",
     createdByUsername = "SAR_USER",
   )
@@ -81,14 +85,14 @@ class DocumentSearchServiceTest {
   @Test
   fun `search by document type and metadata property`() {
     val documentType = DocumentType.HMCTS_WARRANT
-    val metadata = ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }")
+    val metadata = METADATA_PRISON_NUMBER
 
     whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>())).thenReturn(Page.empty())
 
     service.searchDocuments(DocumentSearchRequest(listOf(documentType), metadata), DocumentType.entries, documentRequestContext)
 
     verify(documentSearchSpecification).documentTypeIn(setOf(documentType))
-    verify(documentSearchSpecification).metadataContains("prisonNumber", "A1234BC")
+    verify(documentSearchSpecification).metadataContains(PRISON_NUMBER_KEY, PRISON_NUMBER_VALUE)
     verifyNoMoreInteractions(documentSearchSpecification)
 
     verify(documentRepository).findAll(any<Specification<Document>>(), any<PageRequest>())
@@ -97,14 +101,14 @@ class DocumentSearchServiceTest {
 
   @Test
   fun `search by metadata property only`() {
-    val metadata = ObjectMapper().readTree("{ \"prisonNumber\": \"A1234BC\" }")
+    val metadata = METADATA_PRISON_NUMBER
 
     whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>())).thenReturn(Page.empty())
 
     service.searchDocuments(DocumentSearchRequest(null, metadata), DocumentType.entries, documentRequestContext)
 
     verify(documentSearchSpecification).documentTypeIn(DocumentType.entries)
-    verify(documentSearchSpecification).metadataContains("prisonNumber", "A1234BC")
+    verify(documentSearchSpecification).metadataContains(PRISON_NUMBER_KEY, PRISON_NUMBER_VALUE)
     verifyNoMoreInteractions(documentSearchSpecification)
 
     verify(documentRepository).findAll(any<Specification<Document>>(), any<PageRequest>())
@@ -114,15 +118,15 @@ class DocumentSearchServiceTest {
   @Test
   fun `search by multiple metadata properties`() {
     val documentType = DocumentType.HMCTS_WARRANT
-    val metadata = ObjectMapper().readTree("{ \"prisonCode\": \"KPI\", \"prisonNumber\": \"A1234BC\" }")
+    val metadata = METADATA_PRISON_CODE_AND_NUMBER
 
     whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>())).thenReturn(Page.empty())
 
     service.searchDocuments(DocumentSearchRequest(listOf(documentType), metadata), DocumentType.entries, documentRequestContext)
 
     verify(documentSearchSpecification).documentTypeIn(setOf(documentType))
-    verify(documentSearchSpecification).metadataContains("prisonCode", "KPI")
-    verify(documentSearchSpecification).metadataContains("prisonNumber", "A1234BC")
+    verify(documentSearchSpecification).metadataContains(PRISON_CODE_KEY, PRISON_CODE_VALUE)
+    verify(documentSearchSpecification).metadataContains(PRISON_NUMBER_KEY, PRISON_NUMBER_VALUE)
     verifyNoMoreInteractions(documentSearchSpecification)
 
     verify(documentRepository).findAll(any<Specification<Document>>(), any<PageRequest>())
@@ -179,11 +183,51 @@ class DocumentSearchServiceTest {
 
   @Test
   fun `ignores non object metadata`() {
-    val metadata = ObjectMapper().readTree("[ \"test\" ]")
+    val metadata = METADATA_NO_OBJECT
 
     whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>())).thenReturn(Page.empty())
 
     service.searchDocuments(DocumentSearchRequest(null, metadata), DocumentType.entries, documentRequestContext)
+
+    verify(documentSearchSpecification).documentTypeIn(DocumentType.entries)
+    verifyNoMoreInteractions(documentSearchSpecification)
+
+    verify(documentRepository).findAll(any<Specification<Document>>(), any<PageRequest>())
+    verifyNoMoreInteractions(documentRepository)
+  }
+
+  @ParameterizedTest
+  @MethodSource("getUnreadDocumentDateFromTestParameters")
+  fun `test search request by document type, metadata property and metadata-exact property`(documentTypes: List<DocumentType>?, metadata: JsonNode?, metadataExact: JsonNode?) {
+    whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>())).thenReturn(Page.empty())
+
+    service.searchDocuments(DocumentSearchRequest(documentTypes, metadata, metadataExact = metadataExact), DocumentType.entries, documentRequestContext)
+
+    if (documentTypes.isNullOrEmpty()) {
+      verify(documentSearchSpecification).documentTypeIn(DocumentType.entries)
+    } else {
+      verify(documentSearchSpecification).documentTypeIn(documentTypes.toSet())
+    }
+
+    metadata?.propertyNames()?.toSet()?.forEach { property ->
+      verify(documentSearchSpecification).metadataContains(property, metadata.get(property).asString())
+    }
+
+    metadataExact?.propertyNames()?.toSet()?.forEach { property ->
+      verify(documentSearchSpecification).metadataEquals(property, metadataExact.get(property).asString())
+    }
+
+    verifyNoMoreInteractions(documentSearchSpecification)
+
+    verify(documentRepository).findAll(any<Specification<Document>>(), any<PageRequest>())
+    verifyNoMoreInteractions(documentRepository)
+  }
+
+  @Test
+  fun `test search request ignores non object metadata-exact`() {
+    whenever(documentRepository.findAll(any<Specification<Document>>(), any<PageRequest>())).thenReturn(Page.empty())
+
+    service.searchDocuments(DocumentSearchRequest(null, null, metadataExact = METADATA_NO_OBJECT), DocumentType.entries, documentRequestContext)
 
     verify(documentSearchSpecification).documentTypeIn(DocumentType.entries)
     verifyNoMoreInteractions(documentSearchSpecification)
@@ -292,6 +336,29 @@ class DocumentSearchServiceTest {
       eq(DocumentsSearchedEvent(documentSearchResult.request, documentSearchResult.results.size, documentSearchResult.totalResultsCount)),
       eq(documentRequestContext),
       any<Long>(),
+    )
+  }
+
+  private companion object {
+    const val PRISON_NUMBER_KEY: String = "prisonNumber"
+    const val PRISON_NUMBER_VALUE: String = "A1234BC"
+    const val PRISON_CODE_KEY: String = "prisonCode"
+    const val PRISON_CODE_VALUE: String = "KPI"
+    const val SAR_REFERENCE_KEY: String = "sarCaseReference"
+    const val SAR_REFERENCE_VALUE: String = "SAR-1234"
+
+    val METADATA_PRISON_NUMBER: JsonNode = ObjectMapper().readTree("{ \"${PRISON_NUMBER_KEY}\": \"${PRISON_NUMBER_VALUE}\" }")
+    val METADATA_PRISON_CODE_AND_NUMBER: JsonNode = ObjectMapper().readTree("{ \"${PRISON_CODE_KEY}\": \"${PRISON_CODE_VALUE}\", \"${PRISON_NUMBER_KEY}\": \"${PRISON_NUMBER_VALUE}\" }")
+    val METADATA_NO_OBJECT: JsonNode = ObjectMapper().readTree("[ \"test\" ]")
+    val METADATA_PRISON_AND_SAR_REFERENCE: JsonNode = ObjectMapper().readTree("{ \"${SAR_REFERENCE_KEY}\": \"${SAR_REFERENCE_VALUE}\", \"${PRISON_CODE_KEY}\": \"${PRISON_CODE_VALUE}\", \"${PRISON_NUMBER_KEY}\": \"${PRISON_NUMBER_VALUE}\" }")
+
+    @JvmStatic
+    fun getUnreadDocumentDateFromTestParameters() = listOf(
+      Arguments.of(null, null, METADATA_PRISON_NUMBER),
+      Arguments.of(listOf(DocumentType.HMCTS_WARRANT), null, METADATA_PRISON_NUMBER),
+      Arguments.of(null, METADATA_PRISON_NUMBER, METADATA_PRISON_NUMBER),
+      Arguments.of(listOf(DocumentType.HMCTS_WARRANT), null, METADATA_PRISON_NUMBER),
+      Arguments.of(null, null, METADATA_PRISON_CODE_AND_NUMBER),
     )
   }
 }
