@@ -420,18 +420,8 @@ class DocumentSearchByMetadataExactIntTest : IntegrationTestBase() {
     "{ \"previousPrisonCodes\": [\"fake\"] },,, fake, 0",
   )
   fun `search by metadata exact match prisonCode {prisonCode} is in list of previousPrisonCodes, should return {expected} total results`(searchMetadataExact: String, searchDocumentType: DocumentType?, searchMetadata: String?, expected: String, expectedTotal: Int) {
-    val documentTypes = if (searchDocumentType != null) {
-      listOf(searchDocumentType)
-    } else {
-      null
-    }
-
-    val metadata = if (searchMetadata != null) {
-      jsonMapper.readTree(searchMetadata)
-    } else {
-      null
-    }
-
+    val documentTypes = if (searchDocumentType != null) listOf(searchDocumentType) else null
+    val metadata = if (searchMetadata != null) jsonMapper.readTree(searchMetadata) else null
     val metadataExact = jsonMapper.readTree(searchMetadataExact)
 
     val response = webTestClient.searchDocuments(documentTypes, metadata, metadataExact = metadataExact)
