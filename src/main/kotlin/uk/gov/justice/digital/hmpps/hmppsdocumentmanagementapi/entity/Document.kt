@@ -16,8 +16,10 @@ import jakarta.persistence.Table
 import org.hibernate.annotations.ColumnTransformer
 import org.hibernate.annotations.SQLRestriction
 import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.converter.JsonNodeConverter
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.utils.merge
 import java.time.LocalDateTime
 import java.util.UUID
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document as DocumentModel
@@ -97,6 +99,29 @@ data class Document(
     documentMetadataHistory.add(metadataHistory)
 
     this.metadata = metadata
+
+    return metadataHistory
+  }
+
+  fun mergeMetadata(
+    metadata: JsonNode,
+    supersededTime: LocalDateTime = LocalDateTime.now(),
+    supersededByServiceName: String,
+    supersededByUsername: String?,
+  ): DocumentMetadataHistory {
+    val metadataHistory = DocumentMetadataHistory(
+      document = this,
+      metadata = this.metadata,
+      supersededTime = supersededTime,
+      supersededByServiceName = supersededByServiceName,
+      supersededByUsername = supersededByUsername,
+    )
+
+    documentMetadataHistory.add(metadataHistory)
+
+    val mergedMetadata = (this.metadata as ObjectNode).merge(metadata)
+
+    this.metadata = mergedMetadata
 
     return metadataHistory
   }
