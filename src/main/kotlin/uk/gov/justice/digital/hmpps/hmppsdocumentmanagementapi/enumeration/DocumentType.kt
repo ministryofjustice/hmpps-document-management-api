@@ -62,4 +62,7 @@ enum class DocumentType(
   APPEAL_ORDER(
     description = "Appeal order",
   ),
+  BREACH_ORDER(
+    description = "Breach order",
+  ),
 }
