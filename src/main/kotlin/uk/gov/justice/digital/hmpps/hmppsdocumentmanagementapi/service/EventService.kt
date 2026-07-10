@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.EventType
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentMetadataMergedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentMetadataReplacedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentRetrievedByUuidsEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsScannedEvent
@@ -78,6 +79,21 @@ class EventService(
     auditService.auditEvent(EventType.DOCUMENT_METADATA_REPLACED, event, documentRequestContext, eventTime)
     telemetryClient.trackEvent(
       EventType.DOCUMENT_METADATA_REPLACED.name,
+      event.document.toCustomEventProperties(documentRequestContext),
+      event.toCustomEventMetrics(eventTimeMs),
+    )
+  }
+
+  fun recordDocumentMetadataMergedEvent(
+    event: DocumentMetadataMergedEvent,
+    documentRequestContext: DocumentRequestContext,
+    eventTime: LocalDateTime,
+    eventTimeMs: Long,
+  ) {
+    log.info("Document metadata merged {}", event)
+    auditService.auditEvent(EventType.DOCUMENT_METADATA_MERGED, event, documentRequestContext, eventTime)
+    telemetryClient.trackEvent(
+      EventType.DOCUMENT_METADATA_MERGED.name,
       event.document.toCustomEventProperties(documentRequestContext),
       event.toCustomEventMetrics(eventTimeMs),
     )

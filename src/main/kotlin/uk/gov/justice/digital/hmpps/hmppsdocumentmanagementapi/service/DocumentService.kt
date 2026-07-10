@@ -12,6 +12,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.toModels
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.VirusScanResult
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentMetadataMergedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentMetadataReplacedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentRetrievedByUuidsEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsScannedEvent
@@ -230,5 +231,32 @@ class DocumentService(
       }
     }
     return digest.digest().joinToString("") { "%02x".format(it) }
+  }
+
+  fun mergeDocumentMetadata(
+    documentUuid: UUID,
+    metadata: JsonNode,
+    documentRequestContext: DocumentRequestContext,
+  ): DocumentModel {
+    val startTimeInMs = System.currentTimeMillis()
+
+    val document = documentRepository.findByDocumentUuidOrThrowNotFound(documentUuid)
+
+    val originalMetadata = document.metadata
+
+    val metadataHistory = document.mergeMetadata(
+      metadata = metadata,
+      supersededByServiceName = documentRequestContext.serviceName,
+      supersededByUsername = documentRequestContext.username,
+    )
+
+    return documentRepository.saveAndFlush(document).toModel().also {
+      eventService.recordDocumentMetadataMergedEvent(
+        DocumentMetadataMergedEvent(it, originalMetadata),
+        documentRequestContext,
+        metadataHistory.supersededTime,
+        System.currentTimeMillis() - startTimeInMs,
+      )
+    }
   }
 }

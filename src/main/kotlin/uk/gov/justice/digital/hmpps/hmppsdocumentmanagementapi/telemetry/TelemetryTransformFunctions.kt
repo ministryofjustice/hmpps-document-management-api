@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry
 
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentMetadataMergedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentMetadataReplacedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsScannedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsSearchedEvent
@@ -40,6 +41,13 @@ fun DocumentModel.toCustomEventMetrics(eventTimeMs: Long) = mapOf(
 )
 
 fun DocumentMetadataReplacedEvent.toCustomEventMetrics(eventTimeMs: Long) = mapOf(
+  EVENT_TIME_MS_METRIC_KEY to eventTimeMs.toDouble(),
+  FILE_SIZE_METRIC_KEY to document.fileSize.toDouble(),
+  METADATA_FIELD_COUNT_METRIC_KEY to document.metadata.size().toDouble(),
+  ORIGINAL_METADATA_FIELD_COUNT_METRIC_KEY to originalMetadata.size().toDouble(),
+)
+
+fun DocumentMetadataMergedEvent.toCustomEventMetrics(eventTimeMs: Long) = mapOf(
   EVENT_TIME_MS_METRIC_KEY to eventTimeMs.toDouble(),
   FILE_SIZE_METRIC_KEY to document.fileSize.toDouble(),
   METADATA_FIELD_COUNT_METRIC_KEY to document.metadata.size().toDouble(),

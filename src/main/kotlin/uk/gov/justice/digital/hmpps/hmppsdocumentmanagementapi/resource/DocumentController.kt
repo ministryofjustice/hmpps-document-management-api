@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -307,6 +308,70 @@ class DocumentController(
     metadata: JsonNode,
     request: HttpServletRequest,
   ) = documentService.replaceDocumentMetadata(
+    documentUuid,
+    metadata,
+    request.documentRequestContext(),
+  )
+
+  @ResponseStatus(HttpStatus.OK)
+  @PatchMapping("/{documentUuid}/metadata")
+  @Operation(
+    summary = "Merge the metadata associated with a document",
+    description = "Accepts JSON based metadata to associate with the document identified by the supplied unique identifier. " +
+      "Applies authorisation and validation rules based on the type of document. If valid, the previous metadata will be stored " +
+      "and the metadata associated with the document will be updated and overwritten by any fields in the supplied metadata.",
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Document metadata merged successfully",
+        content = [Content(schema = Schema(implementation = Document::class))],
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Bad request",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role. Note that the required role can be document type dependent",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  @PreAuthorize("hasAnyRole('$ROLE_DOCUMENT_WRITER', '$ROLE_DOCUMENT_ADMIN')")
+  fun mergeDocumentMetadata(
+    @PathVariable
+    @Parameter(
+      description = "Document unique identifier",
+      required = true,
+    )
+    documentUuid: UUID,
+    @RequestBody
+    @Parameter(
+      description = "The metadata describing the document to merge over the existing metadata. Should contain a person identifier e.g. " +
+        "prison number or case reference number along with any other pertinent metadata. " +
+        "The document type used will specify what metadata is required as a minimum",
+      required = true,
+      example =
+      """
+      {
+        "prisonCode": "KMI",
+        "prisonNumber": "C3456DE",
+        "court": "Birmingham Magistrates",
+        "warrantDate": "2023-11-14"
+      }
+      """,
+    )
+    metadata: JsonNode,
+    request: HttpServletRequest,
+  ) = documentService.mergeDocumentMetadata(
     documentUuid,
     metadata,
     request.documentRequestContext(),
