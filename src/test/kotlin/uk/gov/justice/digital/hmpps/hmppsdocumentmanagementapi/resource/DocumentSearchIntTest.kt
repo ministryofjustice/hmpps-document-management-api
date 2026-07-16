@@ -213,8 +213,8 @@ class DocumentSearchIntTest : IntegrationTestBase() {
     with(response!!) {
       assertThat(status).isEqualTo(400)
       assertThat(errorCode).isNull()
-      assertThat(userMessage).isEqualTo("Validation failure: Page size must be between 1 and 100.")
-      assertThat(developerMessage).isEqualTo("Page size must be between 1 and 100.")
+      assertThat(userMessage).isEqualTo("Validation failure: Page size must be between 1 and 200.")
+      assertThat(developerMessage).isEqualTo("Page size must be between 1 and 200.")
       assertThat(moreInfo).isNull()
     }
   }
