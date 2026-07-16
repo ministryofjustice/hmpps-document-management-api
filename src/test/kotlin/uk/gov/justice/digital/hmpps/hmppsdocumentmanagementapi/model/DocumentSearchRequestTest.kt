@@ -122,19 +122,19 @@ class DocumentSearchRequestTest {
   @Test
   fun `page size must be 1 or greater - invalid`() {
     val request = DocumentSearchRequest(listOf(DocumentType.HMCTS_WARRANT), null, pageSize = 0)
-    validator.validate(request).assertSingleValidationError("pageSize", "Page size must be between 1 and 100.")
+    validator.validate(request).assertSingleValidationError("pageSize", "Page size must be between 1 and 200.")
   }
 
   @Test
-  fun `page size must be 100 or less - valid`() {
-    val request = DocumentSearchRequest(listOf(DocumentType.HMCTS_WARRANT), null, pageSize = 100)
+  fun `page size must be 200 or less - valid`() {
+    val request = DocumentSearchRequest(listOf(DocumentType.HMCTS_WARRANT), null, pageSize = 200)
     assertThat(validator.validate(request)).isEmpty()
   }
 
   @Test
-  fun `page size must be 100 or less - invalid`() {
-    val request = DocumentSearchRequest(listOf(DocumentType.HMCTS_WARRANT), null, pageSize = 101)
-    validator.validate(request).assertSingleValidationError("pageSize", "Page size must be between 1 and 100.")
+  fun `page size must be 200 or less - invalid`() {
+    val request = DocumentSearchRequest(listOf(DocumentType.HMCTS_WARRANT), null, pageSize = 201)
+    validator.validate(request).assertSingleValidationError("pageSize", "Page size must be between 1 and 200.")
   }
 
   private fun MutableSet<ConstraintViolation<DocumentSearchRequest>>.assertSingleValidationError(propertyName: String, message: String) = with(single()) {
