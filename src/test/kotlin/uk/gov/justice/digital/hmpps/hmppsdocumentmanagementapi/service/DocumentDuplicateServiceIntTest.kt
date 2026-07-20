@@ -48,6 +48,28 @@ class DocumentDuplicateServiceIntTest : IntegrationTestBase() {
     ),
   )
 
+  private fun saveWithStatus(
+    ageMinutes: Long,
+    status: String,
+    fileContentHash: String,
+    fileHash: String = "byte-${sequence++}",
+  ): Document = documentRepository.saveAndFlush(
+    Document(
+      documentUuid = UUID.randomUUID(),
+      documentType = DocumentType.HMCTS_WARRANT,
+      filename = "warrant",
+      fileExtension = "pdf",
+      fileSize = 1234,
+      fileHash = fileHash,
+      mimeType = "application/pdf",
+      metadata = objectMapper.readTree("{ \"status\": \"$status\" }"),
+      createdTime = LocalDateTime.now().minusMinutes(ageMinutes),
+      createdByServiceName = courtIngestion,
+      createdByUsername = "USER",
+      fileContentHash = fileContentHash,
+    ),
+  )
+
   private fun reload(document: Document) = documentRepository.findByDocumentUuid(document.documentUuid)
 
   @Test
@@ -118,5 +140,16 @@ class DocumentDuplicateServiceIntTest : IntegrationTestBase() {
 
     assertThat(reload(a)!!.duplicateOf).isNull()
     assertThat(reload(b)!!.duplicateOf).isNull()
+  }
+
+  @Test
+  fun `with no active statuses configured, a non-active document still takes part in de-duplication`() {
+    val older = saveWithStatus(ageMinutes = 10, status = "AWAITING", fileContentHash = "content-off")
+    val newer = saveWithStatus(ageMinutes = 5, status = "AWAITING", fileContentHash = "content-off")
+
+    documentDuplicateService.redetermineCanonicalFor(newer)
+
+    assertThat(reload(older)!!.duplicateOf).isNull()
+    assertThat(reload(newer)!!.duplicateOf).isEqualTo(older.documentUuid)
   }
 }

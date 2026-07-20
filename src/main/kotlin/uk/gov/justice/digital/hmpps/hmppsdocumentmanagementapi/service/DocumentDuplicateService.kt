@@ -85,10 +85,14 @@ class DocumentDuplicateService(
 
       val found = buildMap {
         if (frontierContent.isNotEmpty()) {
-          documentRepository.findByFileContentHashIn(frontierContent).forEach { put(it.documentUuid, it) }
+          documentRepository.findByFileContentHashIn(frontierContent)
+            .filter { participatesInDeduplication(it) }
+            .forEach { put(it.documentUuid, it) }
         }
         if (frontierFile.isNotEmpty()) {
-          documentRepository.findByFileHashIn(frontierFile).forEach { put(it.documentUuid, it) }
+          documentRepository.findByFileHashIn(frontierFile)
+            .filter { participatesInDeduplication(it) }
+            .forEach { put(it.documentUuid, it) }
         }
       }
 
@@ -109,6 +113,14 @@ class DocumentDuplicateService(
       log.warn("Canonical closure hit iteration cap with {} members; result may be partial", members.size)
     }
     return members.values
+  }
+
+  private fun participatesInDeduplication(document: Document): Boolean {
+    val activeStatuses = canonicalProperties.activeStatuses
+    if (activeStatuses.isEmpty()) return true
+
+    val status = document.metadata.path("status").asString().takeIf { it.isNotBlank() }
+    return status != null && activeStatuses.any { it.equals(status, ignoreCase = true) }
   }
 
   private val canonicalOrder: Comparator<Document> = compareBy<Document> { authoritativeRank(it.createdByServiceName) }

@@ -12,4 +12,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties("document.canonical")
 data class DocumentCanonicalProperties(
   val authoritativeServiceNames: List<String> = emptyList(),
+  val activeStatuses: Set<String> = emptySet(),
 )
