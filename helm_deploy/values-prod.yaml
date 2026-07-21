@@ -7,6 +7,7 @@ generic-service:
 
   env:
     HMPPS_AUTH_URL: https://sign-in.hmpps.service.justice.gov.uk/auth
+    DOCUMENT_CANONICAL_ACTIVE_STATUSES: "ACTIVE,LIVE"
 
   postgresDatabaseRestore:
     enabled: true
