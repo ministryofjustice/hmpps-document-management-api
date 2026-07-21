@@ -150,15 +150,11 @@ class DocumentService(
         metadataHistory.supersededTime,
         System.currentTimeMillis() - startTimeInMs,
       )
+    }.also {
+      documentDuplicateService.redetermineCanonicalFor(document)
     }
   }
 
-  /**
-   * Update the extracted-content hash for a document after upload. The owning service may set this
-   * during backfill or when its extraction changed (a new or fixed library). Gated by the same type
-   * allowlist as upload. Rare by nature, so the change is logged rather than raised as a domain event,
-   * and writing the same value is a no-op.
-   */
   fun setFileContentHash(
     documentUuid: UUID,
     fileContentHash: String,
@@ -257,6 +253,8 @@ class DocumentService(
         metadataHistory.supersededTime,
         System.currentTimeMillis() - startTimeInMs,
       )
+    }.also {
+      documentDuplicateService.redetermineCanonicalFor(document)
     }
   }
 }
