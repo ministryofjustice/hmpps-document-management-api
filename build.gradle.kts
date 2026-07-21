@@ -1,9 +1,9 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.1"
-  kotlin("plugin.spring") version "2.4.0"
-  kotlin("plugin.jpa") version "2.4.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.0-beta2"
+  kotlin("plugin.spring") version "2.4.10"
+  kotlin("plugin.jpa") version "2.4.10"
   jacoco
 }
 
@@ -39,7 +39,7 @@ dependencies {
   implementation("commons-io:commons-io:2.22.0")
 
   // Test dependencies
-  testImplementation("org.junit.jupiter:junit-jupiter:6.1.1")
+  testImplementation("org.junit.jupiter:junit-jupiter:6.1.2")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
   testImplementation("org.wiremock:wiremock-standalone:3.13.2")
   testImplementation("org.testcontainers:postgresql:1.21.4")
