@@ -74,15 +74,15 @@ class DocumentCaseReferenceServiceTest {
 
     @JvmStatic
     fun buildMockedDocument(metadata: JsonNode) = Document(
-        documentType = DocumentType.HMCTS_WARRANT,
-        filename = "warrant_for_remand",
-        fileExtension = "pdf",
-        fileSize = 48243,
-        fileHash = "d58e3582afa99040e27b92b13c8f2280",
-        mimeType = "application/pdf",
-        metadata = metadata,
-        createdByServiceName = "Remand and Sentencing",
-        createdByUsername = "CREATED_BY_USER",
+      documentType = DocumentType.HMCTS_WARRANT,
+      filename = "warrant_for_remand",
+      fileExtension = "pdf",
+      fileSize = 48243,
+      fileHash = "d58e3582afa99040e27b92b13c8f2280",
+      mimeType = "application/pdf",
+      metadata = metadata,
+      createdByServiceName = "Remand and Sentencing",
+      createdByUsername = "CREATED_BY_USER",
     )
 
     @JvmStatic
@@ -94,8 +94,9 @@ class DocumentCaseReferenceServiceTest {
     )
 
     fun parseMetadataCaseReferences(metadata: JsonNode) = ObjectMapper()
-      .readValue(metadata.path("caseReferences").toString(),
-        Array<String>::class.java)
-      .toSet()
+      .readValue(
+        metadata.path("caseReferences").toString(),
+        Array<String>::class.java,
+      ).toSet()
   }
 }
