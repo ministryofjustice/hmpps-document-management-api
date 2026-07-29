@@ -83,6 +83,17 @@ interface DocumentRepository :
     nativeQuery = true,
   )
   fun deleteByDocumentIds(documentIds: Collection<Long>)
+
+  @Query(
+    value = "select distinct metadata->>'caseReferences' as caseReferences " +
+      "from document " +
+      "where metadata->>'prisonerId' = :prisonerId " +
+      "  and metadata->>'caseReferences' is not null " +
+      "  and metadata->>'status' = 'ACTIVE' " +
+      "  and duplicate_of is null",
+    nativeQuery = true,
+  )
+  fun findCaseReferences(prisonerId: String): List<String>
 }
 
 fun DocumentRepository.findByDocumentUuidOrThrowNotFound(documentUuid: UUID) = this.findByDocumentUuid(documentUuid) ?: throw EntityNotFoundException("Document with UUID '$documentUuid' not found.")
