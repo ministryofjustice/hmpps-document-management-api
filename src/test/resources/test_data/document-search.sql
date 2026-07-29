@@ -11,7 +11,8 @@ INSERT INTO document
     metadata,
     created_time,
     created_by_service_name,
-    created_by_username
+    created_by_username,
+    duplicate_of
 )
 VALUES
 (
@@ -23,10 +24,11 @@ VALUES
     48243,
     'd58e3582afa99040e27b92b13c8f2280',
     'application/pdf',
-    JSON '{ "prisonCode": "KMI", "prisonNumber": "A1234BC", "court": "Birmingham Magistrates", "warrantDate": "2023-11-14" }',
+    JSON '{ "prisonCode": "KMI", "prisonNumber": "A1234BC", "court": "Birmingham Magistrates", "warrantDate": "2023-11-14", "prisonerId": "A1234BC", "caseReferences": ["CASE001"], "status": "ACTIVE" }',
     NOW(),
     'Remand and Sentencing',
-    'CREATED_BY_USER'
+    'CREATED_BY_USER',
+    NULL
 ),
 (
     2,
@@ -37,10 +39,11 @@ VALUES
     5252,
     'd58e3582afa99040e27b92b13c8f2280',
     'application/pdf',
-    JSON '{ "prisonCode": "MDI", "previousPrisonCodes": ["KMI"], "prisonNumber": "B2345CD", "court": "Croydon Crown", "warrantDate": "2023-01-02" }',
+    JSON '{ "prisonCode": "MDI", "previousPrisonCodes": ["KMI"], "prisonNumber": "B2345CD", "court": "Croydon Crown", "warrantDate": "2023-01-02", "prisonerId": "B2345CD", "caseReferences": ["CASE001", "CASE002"], "status": "ACTIVE" }',
     NOW(),
     'Remand and Sentencing',
-    'CREATED_BY_USER'
+    'CREATED_BY_USER',
+    '443b5592-a87d-4b3d-8691-61daa7ec882f'
 ),
 (
     3,
@@ -51,10 +54,11 @@ VALUES
     57777,
     'd58e3582afa99040e27b92b13c8f2280',
     'application/pdf',
-    JSON '{ "prisonCode": "RSI", "previousPrisonCodes": ["KMI", "MDI"], "prisonNumber": "C3456DE", "previousPrisonNumbers": ["A1234BC", "B2345CD"], "court": "Dudley Magistrates", "warrantDate": "2022-10-23" }',
+    JSON '{ "prisonCode": "RSI", "previousPrisonCodes": ["KMI", "MDI"], "prisonNumber": "C3456DE", "previousPrisonNumbers": ["A1234BC", "B2345CD"], "court": "Dudley Magistrates", "warrantDate": "2022-10-23", "prisonerId": "C3456DE", "caseReferences": ["CASE001", "CASE002", "CASE003"], "status": "ACTIVE" }',
     NOW(),
     'Remand and Sentencing',
-    'CREATED_BY_USER'
+    'CREATED_BY_USER',
+    NULL
 ),
 (
     4,
@@ -65,10 +69,11 @@ VALUES
     47645,
     'd58e3582afa99040e27b92b13c8f2280',
     'application/pdf',
-    JSON '{ "prisonCode": "PVI", "prisonNumber": "A1234BC", "sarCaseReference": "SAR-1234", "sarMetadata": "SAR specific information" }',
+    JSON '{ "prisonCode": "PVI", "prisonNumber": "A1234BC", "sarCaseReference": "SAR-1234", "sarMetadata": "SAR specific information", "prisonerId": "A1234BC", "caseReferences": ["CASE001", "CASE002", "CASE003"], "status": "ACTIVE" }',
     NOW(),
     'Subject Access Request',
-    'CREATED_BY_USER'
+    'CREATED_BY_USER',
+    NULL
 ),
 (
     5,
@@ -79,10 +84,11 @@ VALUES
     73755,
     'd58e3582afa99040e27b92b13c8f2280',
     'application/pdf',
-    JSON '{ "prisonCode": "SFI", "prisonNumber": "D4567EF", "court": "Stafford Crown", "warrantDate": "2021-09-27" }',
+    JSON '{ "prisonCode": "SFI", "prisonNumber": "D4567EF", "court": "Stafford Crown", "warrantDate": "2021-09-27", "prisonerId": "D4567EF", "caseReferences": ["CASE001"], "status": "ACTIVE" }',
     NOW(),
     'Remand and Sentencing',
-    'CREATED_BY_USER'
+    'CREATED_BY_USER',
+    NULL
 ),
 (
     6,
@@ -93,10 +99,11 @@ VALUES
     2355,
     'd58e3582afa99040e27b92b13c8f2280',
     'application/pdf',
-    JSON '{ "prisonCode": "SFI", "prisonNumber": "D4567EF", "court": "Stoke on Trent Crown", "warrantDate": "2022-02-06" }',
+    JSON '{ "prisonCode": "SFI", "prisonNumber": "D4567EF", "court": "Stoke on Trent Crown", "warrantDate": "2022-02-06", "prisonerId": "D4567EF", "status": "ACTIVE" }',
     NOW(),
     'Remand and Sentencing',
-    'CREATED_BY_USER'
+    'CREATED_BY_USER',
+    NULL
 ),
 (
     7,
@@ -107,10 +114,11 @@ VALUES
     45777,
     'd58e3582afa99040e27b92b13c8f2280',
     'application/pdf',
-    JSON '{ "prisonCode": "SFI", "prisonNumber": "E5678FG", "court": "Stafford Crown", "warrantDate": "2022-09-08" }',
+    JSON '{ "prisonCode": "SFI", "prisonNumber": "E5678FG", "court": "Stafford Crown", "warrantDate": "2022-09-08", "prisonerId": "E5678FG", "caseReferences": ["CASE001"], "status": "ACTIVE" }',
     NOW(),
     'Remand and Sentencing',
-    'CREATED_BY_USER'
+    'CREATED_BY_USER',
+    NULL
 ),
 (
     8,
@@ -121,10 +129,11 @@ VALUES
     45777,
     'd58e3582afa99040e27b92b13c8f2280',
     'application/pdf',
-    JSON '{ "prisonCode": "SFI", "prisonNumber": "E5678FG", "court": "Stafford Crown", "warrantDate": "2022-09-08" }',
+    JSON '{ "prisonCode": "SFI", "prisonNumber": "E5678FG", "court": "Stafford Crown", "warrantDate": "2022-09-08", "prisonerId": "E5678FG", "caseReferences": [], "status": "ACTIVE" }',
     NOW(),
     'Remand and Sentencing',
-    'CREATED_BY_USER'
+    'CREATED_BY_USER',
+    NULL
 );
 
 -- Deleted HMCTS_WARRANT document
@@ -156,7 +165,7 @@ VALUES
     48243,
     'd58e3582afa99040e27b92b13c8f2280',
     'application/pdf',
-    JSON '{ "prisonCode": "KMI", "prisonNumber": "A1234BC", "court": "Birmingham Magistrates", "warrantDate": "2023-11-14" }',
+    JSON '{ "prisonCode": "KMI", "prisonNumber": "A1234BC", "court": "Birmingham Magistrates", "warrantDate": "2023-11-14", "caseReferences": ["CASE001", "CASE002"], "status": "DELETED" }',
     NOW(),
     'Remand and Sentencing',
     'CREATED_BY_USER',

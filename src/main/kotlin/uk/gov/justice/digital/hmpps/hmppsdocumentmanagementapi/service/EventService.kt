@@ -9,6 +9,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.Event
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentMetadataMergedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentMetadataReplacedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentRetrievedByUuidsEvent
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsFacetSearchedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsScannedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsSearchedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.telemetry.toCustomEventMetrics
@@ -118,6 +119,19 @@ class EventService(
     auditService.auditEvent(EventType.DOCUMENTS_SEARCHED, event, documentRequestContext)
     telemetryClient.trackEvent(
       EventType.DOCUMENTS_SEARCHED.name,
+      event.toCustomEventProperties(documentRequestContext),
+      event.toCustomEventMetrics(eventTimeMs),
+    )
+  }
+  fun recordDocumentsFacetSearchedEvent(
+    event: DocumentsFacetSearchedEvent,
+    documentRequestContext: DocumentRequestContext,
+    eventTimeMs: Long,
+  ) {
+    log.info("Documents facet searched {}", event)
+    auditService.auditEvent(EventType.DOCUMENTS_FACET_SEARCHED, event, documentRequestContext)
+    telemetryClient.trackEvent(
+      EventType.DOCUMENTS_FACET_SEARCHED.name,
       event.toCustomEventProperties(documentRequestContext),
       event.toCustomEventMetrics(eventTimeMs),
     )

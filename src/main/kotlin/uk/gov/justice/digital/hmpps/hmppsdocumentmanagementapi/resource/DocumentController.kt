@@ -34,10 +34,12 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRe
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentFacetSearchRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResult
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.SetDocumentFileContentHashRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.VirusScanResult
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.DocumentFacetSearchService
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.DocumentSearchService
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service.DocumentService
 import java.util.UUID
@@ -50,6 +52,7 @@ import java.util.UUID
 class DocumentController(
   private val documentService: DocumentService,
   private val documentSearchService: DocumentSearchService,
+  private val documentFacetSearchService: DocumentFacetSearchService,
 ) {
   @GetMapping("/{documentUuid}")
   @Operation(
@@ -525,6 +528,53 @@ class DocumentController(
     searchRequest: DocumentSearchRequest,
     request: HttpServletRequest,
   ) = documentSearchService.searchDocuments(
+    searchRequest,
+    request.authorisedDocumentTypes(),
+    request.documentRequestContext(),
+  )
+
+  @ResponseStatus(HttpStatus.OK)
+  @PostMapping("/facet/search")
+  @Operation(
+    summary = "Search for documents with matching document type and metadata filters",
+    description = "Uses the supplied document type and metadata criteria to filter and return documents. " +
+      "A list of facets can also be provided to give a list of available metadata filter values to display on a search UI"
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Search request accepted and results returned",
+        content = [Content(schema = Schema(implementation = DocumentSearchResult::class))],
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Bad request",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role. Note that the required role can be document type dependent",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  @PreAuthorize("hasAnyRole('$ROLE_DOCUMENT_READER', '$ROLE_DOCUMENT_ADMIN')")
+  fun facetSearchDocuments(
+    @Valid
+    @RequestBody
+    @Parameter(
+      description = "The search parameters to use to filter documents",
+      required = true,
+    )
+    searchRequest: DocumentFacetSearchRequest,
+    request: HttpServletRequest,
+  ) = documentFacetSearchService.facetSearchDocuments(
     searchRequest,
     request.authorisedDocumentTypes(),
     request.documentRequestContext(),
