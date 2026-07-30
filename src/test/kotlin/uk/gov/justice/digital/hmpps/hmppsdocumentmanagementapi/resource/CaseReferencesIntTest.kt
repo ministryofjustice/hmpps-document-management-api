@@ -108,9 +108,9 @@ class CaseReferencesIntTest : IntegrationTestBase() {
 
     @JvmStatic
     fun getCaseReferencesTestParameters(): Stream<Arguments> = Stream.of(
-      Arguments.of("A1234BC", listOf("KMI", "PVI", "SAR-1234")),
-      Arguments.of("D4567EF", listOf("SFI")),
-      Arguments.of("E5678FG", listOf("SFI")),
+      Arguments.of("A1234BC", listOf("CASE001", "CASE002", "CASE003")),
+      Arguments.of("D4567EF", listOf("CASE001")),
+      Arguments.of("E5678FG", listOf("CASE001")),
       Arguments.of("NO_EXISTS", emptyList<String>()),
     )
   }

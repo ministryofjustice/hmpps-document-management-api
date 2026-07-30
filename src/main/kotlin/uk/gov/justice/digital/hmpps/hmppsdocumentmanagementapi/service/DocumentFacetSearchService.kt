@@ -136,7 +136,7 @@ fun buildWhere(documentTypes: List<DocumentType>, canonical: Boolean?, filters: 
   params["documentTypes"] = documentTypes.map { it.name }
 
   canonical?.let {
-    where += "duplicate_of IS NOT NULL"
+    where += "duplicate_of IS NULL"
   }
 
   filters.forEachIndexed { index, filter ->

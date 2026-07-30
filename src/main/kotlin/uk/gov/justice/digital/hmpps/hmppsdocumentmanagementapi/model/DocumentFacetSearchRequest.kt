@@ -8,7 +8,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.Docum
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.validation.Between
 
 @Schema(
-  description = "Describes the search parameters to use to filter documents along with a list of facets available for additional filtering."
+  description = "Describes the search parameters to use to filter documents along with a list of facets available for additional filtering.",
 )
 data class DocumentFacetSearchRequest(
   @Schema(

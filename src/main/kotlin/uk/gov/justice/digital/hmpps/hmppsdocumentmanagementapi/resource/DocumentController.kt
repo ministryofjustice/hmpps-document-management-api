@@ -538,7 +538,7 @@ class DocumentController(
   @Operation(
     summary = "Search for documents with matching document type and metadata filters",
     description = "Uses the supplied document type and metadata criteria to filter and return documents. " +
-      "A list of facets can also be provided to give a list of available metadata filter values to display on a search UI"
+      "A list of facets can also be provided to give a list of available metadata filter values to display on a search UI",
   )
   @ApiResponses(
     value = [
