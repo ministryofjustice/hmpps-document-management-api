@@ -189,11 +189,11 @@ class DocumentFacetSearchIntTest : IntegrationTestBase() {
       val response = webTestClient.facetSearchDocuments(
         DocumentFacetSearchRequest(
           documentTypes = listOf(documentType),
-          baseFilters = listOf(
+          metadataFilters = listOf(
             MetadataFilter(
               field = "caseReferences",
               operator = FilterOperator.IN,
-              value = "$filterCaseOne,$filterCaseTwo",
+              values = listOf(filterCaseOne, filterCaseTwo),
             ),
           ),
         ),
@@ -211,11 +211,10 @@ class DocumentFacetSearchIntTest : IntegrationTestBase() {
       val response = webTestClient.facetSearchDocuments(
         DocumentFacetSearchRequest(
           documentTypes = listOf(documentType),
-          baseFilters = listOf(
+          metadataFilters = listOf(
             MetadataFilter(
               field = "caseReferences",
               operator = FilterOperator.NOT_EXISTS,
-              value = null,
             ),
           ),
         ),
@@ -229,11 +228,10 @@ class DocumentFacetSearchIntTest : IntegrationTestBase() {
       val response = webTestClient.facetSearchDocuments(
         DocumentFacetSearchRequest(
           documentTypes = listOf(documentType),
-          baseFilters = listOf(
+          metadataFilters = listOf(
             MetadataFilter(
               field = "caseReferences",
               operator = FilterOperator.EXISTS,
-              value = null,
             ),
           ),
         ),
@@ -247,11 +245,11 @@ class DocumentFacetSearchIntTest : IntegrationTestBase() {
       val response = webTestClient.facetSearchDocuments(
         DocumentFacetSearchRequest(
           documentTypes = listOf(documentType),
-          baseFilters = listOf(
+          metadataFilters = listOf(
             MetadataFilter(
               field = "status",
               operator = FilterOperator.EQUALS,
-              value = "ACTIVE",
+              values = listOf("ACTIVE"),
             ),
           ),
         ),
@@ -265,11 +263,11 @@ class DocumentFacetSearchIntTest : IntegrationTestBase() {
       val response = webTestClient.facetSearchDocuments(
         DocumentFacetSearchRequest(
           documentTypes = listOf(documentType),
-          baseFilters = listOf(
+          metadataFilters = listOf(
             MetadataFilter(
               field = "status",
               operator = FilterOperator.NOT_EQUALS,
-              value = "ACTIVE",
+              values = listOf("ACTIVE"),
             ),
           ),
         ),
@@ -368,18 +366,15 @@ class DocumentFacetSearchIntTest : IntegrationTestBase() {
       val responseWithFacetFilter = webTestClient.facetSearchDocuments(
         DocumentFacetSearchRequest(
           documentTypes = listOf(documentType),
-          facetFilters = listOf(
-            MetadataFilter(
-              field = "caseReferences",
-              operator = FilterOperator.IN,
-              value = "$filterCaseTwo",
-            ),
-
-          ),
           facets = listOf(
             FacetRequest(
               "caseReferences",
               FacetType.ARRAY,
+              MetadataFilter(
+                field = "caseReferences",
+                operator = FilterOperator.IN,
+                values = listOf(filterCaseTwo),
+              ),
             ),
           ),
         ),

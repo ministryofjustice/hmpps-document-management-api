@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Min
 import org.springframework.data.domain.Sort.Direction
@@ -60,15 +61,10 @@ data class DocumentFacetSearchRequest(
   @Schema(
     description = "Filters that will be applied to the entire dataset, regardless of whicih facets are requested/filtered. Will also apply to the count of each facet",
   )
-  val baseFilters: List<MetadataFilter> = emptyList(),
+  val metadataFilters: List<MetadataFilter> = emptyList(),
 
   @Schema(
-    description = "Filters that will apply to the paged resultset and not to the faceted counts.",
-  )
-  val facetFilters: List<MetadataFilter> = emptyList(),
-
-  @Schema(
-    description = "A list of available searchable facets.",
+    description = "A list of available searchable facets. A facet must be a field in the metadata",
   )
   val facets: List<FacetRequest> = emptyList(),
 
@@ -88,11 +84,22 @@ data class MetadataFilter(
   val operator: FilterOperator = FilterOperator.EQUALS,
 
   @Schema(
-    description = "The value to filter for. Not required for EXISTS/NOT_EXISTS filters",
+    description = "The values to filter for. Not required for EXISTS/NOT_EXISTS filters, only one value required for EQUALS/NOT_EQUALS, a list provided for IN",
     example = "ACTIVE",
   )
-  val value: String?,
-)
+  val values: List<String> = emptyList(),
+) {
+
+  val value: String
+    @JsonIgnore
+    get() {
+      if (values.size == 1) {
+        return values.first()
+      } else {
+        error("Expected only one value for the filter operation $operator")
+      }
+    }
+}
 
 enum class FilterOperator {
   EQUALS,
@@ -108,11 +115,17 @@ data class FacetRequest(
     example = "ACTIVE",
   )
   val field: String,
+
   @Schema(
     description = "Is the metadata field an array or plain string",
     example = "ACTIVE",
   )
   val type: FacetType,
+
+  @Schema(
+    description = "Filters that will apply to the paged resultset and not to the faceted counts.",
+  )
+  val filter: MetadataFilter? = null,
 )
 
 enum class FacetType {
