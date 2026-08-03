@@ -13,16 +13,13 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentFac
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.FacetResult
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.FacetType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.FacetValue
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.FilterOperator
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.MetadataFilter
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsFacetSearchedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.DocumentSearchSpecification
 
 @Service
 class DocumentFacetSearchService(
   private val documentRepository: DocumentRepository,
-  private val documentSearchSpecification: DocumentSearchSpecification,
+  private val searchSqlBuilder: DocumentFacetSearchSqlBuilder,
   private val eventService: EventService,
   private val jdbcTemplate: NamedParameterJdbcTemplate,
 ) {
@@ -39,7 +36,7 @@ class DocumentFacetSearchService(
       }
     }
 
-    val baseWhere = buildWhere(request.documentTypes, request.canonical, request.baseFilters)
+    val baseWhere = searchSqlBuilder.buildWhere(request.documentTypes, request.canonical, request.metadataFilters)
 
     val facetMapper = RowMapper<FacetValue> { rs, _ ->
       FacetValue(
@@ -50,8 +47,8 @@ class DocumentFacetSearchService(
 
     val facets: Map<String, FacetResult> = request.facets.associate { facet ->
       val sql = when (facet.type) {
-        FacetType.VALUE -> buildValueFacetQuery(facet.field, baseWhere)
-        FacetType.ARRAY -> buildArrayFacetQuery(facet.field, baseWhere)
+        FacetType.VALUE -> searchSqlBuilder.buildValueFacetQuery(facet.field, baseWhere)
+        FacetType.ARRAY -> searchSqlBuilder.buildArrayFacetQuery(facet.field, baseWhere)
       }
       val values = jdbcTemplate.query(
         sql,
@@ -61,8 +58,8 @@ class DocumentFacetSearchService(
       facet.field to FacetResult(values)
     }
 
-    val pageQueryWhere = buildWhere(request.documentTypes, request.canonical, (request.baseFilters + request.facetFilters))
-    val pageSql = buildPageQuery(pageQueryWhere, request.orderBy.columnName, request.orderByDirection.name)
+    val pageQueryWhere = searchSqlBuilder.buildWhere(request.documentTypes, request.canonical, (request.metadataFilters + request.facets.mapNotNull { it.filter }))
+    val pageSql = searchSqlBuilder.buildPageQuery(pageQueryWhere, request.orderBy.columnName, request.orderByDirection.name)
 
     val documentMapper = RowMapper<Long> { rs, _ ->
       rs.getLong("document_id")
@@ -74,7 +71,7 @@ class DocumentFacetSearchService(
         .addValue("offset", request.page * request.pageSize),
       documentMapper,
     )
-    val countQuery = buildCountQuery(pageQueryWhere)
+    val countQuery = searchSqlBuilder.buildCountQuery(pageQueryWhere)
     val countMapper = RowMapper<Long> { rs, _ ->
       rs.getLong("count")
     }
@@ -101,108 +98,3 @@ class DocumentFacetSearchService(
     }
   }
 }
-
-class SqlWhere(
-  val sql: String,
-  val parameters: Map<String, Any>,
-)
-
-fun buildPageQuery(
-  where: SqlWhere,
-  orderColumn: String,
-  orderDirection: String,
-): String = """
-        SELECT *
-        FROM document
-        WHERE ${where.sql}
-        ORDER BY ${listOf(orderColumn, "created_time").distinct().joinToString(", ") { "$it $orderDirection" }}
-        LIMIT :limit
-        OFFSET :offset
-""".trimIndent()
-
-fun buildCountQuery(
-  where: SqlWhere,
-): String = """
-        SELECT COUNT(*) as count
-        FROM document
-        WHERE ${where.sql}
-""".trimIndent()
-fun buildWhere(documentTypes: List<DocumentType>, canonical: Boolean?, filters: List<MetadataFilter>): SqlWhere {
-  val where = mutableListOf<String>()
-  val params = mutableMapOf<String, Any>()
-
-  where += "deleted_time IS NULL"
-  where += "document_type IN (:documentTypes)"
-  params["documentTypes"] = documentTypes.map { it.name }
-
-  canonical?.let {
-    where += "duplicate_of IS NULL"
-  }
-
-  filters.forEachIndexed { index, filter ->
-
-    val param = "p$index"
-
-    when (filter.operator) {
-      FilterOperator.EQUALS -> {
-        where += "metadata ->> '${filter.field}' = :$param"
-        params[param] = filter.value!!
-      }
-
-      FilterOperator.NOT_EQUALS -> {
-        where += "metadata ->> '${filter.field}' <> :$param"
-        params[param] = filter.value!!
-      }
-
-      FilterOperator.IN -> {
-        val values = filter.value!!.split(",").map { it }
-
-        where += "metadata ->> '${filter.field}' IN (:$param)"
-        params[param] = values
-      }
-
-      FilterOperator.EXISTS -> {
-        where += "jsonb_exists(metadata, '${filter.field}')"
-      }
-
-      FilterOperator.NOT_EXISTS -> {
-        where += "NOT jsonb_exists(metadata, '${filter.field}')"
-      }
-    }
-  }
-
-  return SqlWhere(
-    sql = where.joinToString(" AND "),
-    parameters = params,
-  )
-}
-
-fun buildArrayFacetQuery(
-  facet: String,
-  where: SqlWhere,
-): String = """
-        SELECT
-            tag.value,
-            COUNT(*) AS count
-        FROM document
-        CROSS JOIN LATERAL (
-            SELECT DISTINCT value
-            FROM jsonb_array_elements_text(metadata -> '$facet') value
-        ) tag
-        WHERE ${where.sql}
-        GROUP BY tag.value
-        ORDER BY count DESC
-""".trimIndent()
-
-fun buildValueFacetQuery(
-  facet: String,
-  where: SqlWhere,
-): String = """
-        SELECT
-            metadata ->> '$facet' AS value,
-            COUNT(*) AS count
-        FROM document
-        WHERE ${where.sql}
-        GROUP BY value
-        ORDER BY count DESC
-""".trimIndent()
