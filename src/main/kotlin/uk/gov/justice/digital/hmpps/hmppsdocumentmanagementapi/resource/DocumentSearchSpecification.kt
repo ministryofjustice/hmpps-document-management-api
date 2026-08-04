@@ -5,8 +5,6 @@ import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.FilterOperator
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.MetadataFilter
 
 @Component
 class DocumentSearchSpecification {
@@ -75,34 +73,5 @@ class DocumentSearchSpecification {
         ) as Expression<Expression<*>?>?,
       ),
     )
-  }
-
-  fun metaDataFilter(filter: MetadataFilter): Specification<Document> = Specification { root, _, cb ->
-
-    val metadataValue = cb.function(
-      "jsonb_extract_path_text",
-      String::class.java,
-      root.get<String>("metadata"),
-      cb.literal(filter.field),
-    )
-
-    when (filter.operator) {
-      FilterOperator.EQUALS ->
-        cb.equal(metadataValue, filter.value)
-
-      FilterOperator.NOT_EQUALS ->
-        cb.notEqual(metadataValue, filter.value)
-
-      FilterOperator.IN ->
-        metadataValue.`in`(
-          filter.value!!.split(",").map { it },
-        )
-      FilterOperator.EXISTS -> {
-        cb.isNotNull(metadataValue)
-      }
-      FilterOperator.NOT_EXISTS -> {
-        cb.isNull(metadataValue)
-      }
-    }
   }
 }
