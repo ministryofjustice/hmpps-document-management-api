@@ -178,12 +178,37 @@ class DocumentFacetSearchIntTest : IntegrationTestBase() {
   }
 
   @Nested
-  @DisplayName("Base filter tests")
-  inner class BaseFilterTests {
+  @DisplayName("Meta data filter tests")
+  inner class MetaDataFilterTests {
 
     @Sql("classpath:test_data/document-search.sql")
     @Test
-    fun `Base filter out of array`() {
+    fun `Meta data IN filter operator`() {
+      val filterCodeOne = "MDI"
+      val filterCodeTwo = "KMI"
+      val response = webTestClient.facetSearchDocuments(
+        DocumentFacetSearchRequest(
+          documentTypes = listOf(documentType),
+          metadataFilters = listOf(
+            MetadataFilter(
+              field = "prisonCode",
+              operator = FilterOperator.IN,
+              values = listOf(filterCodeOne, filterCodeTwo),
+            ),
+          ),
+        ),
+      )
+      assertThat(response.totalResultsCount).isGreaterThan(0)
+      val anyResultsWithOtherCode = response.results.any {
+        val code = it.metadata.get("prisonCode").asString()
+        !listOf(filterCodeOne, filterCodeTwo).contains(code)
+      }
+      assertThat(anyResultsWithOtherCode).isFalse
+    }
+
+    @Sql("classpath:test_data/document-search.sql")
+    @Test
+    fun `Meta data JSON_ARRAY_CONTAINS filter operator`() {
       val filterCaseOne = "CASE001"
       val filterCaseTwo = "CASE002"
       val response = webTestClient.facetSearchDocuments(
@@ -192,14 +217,19 @@ class DocumentFacetSearchIntTest : IntegrationTestBase() {
           metadataFilters = listOf(
             MetadataFilter(
               field = "caseReferences",
-              operator = FilterOperator.IN,
+              operator = FilterOperator.JSON_ARRAY_CONTAINS,
               values = listOf(filterCaseOne, filterCaseTwo),
             ),
           ),
         ),
       )
+      assertThat(response.totalResultsCount).isGreaterThan(0)
       val anyResultsWithOtherCase = response.results.any {
-        val references = it.metadata.get("caseReferences").asArray().map { it.asString() }
+        val references = it.metadata
+          .path("caseReferences")
+          .asSequence()
+          .map { node -> node.asString() }
+          .toList()
         !references.contains(filterCaseOne) && !references.contains(filterCaseTwo)
       }
       assertThat(anyResultsWithOtherCase).isFalse
@@ -207,7 +237,7 @@ class DocumentFacetSearchIntTest : IntegrationTestBase() {
 
     @Sql("classpath:test_data/document-search.sql")
     @Test
-    fun `Base filter not exists`() {
+    fun `metadata filter not exists`() {
       val response = webTestClient.facetSearchDocuments(
         DocumentFacetSearchRequest(
           documentTypes = listOf(documentType),
@@ -224,7 +254,7 @@ class DocumentFacetSearchIntTest : IntegrationTestBase() {
 
     @Sql("classpath:test_data/document-search.sql")
     @Test
-    fun `Base filter exists`() {
+    fun `metadata filter exists`() {
       val response = webTestClient.facetSearchDocuments(
         DocumentFacetSearchRequest(
           documentTypes = listOf(documentType),
@@ -241,7 +271,7 @@ class DocumentFacetSearchIntTest : IntegrationTestBase() {
 
     @Sql("classpath:test_data/document-search.sql")
     @Test
-    fun `Base filter equals`() {
+    fun `metadata filter equals`() {
       val response = webTestClient.facetSearchDocuments(
         DocumentFacetSearchRequest(
           documentTypes = listOf(documentType),
@@ -259,7 +289,7 @@ class DocumentFacetSearchIntTest : IntegrationTestBase() {
 
     @Sql("classpath:test_data/document-search.sql")
     @Test
-    fun `Base filter not equals`() {
+    fun `metadata filter not equals`() {
       val response = webTestClient.facetSearchDocuments(
         DocumentFacetSearchRequest(
           documentTypes = listOf(documentType),

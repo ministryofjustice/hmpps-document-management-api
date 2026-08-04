@@ -40,24 +40,40 @@ class DocumentFacetSearchSqlBuilder {
       where += "duplicate_of IS NULL"
     }
 
-    filters.forEachIndexed { index, filter ->
-
-      val param = "p$index"
+    var paramIndex = 0
+    filters.forEach { filter ->
 
       when (filter.operator) {
         FilterOperator.EQUALS -> {
+          val param = "p$paramIndex"
           where += "metadata ->> '${filter.field}' = :$param"
           params[param] = filter.value
+          paramIndex += 1
         }
 
         FilterOperator.NOT_EQUALS -> {
+          val param = "p$paramIndex"
           where += "metadata ->> '${filter.field}' <> :$param"
           params[param] = filter.value
+          paramIndex += 1
         }
 
         FilterOperator.IN -> {
+          val param = "p$paramIndex"
           where += "metadata ->> '${filter.field}' IN (:$param)"
           params[param] = filter.values
+          paramIndex += 1
+        }
+
+        FilterOperator.JSON_ARRAY_CONTAINS -> {
+          val containsWhere = mutableListOf<String>()
+          filter.values.forEach { value ->
+            val param = "p$paramIndex"
+            containsWhere += "metadata -> '${filter.field}' @> jsonb_build_array(:$param)"
+            params[param] = value
+            paramIndex += 1
+          }
+          where += "(" + containsWhere.joinToString(" OR ") + ")"
         }
 
         FilterOperator.EXISTS -> {

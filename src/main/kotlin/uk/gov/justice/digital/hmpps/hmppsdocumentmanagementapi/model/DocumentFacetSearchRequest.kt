@@ -105,6 +105,7 @@ enum class FilterOperator {
   EQUALS,
   NOT_EQUALS,
   IN,
+  JSON_ARRAY_CONTAINS,
   EXISTS,
   NOT_EXISTS,
 }
