@@ -39,7 +39,7 @@ VALUES
     5252,
     'd58e3582afa99040e27b92b13c8f2280',
     'application/pdf',
-    JSON '{ "prisonCode": "MDI", "previousPrisonCodes": ["KMI"], "prisonNumber": "B2345CD", "court": "Croydon Crown", "warrantDate": "2023-01-02", "prisonerId": "B2345CD", "caseReferences": ["CASE001", "CASE002"], "status": "ACTIVE" }',
+        JSON '{ "prisonCode": "MDI", "previousPrisonCodes": ["KMI"], "prisonNumber": "B2345CD", "court": "Croydon Crown", "warrantDate": "2023-01-02", "prisonerId": "B2345CD", "caseReferences": ["CASE001", "CASE002"], "status": "ACTIVE" }',
     NOW(),
     'Remand and Sentencing',
     'CREATED_BY_USER',
