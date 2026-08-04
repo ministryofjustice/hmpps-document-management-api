@@ -35,6 +35,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.ErrorRespo
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentFacetSearchRequest
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentFacetSearchResult
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResult
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.SetDocumentFileContentHashRequest
@@ -545,7 +546,7 @@ class DocumentController(
       ApiResponse(
         responseCode = "200",
         description = "Search request accepted and results returned",
-        content = [Content(schema = Schema(implementation = DocumentSearchResult::class))],
+        content = [Content(schema = Schema(implementation = DocumentFacetSearchResult::class))],
       ),
       ApiResponse(
         responseCode = "400",
