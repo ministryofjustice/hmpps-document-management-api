@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
+import org.springframework.aot.hint.TypeReference.listOf
 import org.springframework.data.domain.Sort.Direction
 import org.springframework.http.MediaType
 import org.springframework.test.context.TestPropertySource
@@ -175,6 +176,85 @@ class DocumentFacetSearchIntTest : IntegrationTestBase() {
         ),
       )
     }
+  }
+
+  @Sql("classpath:test_data/document-search.sql")
+  @Test
+  fun `Facet value type when isUnread is not on metadata`() {
+    val response = webTestClient.facetSearchDocuments(
+      DocumentFacetSearchRequest(
+        documentTypes = listOf(documentType),
+        facets = listOf(
+          FacetRequest(
+            "prisonCode",
+            FacetType.VALUE,
+          ),
+          FacetRequest(
+            "isUnread",
+            FacetType.VALUE,
+            filter = MetadataFilter("isUnread", FilterOperator.EXISTS),
+          ),
+        ),
+      ),
+    )
+
+    assertThat(response.facets).isEqualTo(
+      mapOf(
+        "prisonCode" to FacetResult(
+          listOf(
+            FacetValue(
+              value = "SFI",
+              count = 3,
+            ),
+            FacetValue(
+              value = "KMI",
+              count = 1,
+            ),
+            FacetValue(
+              value = "MDI",
+              count = 1,
+            ),
+            FacetValue(
+              value = "RSI",
+              count = 1,
+            ),
+          ),
+        ),
+        "isUnread" to FacetResult(
+          emptyList(),
+        ),
+      ),
+    )
+  }
+
+  @Sql("classpath:test_data/document-search.sql")
+  @Test
+  fun `Facet value type when isUnread is found on metadata`() {
+    val response = webTestClient.facetSearchDocuments(
+      DocumentFacetSearchRequest(
+        documentTypes = listOf(DocumentType.PRISON_COURT_REGISTER),
+        facets = listOf(
+          FacetRequest(
+            "isUnread",
+            FacetType.VALUE,
+            filter = MetadataFilter("isUnread", FilterOperator.EXISTS),
+          ),
+        ),
+      ),
+    )
+
+    assertThat(response.facets).isEqualTo(
+      mapOf(
+        "isUnread" to FacetResult(
+          listOf(
+            FacetValue(
+              value = "true",
+              count = 1,
+            ),
+          ),
+        ),
+      ),
+    )
   }
 
   @Nested
