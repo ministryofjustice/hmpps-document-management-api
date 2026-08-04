@@ -396,15 +396,17 @@ class DocumentFacetSearchIntTest : IntegrationTestBase() {
       val responseWithFacetFilter = webTestClient.facetSearchDocuments(
         DocumentFacetSearchRequest(
           documentTypes = listOf(documentType),
+          metadataFilters = listOf(
+            MetadataFilter(
+              field = "caseReferences",
+              operator = FilterOperator.IN,
+              values = listOf(filterCaseTwo),
+            ),
+          ),
           facets = listOf(
             FacetRequest(
               "caseReferences",
               FacetType.ARRAY,
-              MetadataFilter(
-                field = "caseReferences",
-                operator = FilterOperator.IN,
-                values = listOf(filterCaseTwo),
-              ),
             ),
           ),
         ),

@@ -36,7 +36,7 @@ class DocumentFacetSearchService(
       }
     }
 
-    val baseWhere = searchSqlBuilder.buildWhere(request.documentTypes, request.canonical, request.metadataFilters)
+    val baseWhere = searchSqlBuilder.buildWhere(request.documentTypes, request.canonical, request.facets.mapNotNull { it.filter })
 
     val facetMapper = RowMapper<FacetValue> { rs, _ ->
       FacetValue(
@@ -58,7 +58,7 @@ class DocumentFacetSearchService(
       facet.field to FacetResult(values)
     }
 
-    val pageQueryWhere = searchSqlBuilder.buildWhere(request.documentTypes, request.canonical, (request.metadataFilters + request.facets.mapNotNull { it.filter }))
+    val pageQueryWhere = searchSqlBuilder.buildWhere(request.documentTypes, request.canonical, request.metadataFilters)
     val pageSql = searchSqlBuilder.buildPageQuery(pageQueryWhere, request.orderBy.columnName, request.orderByDirection.name)
 
     val documentMapper = RowMapper<Long> { rs, _ ->
