@@ -176,6 +176,35 @@ class DocumentFacetSearchIntTest : IntegrationTestBase() {
         ),
       )
     }
+
+    @Sql("classpath:test_data/document-search.sql")
+    @Test
+    fun `Facet does not exist`() {
+      val response = webTestClient.facetSearchDocuments(
+        DocumentFacetSearchRequest(
+          documentTypes = listOf(documentType),
+          facets = listOf(
+            FacetRequest(
+              "unknownFacetField",
+              FacetType.VALUE,
+            ),
+          ),
+        ),
+      )
+
+      assertThat(response.facets).isEqualTo(
+        mapOf(
+          "unknownFacetField" to FacetResult(
+            listOf(
+              FacetValue(
+                value = null,
+                count = 6,
+              ),
+            ),
+          ),
+        ),
+      )
+    }
   }
 
   @Sql("classpath:test_data/document-search.sql")
