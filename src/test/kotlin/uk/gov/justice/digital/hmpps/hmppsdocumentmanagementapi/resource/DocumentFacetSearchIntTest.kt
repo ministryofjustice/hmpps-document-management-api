@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
-import org.springframework.aot.hint.TypeReference.listOf
 import org.springframework.data.domain.Sort.Direction
 import org.springframework.http.MediaType
 import org.springframework.test.context.TestPropertySource
@@ -192,7 +191,7 @@ class DocumentFacetSearchIntTest : IntegrationTestBase() {
           FacetRequest(
             "isUnread",
             FacetType.VALUE,
-            filter = MetadataFilter("isUnread", FilterOperator.EXISTS),
+            filters = listOf(MetadataFilter("isUnread", FilterOperator.EXISTS)),
           ),
         ),
       ),
@@ -237,7 +236,10 @@ class DocumentFacetSearchIntTest : IntegrationTestBase() {
           FacetRequest(
             "isUnread",
             FacetType.VALUE,
-            filter = MetadataFilter("isUnread", FilterOperator.EXISTS),
+            filters = listOf(
+              MetadataFilter("isUnread", FilterOperator.EXISTS),
+              MetadataFilter("status", FilterOperator.EQUALS, listOf("ACTIVE")),
+            ),
           ),
         ),
       ),
