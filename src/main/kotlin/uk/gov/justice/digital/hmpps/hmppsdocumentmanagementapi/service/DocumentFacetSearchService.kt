@@ -45,7 +45,7 @@ class DocumentFacetSearchService(
     }
 
     val facets: Map<String, FacetResult> = request.facets.associate { facet ->
-      val filters: List<MetadataFilter> = facet.filter?.let { listOf(facet.filter) }.orEmpty()
+      val filters: List<MetadataFilter> = facet.filters?.let { facet.filters }.orEmpty()
       val baseWhere = searchSqlBuilder.buildWhere(request.documentTypes, request.canonical, filters)
       val sql = when (facet.type) {
         FacetType.VALUE -> searchSqlBuilder.buildValueFacetQuery(facet.field, baseWhere)

@@ -221,7 +221,7 @@ class DocumentFacetSearchIntTest : IntegrationTestBase() {
           FacetRequest(
             "isUnread",
             FacetType.VALUE,
-            filter = MetadataFilter("isUnread", FilterOperator.EXISTS),
+            filters = listOf(MetadataFilter("isUnread", FilterOperator.EXISTS)),
           ),
         ),
       ),
@@ -266,7 +266,10 @@ class DocumentFacetSearchIntTest : IntegrationTestBase() {
           FacetRequest(
             "isUnread",
             FacetType.VALUE,
-            filter = MetadataFilter("isUnread", FilterOperator.EXISTS),
+            filters = listOf(
+              MetadataFilter("isUnread", FilterOperator.EXISTS),
+              MetadataFilter("status", FilterOperator.EQUALS, listOf("ACTIVE")),
+            ),
           ),
         ),
       ),

@@ -126,7 +126,7 @@ data class FacetRequest(
   @Schema(
     description = "Filters that will apply to the paged resultset and not to the faceted counts.",
   )
-  val filter: MetadataFilter? = null,
+  val filters: List<MetadataFilter>? = emptyList(),
 )
 
 enum class FacetType {
