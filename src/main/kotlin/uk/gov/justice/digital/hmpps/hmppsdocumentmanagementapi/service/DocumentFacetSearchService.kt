@@ -13,6 +13,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentFac
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.FacetResult
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.FacetType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.FacetValue
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.MetadataFilter
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsFacetSearchedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
 
@@ -36,8 +37,6 @@ class DocumentFacetSearchService(
       }
     }
 
-    val baseWhere = searchSqlBuilder.buildWhere(request.documentTypes, request.canonical, request.metadataFilters)
-
     val facetMapper = RowMapper<FacetValue> { rs, _ ->
       FacetValue(
         value = rs.getString("value"),
@@ -46,6 +45,8 @@ class DocumentFacetSearchService(
     }
 
     val facets: Map<String, FacetResult> = request.facets.associate { facet ->
+      val filters: List<MetadataFilter> = facet.filter?.let { listOf(facet.filter) }.orEmpty()
+      val baseWhere = searchSqlBuilder.buildWhere(request.documentTypes, request.canonical, filters)
       val sql = when (facet.type) {
         FacetType.VALUE -> searchSqlBuilder.buildValueFacetQuery(facet.field, baseWhere)
         FacetType.ARRAY -> searchSqlBuilder.buildArrayFacetQuery(facet.field, baseWhere)
@@ -58,7 +59,7 @@ class DocumentFacetSearchService(
       facet.field to FacetResult(values)
     }
 
-    val pageQueryWhere = searchSqlBuilder.buildWhere(request.documentTypes, request.canonical, (request.metadataFilters + request.facets.mapNotNull { it.filter }))
+    val pageQueryWhere = searchSqlBuilder.buildWhere(request.documentTypes, request.canonical, request.metadataFilters)
     val pageSql = searchSqlBuilder.buildPageQuery(pageQueryWhere, request.orderBy.columnName, request.orderByDirection.name)
 
     val documentMapper = RowMapper<Long> { rs, _ ->

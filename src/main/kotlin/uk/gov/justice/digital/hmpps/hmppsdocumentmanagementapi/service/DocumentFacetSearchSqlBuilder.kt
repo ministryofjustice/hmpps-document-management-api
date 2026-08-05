@@ -28,6 +28,7 @@ class DocumentFacetSearchSqlBuilder {
         FROM document
         WHERE ${where.sql}
   """.trimIndent()
+
   fun buildWhere(documentTypes: List<DocumentType>, canonical: Boolean?, filters: List<MetadataFilter>): SqlWhere {
     val where = mutableListOf<String>()
     val params = mutableMapOf<String, Any>()
