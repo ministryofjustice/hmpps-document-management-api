@@ -13,7 +13,6 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentFac
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.FacetResult
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.FacetType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.FacetValue
-import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.MetadataFilter
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.event.DocumentsFacetSearchedEvent
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
 
