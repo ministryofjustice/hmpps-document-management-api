@@ -129,7 +129,7 @@ VALUES
     45777,
     'd58e3582afa99040e27b92b13c8f2280',
     'application/pdf',
-    JSON '{ "prisonCode": "SFI", "prisonNumber": "E5678FG", "court": "Stafford Crown", "warrantDate": "2022-09-08", "prisonerId": "E5678FG", "caseReferences": [], "status": "ACTIVE" }',
+    JSON '{ "isUnread": "true", "prisonCode": "SFI", "prisonNumber": "E5678FG", "court": "Stafford Crown", "warrantDate": "2022-09-08", "prisonerId": "E5678FG", "caseReferences": [], "status": "ACTIVE" }',
     NOW(),
     'Remand and Sentencing',
     'CREATED_BY_USER',
