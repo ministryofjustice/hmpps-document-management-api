@@ -31,6 +31,6 @@ data class FacetResult(
 )
 
 data class FacetValue(
-  val value: String,
+  val value: String? = null,
   val count: Long,
 )

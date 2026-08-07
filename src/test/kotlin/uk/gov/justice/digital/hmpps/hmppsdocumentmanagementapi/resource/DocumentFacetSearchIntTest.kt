@@ -175,6 +175,65 @@ class DocumentFacetSearchIntTest : IntegrationTestBase() {
         ),
       )
     }
+
+    @Sql("classpath:test_data/document-search.sql")
+    @Test
+    fun `Facet does not exist`() {
+      val response = webTestClient.facetSearchDocuments(
+        DocumentFacetSearchRequest(
+          documentTypes = listOf(documentType),
+          facets = listOf(
+            FacetRequest(
+              "unknownFacetField",
+              FacetType.VALUE,
+            ),
+          ),
+        ),
+      )
+
+      assertThat(response.facets).isEqualTo(
+        mapOf(
+          "unknownFacetField" to FacetResult(
+            listOf(
+              FacetValue(
+                value = null,
+                count = 6,
+              ),
+            ),
+          ),
+        ),
+      )
+    }
+  }
+
+  @Sql("classpath:test_data/document-search.sql")
+  @Test
+  fun `Facet value type when isUnread is found on metadata`() {
+    val response = webTestClient.facetSearchDocuments(
+      DocumentFacetSearchRequest(
+        documentTypes = listOf(DocumentType.PRISON_COURT_REGISTER),
+        facets = listOf(
+          FacetRequest(
+            "isUnread",
+            FacetType.VALUE,
+            filter = MetadataFilter("isUnread", FilterOperator.EXISTS),
+          ),
+        ),
+      ),
+    )
+
+    assertThat(response.facets).isEqualTo(
+      mapOf(
+        "isUnread" to FacetResult(
+          listOf(
+            FacetValue(
+              value = "true",
+              count = 1,
+            ),
+          ),
+        ),
+      ),
+    )
   }
 
   @Nested
@@ -400,11 +459,7 @@ class DocumentFacetSearchIntTest : IntegrationTestBase() {
             FacetRequest(
               "caseReferences",
               FacetType.ARRAY,
-              MetadataFilter(
-                field = "caseReferences",
-                operator = FilterOperator.IN,
-                values = listOf(filterCaseTwo),
-              ),
+              filter = MetadataFilter("caseReferences", FilterOperator.IN, listOf(filterCaseTwo)),
             ),
           ),
         ),
