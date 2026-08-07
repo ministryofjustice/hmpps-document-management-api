@@ -47,3 +47,9 @@ document:
       - SUBJECT_ACCESS_REQUEST_REPORT
     content-hash-document-types:
       - HMCTS_WARRANT
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
