@@ -44,47 +44,45 @@ class DocumentFacetSearchSqlBuilder {
     var paramIndex = 0
     filters.forEach { filter ->
 
+      val param = "p$paramIndex"
+      val field = "f$paramIndex"
       when (filter.operator) {
         FilterOperator.EQUALS -> {
-          val param = "p$paramIndex"
-          where += "metadata ->> '${filter.field}' = :$param"
+          where += "metadata ->> :$field = :$param"
           params[param] = filter.value
-          paramIndex += 1
         }
 
         FilterOperator.NOT_EQUALS -> {
-          val param = "p$paramIndex"
-          where += "metadata ->> '${filter.field}' <> :$param"
+          where += "metadata ->> :$field <> :$param"
           params[param] = filter.value
-          paramIndex += 1
         }
 
         FilterOperator.IN -> {
-          val param = "p$paramIndex"
-          where += "metadata ->> '${filter.field}' IN (:$param)"
+          where += "metadata ->> :$field IN (:$param)"
           params[param] = filter.values
-          paramIndex += 1
+        }
+
+        FilterOperator.EXISTS -> {
+          where += "jsonb_exists(metadata, :$field)"
+        }
+
+        FilterOperator.NOT_EXISTS -> {
+          where += "NOT jsonb_exists(metadata, :$field)"
         }
 
         FilterOperator.JSON_ARRAY_CONTAINS -> {
           val containsWhere = mutableListOf<String>()
           filter.values.forEach { value ->
-            val param = "p$paramIndex"
-            containsWhere += "metadata -> '${filter.field}' @> jsonb_build_array(:$param)"
-            params[param] = value
+            val innerParam = "p$paramIndex"
+            containsWhere += "metadata -> :$field @> jsonb_build_array(:$innerParam)"
+            params[innerParam] = value
             paramIndex += 1
           }
           where += "(" + containsWhere.joinToString(" OR ") + ")"
         }
-
-        FilterOperator.EXISTS -> {
-          where += "jsonb_exists(metadata, '${filter.field}')"
-        }
-
-        FilterOperator.NOT_EXISTS -> {
-          where += "NOT jsonb_exists(metadata, '${filter.field}')"
-        }
       }
+      params[field] = filter.field
+      paramIndex += 1
     }
 
     return SqlWhere(
