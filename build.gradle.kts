@@ -30,16 +30,16 @@ dependencies {
   runtimeOnly("org.postgresql:postgresql:42.7.13")
 
   // AWS
-  implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:4.0.2")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:7.4.0")
+  implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:4.1.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:7.4.1")
 
   // OpenAPI
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.0")
 
   implementation("commons-io:commons-io:2.22.0")
 
   // Test dependencies
-  testImplementation("org.junit.jupiter:junit-jupiter:6.1.2")
+  testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
   testImplementation("org.wiremock:wiremock-standalone:3.13.2")
   testImplementation("org.testcontainers:postgresql:1.21.4")
