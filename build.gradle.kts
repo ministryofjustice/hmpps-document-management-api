@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.8"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.9"
   kotlin("plugin.spring") version "2.4.20"
   kotlin("plugin.jpa") version "2.4.20"
   jacoco
@@ -49,8 +49,6 @@ dependencies {
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.13.0")
   testImplementation("org.springframework.boot:spring-boot-starter-webflux-test")
 }
-
-extra["hibernate.version"] = "7.2.2.Final"
 
 kotlin {
   jvmToolchain(25) // optional but recommended for aligning JDK version
