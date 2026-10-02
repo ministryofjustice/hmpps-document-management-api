@@ -65,4 +65,7 @@ enum class DocumentType(
   BREACH_ORDER(
     description = "Breach order",
   ),
+  CAS_DOCUMENTS(
+    description = "Documents uploaded by the Community accommodation service (CAS).",
+  ),
 }
