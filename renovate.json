@@ -30,7 +30,7 @@
     {
       "matchPackageNames": ["uk.gov.justice.hmpps.gradle-spring-boot"],
       "matchUpdateTypes": ["minor", "patch"],
-      "minimumReleaseAge": "1 day",
+      "minimumReleaseAge": "0",
       "automerge": true
     }
   ]
