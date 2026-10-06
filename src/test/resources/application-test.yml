@@ -30,6 +30,8 @@ hmpps.s3:
       bucketName: ${random.uuid}
     prisoner-images:
       bucketName: ${random.uuid}
+    probation-accounts:
+      bucketName: ${random.uuid}
 
 hmpps.sqs:
   provider: localstack
