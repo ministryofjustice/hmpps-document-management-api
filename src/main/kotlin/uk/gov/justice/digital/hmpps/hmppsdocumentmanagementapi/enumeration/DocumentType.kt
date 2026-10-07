@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration
 
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.ROLE_DOCUMENT_GENERATION_TEMPLATE_RW
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.ROLE_DOCUMENT_PROBATION_ACCOUNTS
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.ROLE_DOCUMENT_TYPE_SAR
 
 enum class DocumentType(
@@ -67,5 +68,10 @@ enum class DocumentType(
   ),
   CAS_DOCUMENTS(
     description = "Documents uploaded by the Community accommodation service (CAS).",
+  ),
+  PROBATION_ACCOUNT_DOCUMENT(
+    description = "Documents for probation accounts",
+    s3BucketName = S3BucketName.PROBATION_ACCOUNTS,
+    additionalRoles = setOf(ROLE_DOCUMENT_PROBATION_ACCOUNTS),
   ),
 }
