@@ -32,6 +32,9 @@ enum class DocumentType(
   CEMO_ATTACHMENT(
     description = "Attachments used for create electronic monitoring order",
   ),
+  EMAC_REPORT(
+    description = "Reports generated for electronic monitoring acquisitive crime",
+  ),
   TRIAL_RECORD_SHEET(
     description = "Trial record sheet of a Sentence",
   ),
