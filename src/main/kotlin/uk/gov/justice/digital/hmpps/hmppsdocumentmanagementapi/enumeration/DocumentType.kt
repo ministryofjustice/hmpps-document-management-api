@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.ROLE_DOCUMENT_GENERATION_TEMPLATE_RW
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.ROLE_DOCUMENT_PROBATION_ACCOUNTS
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.ROLE_DOCUMENT_TYPE_SAR
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.ROLE_EM_CRIME_MATCHING__EMAC_REPORT__RW
 
 enum class DocumentType(
   val description: String,
@@ -34,6 +35,7 @@ enum class DocumentType(
   ),
   EMAC_REPORT(
     description = "Reports generated for electronic monitoring acquisitive crime",
+    additionalRoles = setOf(ROLE_EM_CRIME_MATCHING__EMAC_REPORT__RW),
   ),
   TRIAL_RECORD_SHEET(
     description = "Trial record sheet of a Sentence",
