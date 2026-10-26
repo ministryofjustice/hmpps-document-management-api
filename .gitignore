@@ -5,6 +5,7 @@
 
 .idea/
 .gradle/
+.kotlin/
 build/
 
 # CMake
@@ -73,3 +74,6 @@ sonar-project.properties
 
 #JMeter
 load-test-*
+
+#Everything else:
+.DS_Store

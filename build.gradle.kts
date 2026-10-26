@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.12"
   kotlin("plugin.spring") version "2.4.21"
@@ -51,13 +49,14 @@ dependencies {
 }
 
 kotlin {
-  jvmToolchain(25) // optional but recommended for aligning JDK version
-
-  compilerOptions {
-    jvmTarget.set(JvmTarget.JVM_25)
-  }
+  jvmToolchain(25)
 }
 
+tasks {
+  withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    compilerOptions.jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_25
+  }
+}
 // Jacoco code coverage
 tasks.named("test") {
   finalizedBy("jacocoTestReport")
