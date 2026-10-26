@@ -15,15 +15,14 @@ generic-service:
     SPRINGDOC_SWAGGER-UI_ENABLED: "true"
 
   allowlist:
-    penetration-test-ip-1: 54.37.241.156/30
-    penetration-test-ip-2: 167.71.136.237/32
     groups:
-      - internal
-      - circleci
+      - digital_staff_and_mojo
+      - moj_cloud_platform
 
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 # See https://user-guide.cloud-platform.service.justice.gov.uk/documentation/monitoring-an-app/how-to-create-alarms.html#creating-your-own-custom-alerts
 generic-prometheus-alerts:
+  businessHoursOnly: true
   alertSeverity: hmpps_document_management_api_non_prod
 
 s3Sync:
