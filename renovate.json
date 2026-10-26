@@ -24,8 +24,9 @@
         "**/.github/workflows/**/*.ya?ml",
         "**/.github/actions/**/*.ya?ml"
       ],
-      "minimumReleaseAge": "7 days",
-      "pinDigests": true
+      "matchUpdateTypes": ["minor", "patch"],
+      "enabled": false
     }
-  ]
+  ],
+  "platformCommit": "enabled"
 }
