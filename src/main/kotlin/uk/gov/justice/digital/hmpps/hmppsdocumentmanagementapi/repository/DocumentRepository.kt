@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import java.time.LocalDateTime
@@ -31,6 +32,12 @@ interface DocumentRepository :
 
   @Query("SELECT d.documentType FROM Document d WHERE d.documentUuid = :documentUuid")
   fun getDocumentTypeByDocumentUuid(documentUuid: UUID): DocumentType?
+
+  @Query(
+    value = "SELECT d.document_type FROM document d WHERE d.document_uuid = :documentUuid",
+    nativeQuery = true,
+  )
+  fun getDocumentTypeByDocumentUuidIncludingSoftDeleted(documentUuid: UUID): String?
 
   fun findByFileContentHashIn(fileContentHashes: Collection<String>): List<Document>
 
@@ -76,6 +83,15 @@ interface DocumentRepository :
     nativeQuery = true,
   )
   fun deleteMetadataHistoryByDocumentIds(documentIds: Collection<Long>)
+
+  @Transactional
+  @Modifying
+  @Query(
+    value = "UPDATE document SET deleted_time = NULL, deleted_by_service_name = NULL, deleted_by_username = NULL " +
+      "WHERE document_uuid = :documentUuid AND deleted_time IS NOT NULL",
+    nativeQuery = true,
+  )
+  fun reactivateByDocumentUuid(documentUuid: UUID): Int
 
   @Modifying
   @Query(

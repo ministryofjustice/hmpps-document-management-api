@@ -28,6 +28,7 @@ class DocumentServiceScanDocumentTest {
     virusScanService,
     DocumentHashingProperties(),
     mock(),
+    mock(),
   )
 
   private val file = mock<MultipartFile>()

@@ -483,6 +483,95 @@ class DocumentController(
     request.documentRequestContext(),
   )
 
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @DeleteMapping("/{documentUuid}/purge")
+  @Operation(
+    summary = "Permanently purge a document and its file by its unique identifier",
+    description = "Irreversibly removes the document, its metadata history and the stored file. Unlike " +
+      "DELETE /documents/{documentUuid}, which soft deletes the document and keeps the file.",
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "204",
+        description = "Document purged or no document exists with this unique identifier",
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires the document admin role and the applicable document type role",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "500",
+        description = "The document could not be completely purged and the request can be retried",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  @PreAuthorize("hasRole('$ROLE_DOCUMENT_ADMIN')")
+  fun purgeDocument(
+    @PathVariable
+    @Parameter(
+      description = "Document unique identifier",
+      required = true,
+    )
+    documentUuid: UUID,
+    request: HttpServletRequest,
+  ) = documentService.purgeDocument(
+    documentUuid,
+    request.documentRequestContext(),
+  )
+
+  @ResponseStatus(HttpStatus.OK)
+  @PutMapping("/{documentUuid}/reactivate")
+  @Operation(
+    summary = "Reactivate a soft deleted document by its unique identifier",
+    description = "Reverses a soft delete made via DELETE /documents/{documentUuid}, making the document visible " +
+      "again to retrieval and search and restoring it to any duplicate set it belongs to.",
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Document reactivated",
+        content = [Content(schema = Schema(implementation = Document::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "The document was not found.",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  @PreAuthorize("hasAnyRole('$ROLE_DOCUMENT_WRITER', '$ROLE_DOCUMENT_ADMIN')")
+  fun reactivateDocument(
+    @PathVariable
+    @Parameter(
+      description = "Document unique identifier",
+      required = true,
+    )
+    documentUuid: UUID,
+    request: HttpServletRequest,
+  ) = documentService.reactivateDocument(
+    documentUuid,
+    request.documentRequestContext(),
+  )
+
   @ResponseStatus(HttpStatus.OK)
   @PostMapping("/search")
   @Operation(

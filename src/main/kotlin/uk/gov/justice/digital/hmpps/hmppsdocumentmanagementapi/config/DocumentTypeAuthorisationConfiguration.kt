@@ -69,6 +69,7 @@ class DocumentTypeAuthorisationInterceptor(
     }
 
   private fun HttpServletRequest.documentTypeFromUuidOrTypePathVariable() = documentUuidFromPathVariable()
-    ?.let { documentRepository.getDocumentTypeByDocumentUuid(it) }
+    ?.let { documentRepository.getDocumentTypeByDocumentUuidIncludingSoftDeleted(it) }
+    ?.let { DocumentType.valueOf(it) }
     ?: documentTypeFromPathVariable()
 }

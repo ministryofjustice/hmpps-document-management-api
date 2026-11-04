@@ -33,6 +33,7 @@ class DocumentServiceGetDocumentFileTest {
     virusScanService,
     DocumentHashingProperties(),
     mock(),
+    mock(),
   )
 
   private val documentUuid = UUID.randomUUID()

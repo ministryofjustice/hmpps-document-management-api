@@ -32,6 +32,7 @@ class DocumentServiceFindByUuidsTest {
     virusScanService,
     DocumentHashingProperties(),
     mock(),
+    mock(),
   )
 
   private val matchingDocument = Document(

@@ -29,6 +29,7 @@ class DocumentServiceSetFileContentHashTest {
     mock(),
     DocumentHashingProperties(contentHashDocumentTypes = setOf(DocumentType.HMCTS_WARRANT)),
     mock(),
+    mock(),
   )
 
   private val documentUuid = UUID.randomUUID()
