@@ -14,6 +14,7 @@ import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.Docum
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.Document
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchRequest
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.DocumentSearchResult
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.ROLE_DOCUMENT_ADMIN
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.ROLE_DOCUMENT_READER
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.resource.ROLE_DOCUMENT_WRITER
 import java.time.LocalDateTime
@@ -191,6 +192,50 @@ abstract class AbstractDocumentTypeIntegrationTest : IntegrationTestBase() {
     ).expectStatus().isNoContent
   }
 
+  @Test
+  fun `purge document - 403 forbidden - document admin only`() {
+    purgeDocument(documentUuid, listOf(ROLE_DOCUMENT_ADMIN)).expectStatus().isForbidden
+  }
+
+  @Test
+  fun `purge document - 403 forbidden - document type role only`() {
+    purgeDocument(documentUuid, listOf(documentTypeRole)).expectStatus().isForbidden
+  }
+
+  @Test
+  fun `purge document success`() {
+    putDocumentInS3()
+
+    purgeDocument(
+      documentUuid,
+      listOf(ROLE_DOCUMENT_ADMIN, documentTypeRole),
+    ).expectStatus().isNoContent
+  }
+
+  @Test
+  fun `reactivate document - 403 forbidden - document writer only`() {
+    deleteDocument(documentUuid, listOf(ROLE_DOCUMENT_WRITER, documentTypeRole)).expectStatus().isNoContent
+
+    reactivateDocument(documentUuid, listOf(ROLE_DOCUMENT_WRITER)).expectStatus().isForbidden
+  }
+
+  @Test
+  fun `reactivate document - 403 forbidden - document type role only`() {
+    deleteDocument(documentUuid, listOf(ROLE_DOCUMENT_WRITER, documentTypeRole)).expectStatus().isNoContent
+
+    reactivateDocument(documentUuid, listOf(documentTypeRole)).expectStatus().isForbidden
+  }
+
+  @Test
+  fun `reactivate document success`() {
+    deleteDocument(documentUuid, listOf(ROLE_DOCUMENT_WRITER, documentTypeRole)).expectStatus().isNoContent
+
+    reactivateDocument(
+      documentUuid,
+      listOf(ROLE_DOCUMENT_WRITER, documentTypeRole),
+    ).expectStatus().isOk
+  }
+
   private fun putDocumentInS3() = putDocumentInS3(
     documentUuid,
     resourcePathOfTestDocument,
@@ -236,6 +281,20 @@ abstract class AbstractDocumentTypeIntegrationTest : IntegrationTestBase() {
     documentUuid: UUID,
     roles: List<String>,
   ): WebTestClient.ResponseSpec = webTestClient.delete().uri("/documents/$documentUuid")
+    .headers(setAuthorisation(roles = roles))
+    .headers(setDocumentContext(serviceName, activeCaseLoadId, username)).exchange()
+
+  private fun purgeDocument(
+    documentUuid: UUID,
+    roles: List<String>,
+  ): WebTestClient.ResponseSpec = webTestClient.delete().uri("/documents/$documentUuid/purge")
+    .headers(setAuthorisation(roles = roles))
+    .headers(setDocumentContext(serviceName, activeCaseLoadId, username)).exchange()
+
+  private fun reactivateDocument(
+    documentUuid: UUID,
+    roles: List<String>,
+  ): WebTestClient.ResponseSpec = webTestClient.put().uri("/documents/$documentUuid/reactivate")
     .headers(setAuthorisation(roles = roles))
     .headers(setDocumentContext(serviceName, activeCaseLoadId, username)).exchange()
 

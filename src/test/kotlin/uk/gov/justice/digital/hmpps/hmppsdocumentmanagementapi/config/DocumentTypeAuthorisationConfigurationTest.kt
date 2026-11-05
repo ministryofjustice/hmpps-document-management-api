@@ -54,7 +54,7 @@ class DocumentTypeAuthorisationConfigurationTest {
       ),
     )
 
-    whenever(documentRepository.getDocumentTypeByDocumentUuid(documentUuid)).thenReturn(documentType)
+    whenever(documentRepository.getDocumentTypeByDocumentUuidIncludingSoftDeleted(documentUuid)).thenReturn(documentType.name)
 
     assertThrows<AccessDeniedException>(
       "Document type '$documentType' requires additional role",
@@ -93,7 +93,7 @@ class DocumentTypeAuthorisationConfigurationTest {
       ),
     )
 
-    whenever(documentRepository.getDocumentTypeByDocumentUuid(documentUuid)).thenReturn(documentType)
+    whenever(documentRepository.getDocumentTypeByDocumentUuidIncludingSoftDeleted(documentUuid)).thenReturn(documentType.name)
 
     assertThrows<AccessDeniedException>(
       "Document type '$documentType' requires additional role",
@@ -115,7 +115,7 @@ class DocumentTypeAuthorisationConfigurationTest {
       ),
     )
 
-    whenever(documentRepository.getDocumentTypeByDocumentUuid(documentUuid)).thenReturn(null)
+    whenever(documentRepository.getDocumentTypeByDocumentUuidIncludingSoftDeleted(documentUuid)).thenReturn(null)
 
     assertThrows<AccessDeniedException>(
       "Document type '$documentType' requires additional role",

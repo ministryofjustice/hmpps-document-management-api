@@ -30,6 +30,7 @@ class DocumentServiceMergeMetadataTest {
     mock(),
     DocumentHashingProperties(),
     documentDuplicateService,
+    mock(),
   )
 
   private val documentUuid = UUID.randomUUID()

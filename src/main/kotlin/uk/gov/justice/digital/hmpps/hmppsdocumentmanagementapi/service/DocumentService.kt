@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.service
 
+import jakarta.persistence.EntityNotFoundException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -34,6 +35,7 @@ class DocumentService(
   private val virusScanService: VirusScanService,
   private val hashingProperties: DocumentHashingProperties,
   private val documentDuplicateService: DocumentDuplicateService,
+  private val purgeBatchExecutor: DocumentPurgeBatchExecutor,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -203,6 +205,81 @@ class DocumentService(
         eventService.recordDocumentDeletedEvent(it, documentRequestContext, System.currentTimeMillis() - startTimeInMs)
       }
       documentDuplicateService.redetermineCanonicalFor(contentHash, byteHash)
+    }
+  }
+
+  fun purgeDocument(
+    documentUuid: UUID,
+    documentRequestContext: DocumentRequestContext,
+  ) {
+    val startTimeInMs = System.currentTimeMillis()
+
+    val document = documentRepository.findByDocumentUuidIncludingSoftDeleted(documentUuid)
+
+    document?.apply {
+      val contentHash = fileContentHash
+      val byteHash = fileHash
+      val model = toModel()
+
+      var failureStage = "STORED_FILE_DELETE"
+
+      try {
+        documentFileService.deleteDocumentFile(documentUuid, documentType)
+
+        failureStage = "DATABASE_DELETE"
+        purgeBatchExecutor.purgeBatch(listOf(documentId), listOf(documentUuid))
+      } catch (exception: Exception) {
+        log.error(
+          "Failed to purge document: documentUuid={}, documentType={}, failureStage={}",
+          documentUuid,
+          documentType,
+          failureStage,
+          exception,
+        )
+
+        runCatching {
+          eventService.recordDocumentPurgeFailedEvent(
+            model,
+            documentRequestContext,
+            System.currentTimeMillis() - startTimeInMs,
+            failureStage,
+            exception,
+          )
+        }.onFailure {
+          log.error(
+            "Failed to record purge failure telemetry: documentUuid={}, documentType={}",
+            documentUuid,
+            documentType,
+            it,
+          )
+        }
+
+        throw exception
+      }
+
+      eventService.recordDocumentPurgedEvent(model, documentRequestContext, System.currentTimeMillis() - startTimeInMs)
+      documentDuplicateService.redetermineCanonicalFor(contentHash, byteHash)
+    }
+  }
+
+  fun reactivateDocument(
+    documentUuid: UUID,
+    documentRequestContext: DocumentRequestContext,
+  ): DocumentModel {
+    val startTimeInMs = System.currentTimeMillis()
+
+    documentRepository.findByDocumentUuidIncludingSoftDeleted(documentUuid)
+      ?: throw EntityNotFoundException("Document with UUID '$documentUuid' not found.")
+
+    val reactivated = documentRepository.reactivateByDocumentUuid(documentUuid) > 0
+
+    val document = documentRepository.findByDocumentUuidOrThrowNotFound(documentUuid)
+
+    return document.toModel().also {
+      if (reactivated) {
+        eventService.recordDocumentReactivatedEvent(it, documentRequestContext, System.currentTimeMillis() - startTimeInMs)
+        documentDuplicateService.redetermineCanonicalFor(document)
+      }
     }
   }
 

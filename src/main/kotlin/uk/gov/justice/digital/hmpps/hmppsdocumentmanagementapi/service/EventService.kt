@@ -110,6 +110,60 @@ class EventService(
     )
   }
 
+  fun recordDocumentPurgedEvent(document: DocumentModel, documentRequestContext: DocumentRequestContext, eventTimeMs: Long) {
+    log.info(
+      "Document purged: documentUuid={}, documentType={}",
+      document.documentUuid,
+      document.documentType,
+    )
+    auditService.auditEvent(EventType.DOCUMENT_PURGED, document, documentRequestContext)
+    telemetryClient.trackEvent(
+      EventType.DOCUMENT_PURGED.name,
+      document.toCustomEventProperties(documentRequestContext),
+      document.toCustomEventMetrics(eventTimeMs),
+    )
+  }
+
+  fun recordDocumentPurgeFailedEvent(
+    document: DocumentModel,
+    documentRequestContext: DocumentRequestContext,
+    eventTimeMs: Long,
+    failureStage: String,
+    exception: Exception,
+  ) {
+    log.error(
+      "Document purge failed: documentUuid={}, documentType={}, failureStage={}, exceptionType={}",
+      document.documentUuid,
+      document.documentType,
+      failureStage,
+      exception.javaClass.simpleName,
+    )
+
+    telemetryClient.trackEvent(
+      EventType.DOCUMENT_PURGE_FAILED.name,
+      document.toCustomEventProperties(documentRequestContext) +
+        mapOf(
+          "failureStage" to failureStage,
+          "exceptionType" to exception.javaClass.simpleName,
+        ),
+      document.toCustomEventMetrics(eventTimeMs),
+    )
+  }
+
+  fun recordDocumentReactivatedEvent(document: DocumentModel, documentRequestContext: DocumentRequestContext, eventTimeMs: Long) {
+    log.info(
+      "Document reactivated: documentUuid={}, documentType={}",
+      document.documentUuid,
+      document.documentType,
+    )
+    auditService.auditEvent(EventType.DOCUMENT_REACTIVATED, document, documentRequestContext)
+    telemetryClient.trackEvent(
+      EventType.DOCUMENT_REACTIVATED.name,
+      document.toCustomEventProperties(documentRequestContext),
+      document.toCustomEventMetrics(eventTimeMs),
+    )
+  }
+
   fun recordDocumentsSearchedEvent(
     event: DocumentsSearchedEvent,
     documentRequestContext: DocumentRequestContext,
