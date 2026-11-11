@@ -9,6 +9,7 @@ enum class DocumentType(
   val description: String,
   val s3BucketName: S3BucketName = S3BucketName.DOCUMENT_MANAGEMENT,
   val additionalRoles: Collection<String> = emptySet(),
+  val maxFileSize: Long = DEFAULT_MAX_FILE_SIZE,
 ) {
   HMCTS_WARRANT(
     description = "Warrants for Remand and Sentencing",
@@ -16,6 +17,7 @@ enum class DocumentType(
   SUBJECT_ACCESS_REQUEST_REPORT(
     description = "Subject Access Request Report",
     additionalRoles = setOf(ROLE_DOCUMENT_TYPE_SAR),
+    maxFileSize = 250L * 1024 * 1024,
   ),
   EXCLUSION_ZONE_MAP(
     description = "Exclusion zone maps used for exclusion zone condition on offender licence",
@@ -80,3 +82,5 @@ enum class DocumentType(
     additionalRoles = setOf(ROLE_DOCUMENT_PROBATION_ACCOUNTS),
   ),
 }
+
+const val DEFAULT_MAX_FILE_SIZE = 50L * 1024 * 1024

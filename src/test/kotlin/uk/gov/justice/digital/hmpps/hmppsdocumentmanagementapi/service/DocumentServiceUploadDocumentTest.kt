@@ -9,14 +9,18 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import org.springframework.web.multipart.MultipartFile
 import tools.jackson.databind.JsonNode
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentAlreadyUploadedException
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentFileTooLargeException
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentHashingProperties
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DEFAULT_MAX_FILE_SIZE
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.repository.DocumentRepository
 import java.time.LocalDateTime
@@ -67,6 +71,39 @@ class DocumentServiceUploadDocumentTest {
     whenever(documentRepository.findByDocumentUuidIncludingSoftDeleted(documentUuid)).thenReturn(mock<Document>())
     assertThrows<DocumentAlreadyUploadedException>("Document with UUID '$documentUuid' already uploaded.") {
       service.uploadDocument(mock(), documentUuid, mock(), mock(), mock())
+    }
+  }
+
+  @Test
+  fun `rejects file larger than the document type limit before saving or scanning`() {
+    whenever(file.size).thenReturn(DEFAULT_MAX_FILE_SIZE + 1)
+
+    assertThrows<DocumentFileTooLargeException> {
+      service.uploadDocument(documentType, documentUuid, file, mock(), documentRequestContext)
+    }.message.let { assertThat(it).contains("exceeds the maximum of 50MB").contains("HMCTS_WARRANT") }
+
+    verify(documentRepository, never()).saveAndFlush(any<Document>())
+    verifyNoInteractions(virusScanService, documentFileService)
+  }
+
+  @Test
+  fun `accepts file exactly at the document type limit`() {
+    whenever(file.size).thenReturn(DEFAULT_MAX_FILE_SIZE)
+
+    service.uploadDocument(documentType, documentUuid, file, mock(), documentRequestContext)
+
+    verify(virusScanService).scanAndThrow(any())
+  }
+
+  @Test
+  fun `allows subject access request reports up to 250MB`() {
+    whenever(file.size).thenReturn(250L * 1024 * 1024)
+    service.uploadDocument(DocumentType.SUBJECT_ACCESS_REQUEST_REPORT, documentUuid, file, mock(), documentRequestContext)
+    verify(virusScanService).scanAndThrow(any())
+
+    whenever(file.size).thenReturn(250L * 1024 * 1024 + 1)
+    assertThrows<DocumentFileTooLargeException> {
+      service.uploadDocument(DocumentType.SUBJECT_ACCESS_REQUEST_REPORT, UUID.randomUUID(), file, mock(), documentRequestContext)
     }
   }
 
