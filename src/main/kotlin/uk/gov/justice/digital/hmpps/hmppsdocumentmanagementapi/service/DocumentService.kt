@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import tools.jackson.databind.JsonNode
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentAlreadyUploadedException
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentFileTooLargeException
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentHashingProperties
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.config.DocumentRequestContext
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.entity.Document
@@ -89,6 +90,10 @@ class DocumentService(
     fileContentHash: String? = null,
   ): DocumentModel {
     val startTimeInMs = System.currentTimeMillis()
+
+    if (file.size > documentType.maxFileSize) {
+      throw DocumentFileTooLargeException(documentType, file.size, documentType.maxFileSize)
+    }
 
     if (documentRepository.findByDocumentUuidIncludingSoftDeleted(documentUuid) != null) {
       throw DocumentAlreadyUploadedException(documentUuid)

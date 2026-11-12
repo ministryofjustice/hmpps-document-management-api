@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
+import org.springframework.http.HttpStatus.PAYLOAD_TOO_LARGE
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.security.access.AccessDeniedException
@@ -17,6 +18,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.multipart.MultipartException
 import org.springframework.web.multipart.support.MissingServletRequestPartException
 import org.springframework.web.servlet.resource.NoResourceFoundException
+import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.enumeration.DocumentType
 import uk.gov.justice.digital.hmpps.hmppsdocumentmanagementapi.model.VirusScanResult
 import java.util.UUID
 
@@ -63,6 +65,17 @@ class HmppsDocumentManagementApiExceptionHandler {
         developerMessage = e.message,
       ),
     ).also { log.info("HTTP message not readable exception: {}", e.message) }
+
+  @ExceptionHandler(DocumentFileTooLargeException::class)
+  fun handleDocumentFileTooLargeException(e: DocumentFileTooLargeException): ResponseEntity<ErrorResponse> = ResponseEntity
+    .status(PAYLOAD_TOO_LARGE)
+    .body(
+      ErrorResponse(
+        status = PAYLOAD_TOO_LARGE,
+        userMessage = e.message,
+        developerMessage = e.message,
+      ),
+    ).also { log.info("Document file too large exception: {}", e.message) }
 
   @ExceptionHandler(MultipartException::class)
   fun handleMultipartException(e: MultipartException): ResponseEntity<ErrorResponse> = ResponseEntity
@@ -211,6 +224,12 @@ data class ErrorResponse(
 }
 
 class DocumentAlreadyUploadedException(documentUuid: UUID) : Exception("Document with UUID '$documentUuid' already uploaded.")
+
+class DocumentFileTooLargeException(documentType: DocumentType, size: Long, maxSize: Long) : Exception("File size ${size / BYTES_PER_MB}MB exceeds the maximum of ${maxSize / BYTES_PER_MB}MB allowed for document type $documentType.") {
+  private companion object {
+    const val BYTES_PER_MB = 1024L * 1024L
+  }
+}
 
 class DocumentFileNotFoundException(documentUuid: UUID) : Exception("Document file with UUID '$documentUuid' not found.")
 

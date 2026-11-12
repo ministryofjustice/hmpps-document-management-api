@@ -14,9 +14,17 @@ generic-service:
     host: app-hostname.local # override per environment
     tlsSecretName: hmpps-document-management-api-cert
     annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: "260m"
       # Allow large document uploads that take longer than the 60s nginx default
       nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
       nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+
+  # 3 concurrent 250MB multipart temp files plus headroom
+  resources:
+    requests:
+      ephemeral-storage: 1Gi
+    limits:
+      ephemeral-storage: 2Gi
 
   # Used to access resources like S3 buckets, SQS queues and SNS topics
   serviceAccountName: hmpps-document-management-api
