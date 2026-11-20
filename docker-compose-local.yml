@@ -1,7 +1,7 @@
 version: "3"
 services:
   db:
-    image: postgres:18
+    image: postgres:19
     networks:
       - hmpps
     container_name: document-management-db
