@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.15"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.1.1"
   kotlin("plugin.spring") version "2.4.21"
   kotlin("plugin.jpa") version "2.4.21"
   jacoco
@@ -7,6 +7,17 @@ plugins {
 
 configurations {
   testImplementation { exclude(group = "org.junit.vintage") }
+
+  // Below all {} added to force commons-codec onto 1.23.0 which contains
+  // the CVE fix. Remove when possible.
+  all {
+    resolutionStrategy.eachDependency {
+      if (requested.group == "commons-codec" && requested.name == "commons-codec") {
+        useVersion("1.23.0")
+        because("SNYK-JAVA-COMMONSCODEC-22391319")
+      }
+    }
+  }
 }
 
 dependencies {
