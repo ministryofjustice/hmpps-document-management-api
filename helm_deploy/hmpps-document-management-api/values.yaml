@@ -40,6 +40,7 @@ generic-service:
     AWS_REGION: "eu-west-2"
     HMPPS_SQS_USE_WEB_TOKEN: "true"
     HMPPS_CLAMAV_HOST: "hmpps-document-management-api-clamav"
+    HMPPS_CLAMAV_READTIMEOUT: "300000"
 
   # Pre-existing kubernetes secrets to load as environment variables in the deployment.
   # namespace_secrets:
@@ -74,8 +75,10 @@ generic-prometheus-alerts:
   targetApplication: hmpps-document-management-api
 
 clamav:
+  replicaCount: 3
   resources:
     requests:
+      cpu: 1000m
       memory: 2Gi
     limits:
       memory: 2.5Gi
