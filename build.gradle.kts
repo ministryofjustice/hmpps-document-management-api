@@ -23,7 +23,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-cache")
   // Temporarily pin swagger-ui for dompurify issues CVE-2026-11680(2-4)
   constraints {
-    implementation("org.webjars:swagger-ui:5.35.0")
+    implementation("org.webjars:swagger-ui:5.35.1")
   }
 
   // Database dependencies
@@ -33,10 +33,10 @@ dependencies {
 
   // AWS
   implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:4.2.2")
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:7.4.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:7.6.0")
 
   // OpenAPI
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.0")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.1")
 
   implementation("commons-io:commons-io:2.22.0")
 
